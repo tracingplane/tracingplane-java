@@ -1,0 +1,10 @@
+.cache
+.idea
+*.cache-main
+*.iml
+.couscous
+target
+.classpath
+.settings
+.project
+.DS_Store
