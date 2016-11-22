@@ -226,4 +226,55 @@ public class TestXUnsignedVarint32 extends TestCase {
 			
 		}
 	}
+
+	
+	private static Random r = new Random(10);
+	private static int generate(int size) {
+		long min = 0;
+		int max = 128;
+		for (int i = 1; i < size; i++) {
+			min = max;
+			max *= 128;
+		}
+		
+		long value;
+		do {
+			value = r.nextLong() % (max-min);
+		} while (value < 0);
+		value += min;
+		return (int) value;
+	}
+	
+	@Test
+	public void testUnsignedVarint64Comparison() {
+		byte[] imax = XUnsignedVarint.writeLexVarUInt32(Integer.MAX_VALUE);
+		byte[] imax2 = XUnsignedVarint.writeLexVarUInt32(-1);
+		
+		assertTrue(DataUtils.compare(imax, imax2) < 0);
+		
+
+		int numtests = 100;
+		for (int sizea = 1; sizea <= 5; sizea++) {
+			ByteBuffer bufa = ByteBuffer.allocate(sizea);
+			for (int sizeb = sizea; sizeb <= 5; sizeb++) {
+				ByteBuffer bufb = ByteBuffer.allocate(sizeb);
+				for (int i = 0; i < numtests; i++) {
+					int a = generate(sizea);
+					int b = generate(sizeb);
+					
+					bufa.rewind();
+					assertEquals(sizea, XUnsignedVarint.writeLexVarUInt32(bufa, a));
+					
+					bufb.rewind();
+					assertEquals(sizeb, XUnsignedVarint.writeLexVarUInt32(bufb, b));
+
+					boolean a_smaller = a >= 0 ? (b < 0 || a < b) : (b < 0 && a < b);
+					
+					assertEquals(a==b, DataUtils.compare(bufa.array(), bufb.array()) == 0);
+					assertEquals(a_smaller, DataUtils.compare(bufa.array(), bufb.array()) < 0);
+					assertEquals(!a_smaller, DataUtils.compare(bufb.array(), bufa.array()) < 0);
+				}
+			}
+		}
+	}
 }
