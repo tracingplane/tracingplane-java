@@ -39,7 +39,7 @@ import edu.brown.cs.systems.baggage.data.DataLayerException;
  * @author jon
  *
  */
-public class XUnsignedVarint {
+public class UnsignedLexVarInt {
 
 	/**
 	 * @param value

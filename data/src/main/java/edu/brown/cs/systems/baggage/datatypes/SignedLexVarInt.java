@@ -28,7 +28,7 @@ import edu.brown.cs.systems.baggage.data.DataLayerException;
  * 64:  1100 0000 0100 0000
  *
  */
-public class XSignedVarint {
+public class SignedLexVarInt {
 
 	/**
 	 * @param value Any integer value

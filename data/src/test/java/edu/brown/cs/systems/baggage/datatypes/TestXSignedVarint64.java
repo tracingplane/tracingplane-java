@@ -22,7 +22,7 @@ public class TestXSignedVarint64 extends TestCase {
 	
 	private static byte[] write(long value) {
 		ByteBuffer buf = ByteBuffer.allocate(9);
-		XSignedVarint.writeLexVarInt64(buf, value);
+		SignedLexVarInt.writeLexVarInt64(buf, value);
 		buf.flip();
 		byte[] bytes = new byte[buf.remaining()];
 		buf.get(bytes);
@@ -40,18 +40,18 @@ public class TestXSignedVarint64 extends TestCase {
 	
 	@Test
 	public void testXSignedVarint64Simple() throws DataLayerException {
-		assertEquals(Long.MIN_VALUE, XSignedVarint.readLexVarInt64(make("00000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000")));
-		assertEquals(-65, XSignedVarint.readLexVarInt64(make("0011 1111", "1011 1111")));
-		assertEquals(-64, XSignedVarint.readLexVarInt64(make("0100 0000")));
-		assertEquals(-19, XSignedVarint.readLexVarInt64(make("0110 1101")));
-		assertEquals(-4, XSignedVarint.readLexVarInt64(make("0111 1100")));
-		assertEquals(-1, XSignedVarint.readLexVarInt64(make("0111 1111")));
-		assertEquals(0, XSignedVarint.readLexVarInt64(make("1000 0000")));
-		assertEquals(1, XSignedVarint.readLexVarInt64(make("1000 0001")));
-		assertEquals(19, XSignedVarint.readLexVarInt64(make("1001 0011")));
-		assertEquals(63, XSignedVarint.readLexVarInt64(make("1011 1111")));
-		assertEquals(64, XSignedVarint.readLexVarInt64(make("1100 0000", "0100 0000")));
-		assertEquals(Long.MAX_VALUE, XSignedVarint.readLexVarInt64(make("11111111", "11111111", "11111111", "11111111", "11111111", "11111111", "11111111", "11111111", "11111111")));
+		assertEquals(Long.MIN_VALUE, SignedLexVarInt.readLexVarInt64(make("00000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000")));
+		assertEquals(-65, SignedLexVarInt.readLexVarInt64(make("0011 1111", "1011 1111")));
+		assertEquals(-64, SignedLexVarInt.readLexVarInt64(make("0100 0000")));
+		assertEquals(-19, SignedLexVarInt.readLexVarInt64(make("0110 1101")));
+		assertEquals(-4, SignedLexVarInt.readLexVarInt64(make("0111 1100")));
+		assertEquals(-1, SignedLexVarInt.readLexVarInt64(make("0111 1111")));
+		assertEquals(0, SignedLexVarInt.readLexVarInt64(make("1000 0000")));
+		assertEquals(1, SignedLexVarInt.readLexVarInt64(make("1000 0001")));
+		assertEquals(19, SignedLexVarInt.readLexVarInt64(make("1001 0011")));
+		assertEquals(63, SignedLexVarInt.readLexVarInt64(make("1011 1111")));
+		assertEquals(64, SignedLexVarInt.readLexVarInt64(make("1100 0000", "0100 0000")));
+		assertEquals(Long.MAX_VALUE, SignedLexVarInt.readLexVarInt64(make("11111111", "11111111", "11111111", "11111111", "11111111", "11111111", "11111111", "11111111", "11111111")));
 	}
 	
 	@Test
@@ -72,54 +72,54 @@ public class TestXSignedVarint64 extends TestCase {
 	
 	@Test
 	public void testEstimatedSize() {
-		assertEquals(1, XSignedVarint.encodedLength((long) -64));
-		assertEquals(1, XSignedVarint.encodedLength((long) -1));
-		assertEquals(1, XSignedVarint.encodedLength((long) 0));
-		assertEquals(1, XSignedVarint.encodedLength((long) 63));
+		assertEquals(1, SignedLexVarInt.encodedLength((long) -64));
+		assertEquals(1, SignedLexVarInt.encodedLength((long) -1));
+		assertEquals(1, SignedLexVarInt.encodedLength((long) 0));
+		assertEquals(1, SignedLexVarInt.encodedLength((long) 63));
 
-		assertEquals(2, XSignedVarint.encodedLength((long) -64*128));
-		assertEquals(2, XSignedVarint.encodedLength((long) -64-1));
-		assertEquals(2, XSignedVarint.encodedLength((long) 64));
-		assertEquals(2, XSignedVarint.encodedLength((long) 64*128-1));
+		assertEquals(2, SignedLexVarInt.encodedLength((long) -64*128));
+		assertEquals(2, SignedLexVarInt.encodedLength((long) -64-1));
+		assertEquals(2, SignedLexVarInt.encodedLength((long) 64));
+		assertEquals(2, SignedLexVarInt.encodedLength((long) 64*128-1));
 
-		assertEquals(3, XSignedVarint.encodedLength((long) -64*128*128));
-		assertEquals(3, XSignedVarint.encodedLength((long) -64*128-1));
-		assertEquals(3, XSignedVarint.encodedLength((long) 64*128));
-		assertEquals(3, XSignedVarint.encodedLength((long) 64*128*128-1));
+		assertEquals(3, SignedLexVarInt.encodedLength((long) -64*128*128));
+		assertEquals(3, SignedLexVarInt.encodedLength((long) -64*128-1));
+		assertEquals(3, SignedLexVarInt.encodedLength((long) 64*128));
+		assertEquals(3, SignedLexVarInt.encodedLength((long) 64*128*128-1));
 
-		assertEquals(4, XSignedVarint.encodedLength((long) -64*128*128*128));
-		assertEquals(4, XSignedVarint.encodedLength((long) -64*128*128-1));
-		assertEquals(4, XSignedVarint.encodedLength((long) 64*128*128));
-		assertEquals(4, XSignedVarint.encodedLength((long) 64*128*128*128-1));
+		assertEquals(4, SignedLexVarInt.encodedLength((long) -64*128*128*128));
+		assertEquals(4, SignedLexVarInt.encodedLength((long) -64*128*128-1));
+		assertEquals(4, SignedLexVarInt.encodedLength((long) 64*128*128));
+		assertEquals(4, SignedLexVarInt.encodedLength((long) 64*128*128*128-1));
 
-		assertEquals(5, XSignedVarint.encodedLength((long) -64*128*128*128*128));
-		assertEquals(5, XSignedVarint.encodedLength((long) -64*128*128*128-1));
-		assertEquals(5, XSignedVarint.encodedLength((long) 64*128*128*128));
-		assertEquals(5, XSignedVarint.encodedLength((long) Integer.MAX_VALUE));
-		assertEquals(5, XSignedVarint.encodedLength((long) Integer.MIN_VALUE));
-		assertEquals(5, XSignedVarint.encodedLength((long) 64*128*128*128*128-1));
+		assertEquals(5, SignedLexVarInt.encodedLength((long) -64*128*128*128*128));
+		assertEquals(5, SignedLexVarInt.encodedLength((long) -64*128*128*128-1));
+		assertEquals(5, SignedLexVarInt.encodedLength((long) 64*128*128*128));
+		assertEquals(5, SignedLexVarInt.encodedLength((long) Integer.MAX_VALUE));
+		assertEquals(5, SignedLexVarInt.encodedLength((long) Integer.MIN_VALUE));
+		assertEquals(5, SignedLexVarInt.encodedLength((long) 64*128*128*128*128-1));
 
-		assertEquals(6, XSignedVarint.encodedLength((long) -64*128*128*128*128*128));
-		assertEquals(6, XSignedVarint.encodedLength((long) -64*128*128*128*128-1));
-		assertEquals(6, XSignedVarint.encodedLength((long) 64*128*128*128*128));
-		assertEquals(6, XSignedVarint.encodedLength((long) 64*128*128*128*128*128-1));
+		assertEquals(6, SignedLexVarInt.encodedLength((long) -64*128*128*128*128*128));
+		assertEquals(6, SignedLexVarInt.encodedLength((long) -64*128*128*128*128-1));
+		assertEquals(6, SignedLexVarInt.encodedLength((long) 64*128*128*128*128));
+		assertEquals(6, SignedLexVarInt.encodedLength((long) 64*128*128*128*128*128-1));
 
-		assertEquals(7, XSignedVarint.encodedLength((long) -64*128*128*128*128*128*128));
-		assertEquals(7, XSignedVarint.encodedLength((long) -64*128*128*128*128*128-1));
-		assertEquals(7, XSignedVarint.encodedLength((long) 64*128*128*128*128*128));
-		assertEquals(7, XSignedVarint.encodedLength((long) 64*128*128*128*128*128*128-1));
+		assertEquals(7, SignedLexVarInt.encodedLength((long) -64*128*128*128*128*128*128));
+		assertEquals(7, SignedLexVarInt.encodedLength((long) -64*128*128*128*128*128-1));
+		assertEquals(7, SignedLexVarInt.encodedLength((long) 64*128*128*128*128*128));
+		assertEquals(7, SignedLexVarInt.encodedLength((long) 64*128*128*128*128*128*128-1));
 
-		assertEquals(8, XSignedVarint.encodedLength((long) -64*128*128*128*128*128*128*128));
-		assertEquals(8, XSignedVarint.encodedLength((long) -64*128*128*128*128*128*128-1));
-		assertEquals(8, XSignedVarint.encodedLength((long) 64*128*128*128*128*128*128));
-		assertEquals(8, XSignedVarint.encodedLength((long) 64*128*128*128*128*128*128*128-1));
+		assertEquals(8, SignedLexVarInt.encodedLength((long) -64*128*128*128*128*128*128*128));
+		assertEquals(8, SignedLexVarInt.encodedLength((long) -64*128*128*128*128*128*128-1));
+		assertEquals(8, SignedLexVarInt.encodedLength((long) 64*128*128*128*128*128*128));
+		assertEquals(8, SignedLexVarInt.encodedLength((long) 64*128*128*128*128*128*128*128-1));
 
-		assertEquals(9, XSignedVarint.encodedLength((long) -64*128*128*128*128*128*128*128*128));
-		assertEquals(9, XSignedVarint.encodedLength((long) -64*128*128*128*128*128*128*128-1));
-		assertEquals(9, XSignedVarint.encodedLength((long) 64*128*128*128*128*128*128*128));
-		assertEquals(9, XSignedVarint.encodedLength((long) 64*128*128*128*128*128*128*128*128-1));
-		assertEquals(9, XSignedVarint.encodedLength((long) Long.MAX_VALUE));
-		assertEquals(9, XSignedVarint.encodedLength((long) Long.MIN_VALUE));
+		assertEquals(9, SignedLexVarInt.encodedLength((long) -64*128*128*128*128*128*128*128*128));
+		assertEquals(9, SignedLexVarInt.encodedLength((long) -64*128*128*128*128*128*128*128-1));
+		assertEquals(9, SignedLexVarInt.encodedLength((long) 64*128*128*128*128*128*128*128));
+		assertEquals(9, SignedLexVarInt.encodedLength((long) 64*128*128*128*128*128*128*128*128-1));
+		assertEquals(9, SignedLexVarInt.encodedLength((long) Long.MAX_VALUE));
+		assertEquals(9, SignedLexVarInt.encodedLength((long) Long.MIN_VALUE));
 	}
 	
 	@Test
@@ -142,19 +142,19 @@ public class TestXSignedVarint64 extends TestCase {
 				assertTrue(value < max);
 				
 				b.rewind();
-				int sizeWritten = XSignedVarint.writeLexVarInt64(b, value);
+				int sizeWritten = SignedLexVarInt.writeLexVarInt64(b, value);
 				assertEquals(size, sizeWritten);
 	
 				b.rewind();
-				long valueRead = XSignedVarint.readLexVarInt64(b);
+				long valueRead = SignedLexVarInt.readLexVarInt64(b);
 				assertEquals(value, valueRead);
 				
 				b.rewind();
-				sizeWritten = XSignedVarint.writeLexVarInt64(b, -value-1);
+				sizeWritten = SignedLexVarInt.writeLexVarInt64(b, -value-1);
 				assertEquals(size, sizeWritten);
 	
 				b.rewind();
-				valueRead = XSignedVarint.readLexVarInt64(b);
+				valueRead = SignedLexVarInt.readLexVarInt64(b);
 				assertEquals(-value-1, valueRead);
 			}
 			
@@ -173,19 +173,19 @@ public class TestXSignedVarint64 extends TestCase {
 			assertTrue(value < Long.MAX_VALUE);
 			
 			b.rewind();
-			int sizeWritten = XSignedVarint.writeLexVarInt64(b, value);
+			int sizeWritten = SignedLexVarInt.writeLexVarInt64(b, value);
 			assertEquals(9, sizeWritten);
 
 			b.rewind();
-			long valueRead = XSignedVarint.readLexVarInt64(b);
+			long valueRead = SignedLexVarInt.readLexVarInt64(b);
 			assertEquals(value, valueRead);
 			
 			b.rewind();
-			sizeWritten = XSignedVarint.writeLexVarInt64(b, -value-1);
+			sizeWritten = SignedLexVarInt.writeLexVarInt64(b, -value-1);
 			assertEquals(9, sizeWritten);
 
 			b.rewind();
-			valueRead = XSignedVarint.readLexVarInt64(b);
+			valueRead = SignedLexVarInt.readLexVarInt64(b);
 			assertEquals(-value-1, valueRead);
 		}
 	}
@@ -227,10 +227,10 @@ public class TestXSignedVarint64 extends TestCase {
 						for (long b : new long[] { valueb, -valueb-1 }) {
 							
 							bufa.rewind();
-							assertEquals(sizea, XSignedVarint.writeLexVarInt64(bufa, a));
+							assertEquals(sizea, SignedLexVarInt.writeLexVarInt64(bufa, a));
 							
 							bufb.rewind();
-							assertEquals(sizeb, XSignedVarint.writeLexVarInt64(bufb, b));
+							assertEquals(sizeb, SignedLexVarInt.writeLexVarInt64(bufb, b));
 
 							assertEquals(Long.compare(a, b) == 0, DataUtils.compare(bufa.array(), bufb.array()) == 0);
 							assertEquals(Long.compare(a, b) < 0, DataUtils.compare(bufa.array(), bufb.array()) < 0);
