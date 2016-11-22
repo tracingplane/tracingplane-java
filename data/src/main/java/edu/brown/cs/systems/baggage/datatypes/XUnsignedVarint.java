@@ -84,9 +84,7 @@ public class XUnsignedVarint {
 	}
 	
 	public static int readLexVarUInt32(ByteBuffer buf) throws DataLayerException {
-		byte b0 = buf.get();
-		int size = interpretSize(b0);
-		return (int) read(size, b0, buf);
+		return (int) readLexVarUInt64(buf);
 	}
 
 	/**
@@ -95,14 +93,10 @@ public class XUnsignedVarint {
 	public static long readLexVarUInt64(ByteBuffer buf) throws DataLayerException {
 		byte b0 = buf.get();
 		int size = interpretSize(b0);
-		return read(size, b0, buf);
-	}
-	
-	static long read(int size, byte b0, ByteBuffer buf) throws DataLayerException {
 		if (size == 1) {
 			return b0;
 		}
-		long result = b0 & (0xff >>> (size-1));
+		long result = b0 & (0xff >>> size);
 		result <<= (8 * (size-1));
 		result += readUInt64(buf, (size-1));
 		return result;
