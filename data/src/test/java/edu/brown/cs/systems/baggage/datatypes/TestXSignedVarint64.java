@@ -9,7 +9,7 @@ import edu.brown.cs.systems.baggage.data.DataLayerException;
 import edu.brown.cs.systems.baggage.data.DataUtils;
 import junit.framework.TestCase;
 
-public class TestXSignedVarint extends TestCase {
+public class TestXSignedVarint64 extends TestCase {
 	
 	private static ByteBuffer make(String... ss) {
 		ByteBuffer buf = ByteBuffer.allocate(ss.length);
@@ -39,7 +39,7 @@ public class TestXSignedVarint extends TestCase {
 	}
 	
 	@Test
-	public void testXSignedVarintSimple() throws DataLayerException {
+	public void testXSignedVarint64Simple() throws DataLayerException {
 		assertEquals(Long.MIN_VALUE, XSignedVarint.readLexVarInt64(make("00000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000")));
 		assertEquals(-65, XSignedVarint.readLexVarInt64(make("0011 1111", "1011 1111")));
 		assertEquals(-64, XSignedVarint.readLexVarInt64(make("0100 0000")));
@@ -55,7 +55,7 @@ public class TestXSignedVarint extends TestCase {
 	}
 	
 	@Test
-	public void testXSignedVarintSimple2() throws DataLayerException {
+	public void testXSignedVarint64Simple2() throws DataLayerException {
 		assertEquals("000000000000000000000000000000000000000000000000000000000000000000000000", writeString(Long.MIN_VALUE));
 		assertEquals("0011111110111111", writeString(-65));
 		assertEquals("01000000", writeString(-64));
@@ -71,14 +71,14 @@ public class TestXSignedVarint extends TestCase {
 	}
 	
 	@Test
-	public void testXSignedVarIntEncodeDecode() throws DataLayerException {
+	public void testXSignedVarInt64EncodeDecode() throws DataLayerException {
 		int numtests = 1000;
 		Random r = new Random(0);
 		
 		long min = 0;
 		long max = 64;
 		
-		for (int size = 1; size < 3; size++) {
+		for (int size = 1; size < 9; size++) {
 			ByteBuffer b = ByteBuffer.allocate(size);
 			for (int i = 0; i < numtests; i++) {
 				long value;
@@ -107,7 +107,7 @@ public class TestXSignedVarint extends TestCase {
 			}
 			
 			min = max;
-			max *= 64;
+			max *= 128;
 		}
 
 		ByteBuffer b = ByteBuffer.allocate(9);
@@ -135,6 +135,58 @@ public class TestXSignedVarint extends TestCase {
 			b.rewind();
 			valueRead = XSignedVarint.readLexVarInt64(b);
 			assertEquals(-value-1, valueRead);
+		}
+	}
+	
+	private static final Random r = new Random(7);
+	private static long generate(int size) {
+		if (size == 9) {
+			long value;
+			do {
+				value = r.nextLong();
+			} while (value <= Long.MAX_VALUE/2);
+			return value;
+		}
+		long min = 0;
+		long max = 64;
+		for (; size > 1; size--) {
+			min = max;
+			max *= 128;
+		}
+		long value;
+		do {
+			value = r.nextLong() % (max-min);
+		} while (value < 0);
+		return value + min;
+	}
+	
+	@Test
+	public void testSignedVarint64Comparison() {
+		int numtests = 100;
+		for (int sizea = 1; sizea <= 9; sizea++) {
+			ByteBuffer bufa = ByteBuffer.allocate(sizea);
+			for (int sizeb = sizea; sizeb <= 9; sizeb++) {
+				ByteBuffer bufb = ByteBuffer.allocate(sizeb);
+				for (int i = 0; i < numtests; i++) {
+					long valuea = generate(sizea);
+					long valueb = generate(sizeb);
+					
+					for (long a : new long[] { valuea, -valuea-1 }) {
+						for (long b : new long[] { valueb, -valueb-1 }) {
+							
+							bufa.rewind();
+							assertEquals(sizea, XSignedVarint.writeLexVarInt64(bufa, a));
+							
+							bufb.rewind();
+							assertEquals(sizeb, XSignedVarint.writeLexVarInt64(bufb, b));
+
+							assertEquals(Long.compare(a, b) == 0, DataUtils.compare(bufa.array(), bufb.array()) == 0);
+							assertEquals(Long.compare(a, b) < 0, DataUtils.compare(bufa.array(), bufb.array()) < 0);
+							assertEquals(Long.compare(b, a) < 0, DataUtils.compare(bufb.array(), bufa.array()) < 0);
+						}
+					}
+				}
+			}
 		}
 	}
 }

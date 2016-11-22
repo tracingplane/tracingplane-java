@@ -3,7 +3,6 @@ package edu.brown.cs.systems.baggage.datatypes;
 import java.nio.ByteBuffer;
 
 import edu.brown.cs.systems.baggage.data.DataLayerException;
-import edu.brown.cs.systems.baggage.data.DataUtils;
 
 /**
  * Signed varint (32 bit and 64 bit) that is encoded in such a way that the
@@ -47,13 +46,13 @@ public class XSignedVarint {
 			if (value < cutoff) {
 				return i;
 			} else {
-				cutoff *= 64;
+				cutoff *= 128;
 			}
 		}
 		return 9;
 	}
 
-	public static int writeLexVarUInt32(ByteBuffer buf, int value) {
+	public static int writeLexVarInt32(ByteBuffer buf, int value) {
 		return writeLexVarInt64(buf, value);
 	}
 
@@ -166,15 +165,5 @@ public class XSignedVarint {
 			}
 		}
 		return result;
-	}
-	
-	public static void main(String[] args) {
-		ByteBuffer buf = ByteBuffer.allocate(9);
-		int numWritten = writeLexVarInt64(buf, Long.MIN_VALUE+1);
-		System.out.println(numWritten + " written");
-		buf.rewind();
-		for (int i = 0; i < 9; i++) {
-			System.out.println(DataUtils.toBinaryString(buf.get()));
-		}
 	}
 }
