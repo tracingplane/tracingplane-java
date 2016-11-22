@@ -43,6 +43,28 @@ public class XUnsignedVarint {
 
 	/**
 	 * @param value
+	 *            Any integer value
+	 * @return the length of the encoded representation of this value. Values in
+	 *         the range [0, 2^7) use 1 byte; [2^7, 2^14) use 2 bytes, and so
+	 *         on. Negative values use 5 bytes.
+	 */
+	public static int encodedLength(int value) {
+		if (value < 0) {
+			return 5;
+		}
+		long cutoff = 128;
+		for (int i = 1; i < 5; i++) {
+			if (value < cutoff) {
+				return i;
+			} else {
+				cutoff *= 128;
+			}
+		}
+		return 5;
+	}
+
+	/**
+	 * @param value
 	 *            Any long value
 	 * @return the length of the encoded representation of this value. Values in
 	 *         the range [0, 2^7) use 1 byte; [2^7, 2^14) use 2 bytes, and so
@@ -70,6 +92,18 @@ public class XUnsignedVarint {
 		} else {
 			return writeLexVarUInt64(buf, value);
 		}
+	}
+	
+	public static byte[] writeLexVarUInt32(int value) {
+		ByteBuffer buf = ByteBuffer.allocate(encodedLength(value));
+		writeLexVarUInt32(buf, value);
+		return buf.array();
+	}
+	
+	public static byte[] writeLexVarUInt64(long value) {
+		ByteBuffer buf = ByteBuffer.allocate(encodedLength(value));
+		writeLexVarUInt64(buf, value);
+		return buf.array();
 	}
 
 	public static int writeLexVarUInt64(ByteBuffer buf, long value) {

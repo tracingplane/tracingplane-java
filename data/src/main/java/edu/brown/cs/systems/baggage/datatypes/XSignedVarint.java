@@ -31,8 +31,28 @@ import edu.brown.cs.systems.baggage.data.DataLayerException;
 public class XSignedVarint {
 
 	/**
-	 * @param value
-	 *            Any long value
+	 * @param value Any integer value
+	 * @return the length of the encoded representation of this value. Values in
+	 *         the range [-2^6, 2^6) use 1 byte; [-2^12, -2^6) and [2^6, 2^12)
+	 *         use 2 bytes, and so on
+	 */
+	public static int encodedLength(int value) {
+		if (value < 0) {
+			value = -(value + 1);
+		}
+		long cutoff = 64;
+		for (int i = 1; i < 5; i++) {
+			if (value < cutoff) {
+				return i;
+			} else {
+				cutoff *= 128;
+			}
+		}
+		return 5;
+	}
+
+	/**
+	 * @param value Any long value
 	 * @return the length of the encoded representation of this value. Values in
 	 *         the range [-2^6, 2^6) use 1 byte; [-2^12, -2^6) and [2^6, 2^12)
 	 *         use 2 bytes, and so on

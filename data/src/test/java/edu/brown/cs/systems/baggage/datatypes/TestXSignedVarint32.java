@@ -71,6 +71,34 @@ public class TestXSignedVarint32 extends TestCase {
 	}
 	
 	@Test
+	public void testEstimatedSize() {
+		assertEquals(1, XSignedVarint.encodedLength(-64));
+		assertEquals(1, XSignedVarint.encodedLength(-1));
+		assertEquals(1, XSignedVarint.encodedLength(0));
+		assertEquals(1, XSignedVarint.encodedLength(63));
+
+		assertEquals(2, XSignedVarint.encodedLength(-64*128));
+		assertEquals(2, XSignedVarint.encodedLength(-64-1));
+		assertEquals(2, XSignedVarint.encodedLength(64));
+		assertEquals(2, XSignedVarint.encodedLength(64*128-1));
+
+		assertEquals(3, XSignedVarint.encodedLength(-64*128*128));
+		assertEquals(3, XSignedVarint.encodedLength(-64*128-1));
+		assertEquals(3, XSignedVarint.encodedLength(64*128));
+		assertEquals(3, XSignedVarint.encodedLength(64*128*128-1));
+
+		assertEquals(4, XSignedVarint.encodedLength(-64*128*128*128));
+		assertEquals(4, XSignedVarint.encodedLength(-64*128*128-1));
+		assertEquals(4, XSignedVarint.encodedLength(64*128*128));
+		assertEquals(4, XSignedVarint.encodedLength(64*128*128*128-1));
+
+		assertEquals(5, XSignedVarint.encodedLength(-64*128*128*128-1));
+		assertEquals(5, XSignedVarint.encodedLength(64*128*128*128));
+		assertEquals(5, XSignedVarint.encodedLength(Integer.MAX_VALUE));
+		assertEquals(5, XSignedVarint.encodedLength(Integer.MIN_VALUE));
+	}
+	
+	@Test
 	public void testXSignedVarInt32EncodeDecode() throws DataLayerException {
 		int numtests = 1000;
 		Random r = new Random(0);

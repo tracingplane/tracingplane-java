@@ -6,6 +6,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import edu.brown.cs.systems.baggage.data.DataLayerException;
+import edu.brown.cs.systems.baggage.data.DataUtils;
 import junit.framework.TestCase;
 
 public class TestXUnsignedVarint64 extends TestCase {
@@ -26,6 +27,23 @@ public class TestXUnsignedVarint64 extends TestCase {
 				assertEquals((value >>> (8*(8-i))), XUnsignedVarint.readUInt64(b, i));
 			}
 		}
+	}
+	
+	@Test
+	public void testEstimatedSize() {
+		assertEquals(1, XUnsignedVarint.encodedLength(0L));
+		assertEquals(2, XUnsignedVarint.encodedLength(128L));
+		assertEquals(3, XUnsignedVarint.encodedLength(128L*256));
+		assertEquals(4, XUnsignedVarint.encodedLength(128L*256*256));
+		assertEquals(5, XUnsignedVarint.encodedLength(128L*256*256*256));
+		assertEquals(5, XUnsignedVarint.encodedLength((long) Integer.MAX_VALUE));
+		assertEquals(6, XUnsignedVarint.encodedLength(128L*256*256*256*256));
+		assertEquals(7, XUnsignedVarint.encodedLength(128L*256*256*256*256*256));
+		assertEquals(8, XUnsignedVarint.encodedLength(128L*256*256*256*256*256*256));
+		assertEquals(9, XUnsignedVarint.encodedLength((long) Integer.MIN_VALUE));
+		assertEquals(9, XUnsignedVarint.encodedLength(Long.MAX_VALUE));
+		assertEquals(9, XUnsignedVarint.encodedLength(Long.MIN_VALUE));
+		assertEquals(9, XUnsignedVarint.encodedLength((long) -1));
 	}
 	
 	@Test
@@ -137,6 +155,63 @@ public class TestXUnsignedVarint64 extends TestCase {
 			long valueRead = XUnsignedVarint.readLexVarUInt64(b);
 			assertEquals(value, valueRead);
 			
+		}
+	}
+	
+	private static Random r = new Random(10);
+	private static long generate(int size) {
+		if (size == 9) {
+			long value;
+			do {
+				value = r.nextLong();
+			} while (value >= 0);
+			return value;
+		}
+		long min = 0;
+		long max = 128;
+		for (int i = 1; i < size; i++) {
+			min = max;
+			max *= 128;
+		}
+		
+		long value;
+		do {
+			value = r.nextLong() % (max-min);
+		} while (value < 0);
+		value += min;
+		return value;
+	}
+	
+	@Test
+	public void testUnsignedVarint64Comparison() {
+		byte[] imax = XUnsignedVarint.writeLexVarUInt32(Integer.MAX_VALUE);
+		byte[] imax2 = XUnsignedVarint.writeLexVarUInt32(-1);
+		
+		assertTrue(DataUtils.compare(imax, imax2) < 0);
+		
+
+		int numtests = 100;
+		for (int sizea = 1; sizea <= 9; sizea++) {
+			ByteBuffer bufa = ByteBuffer.allocate(sizea);
+			for (int sizeb = sizea; sizeb <= 9; sizeb++) {
+				ByteBuffer bufb = ByteBuffer.allocate(sizeb);
+				for (int i = 0; i < numtests; i++) {
+					long a = generate(sizea);
+					long b = generate(sizeb);
+					
+					bufa.rewind();
+					assertEquals(sizea, XUnsignedVarint.writeLexVarUInt64(bufa, a));
+					
+					bufb.rewind();
+					assertEquals(sizeb, XUnsignedVarint.writeLexVarUInt64(bufb, b));
+
+					boolean a_smaller = a >= 0 ? (b < 0 || a < b) : (b < 0 && a < b);
+					
+					assertEquals(a==b, DataUtils.compare(bufa.array(), bufb.array()) == 0);
+					assertEquals(a_smaller, DataUtils.compare(bufa.array(), bufb.array()) < 0);
+					assertEquals(!a_smaller, DataUtils.compare(bufb.array(), bufa.array()) < 0);
+				}
+			}
 		}
 	}
 }

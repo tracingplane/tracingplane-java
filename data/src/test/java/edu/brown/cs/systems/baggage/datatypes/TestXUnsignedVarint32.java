@@ -144,6 +144,18 @@ public class TestXUnsignedVarint32 extends TestCase {
 		
 	}
 	
+	@Test
+	public void testEstimatedSize() {
+		assertEquals(1, XUnsignedVarint.encodedLength(0));
+		assertEquals(2, XUnsignedVarint.encodedLength(128));
+		assertEquals(3, XUnsignedVarint.encodedLength(128*256));
+		assertEquals(4, XUnsignedVarint.encodedLength(128*256*256));
+		assertEquals(5, XUnsignedVarint.encodedLength(128*256*256*256));
+		assertEquals(5, XUnsignedVarint.encodedLength(Integer.MAX_VALUE));
+		assertEquals(5, XUnsignedVarint.encodedLength(Integer.MIN_VALUE));
+		assertEquals(5, XUnsignedVarint.encodedLength(-1));
+	}
+	
 	
 	@Test
 	public void testLexVarPrefixSize() throws DataLayerException {
