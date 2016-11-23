@@ -1,8 +1,8 @@
-package edu.brown.cs.systems.baggage.datatypes;
+package edu.brown.cs.systems.baggage.datalayer.types;
 
 import java.nio.ByteBuffer;
 
-import edu.brown.cs.systems.baggage.data.DataLayerException;
+import edu.brown.cs.systems.baggage.datalayer.DataLayerException;
 
 /**
  * Unsigned varint (32 bit and 64 bit) that is encoded in such a way that the

@@ -1,8 +1,6 @@
-package edu.brown.cs.systems.baggage.data;
+package edu.brown.cs.systems.baggage.datalayer;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 
 import com.google.common.primitives.UnsignedBytes;
 
@@ -15,47 +13,43 @@ public class DataUtils {
 		return byteComparator.compare(a, b);
 	}
 	
-	public static int compare(Frame a, Frame b) {
-		return compare(a.toByteArray(), b.toByteArray());
-	}
+//	/** Merge two payloads */
+//	public static List<ByteBuffer> merge(List<ByteBuffer> a, List<ByteBuffer> b) {
+//		List<Frame> merged = new ArrayList<>(a.size() + b.size());
+//		int ia = 0, ib = 0;
+//		while (ia < a.size() && ib < b.size()) {
+//			Frame fa = a.get(ia), fb = b.get(ib);
+//			int comparison = compare(fa, fb);
+//			if (comparison == 0) {
+//				merged.add(fa);
+//				ia++; ib++;
+//			} else if (comparison < 0) {
+//				merged.add(fa);
+//				ia++;
+//			} else {
+//				merged.add(fb);
+//				ib++;
+//			}
+//		}
+//		while (ia < a.size()) {
+//			merged.add(a.get(ia++));
+//		}
+//		while (ib < b.size()) {
+//			merged.add(b.get(ib++));
+//		}
+//		return merged;
+//	}
 	
-	/** Merge two payloads */
-	public static List<Frame> merge(List<Frame> a, List<Frame> b) {
-		List<Frame> merged = new ArrayList<>(a.size() + b.size());
-		int ia = 0, ib = 0;
-		while (ia < a.size() && ib < b.size()) {
-			Frame fa = a.get(ia), fb = b.get(ib);
-			int comparison = compare(fa, fb);
-			if (comparison == 0) {
-				merged.add(fa);
-				ia++; ib++;
-			} else if (comparison < 0) {
-				merged.add(fa);
-				ia++;
-			} else {
-				merged.add(fb);
-				ib++;
-			}
-		}
-		while (ia < a.size()) {
-			merged.add(a.get(ia++));
-		}
-		while (ib < b.size()) {
-			merged.add(b.get(ib++));
-		}
-		return merged;
-	}
-	
-	public static List<Frame> drop(List<Frame> input, int maxSize) {
-		int totalBytes = 0;
-		for (int i = 0; i < input.size(); i++) {
-			totalBytes += input.get(i).toByteArray().length;
-			if (totalBytes > maxSize) {
-				return input.subList(0, i);
-			}
-		}
-		return input;
-	}
+//	public static List<Frame> drop(List<Frame> input, int maxSize) {
+//		int totalBytes = 0;
+//		for (int i = 0; i < input.size(); i++) {
+//			totalBytes += input.get(i).toByteArray().length;
+//			if (totalBytes > maxSize) {
+//				return input.subList(0, i);
+//			}
+//		}
+//		return input;
+//	}
 	
 	/** Naive implementation of byte array equals */
 	public static boolean equals(byte[] a, byte[] b) {

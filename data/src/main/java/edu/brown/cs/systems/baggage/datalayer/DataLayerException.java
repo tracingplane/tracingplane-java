@@ -1,4 +1,4 @@
-package edu.brown.cs.systems.baggage.data;
+package edu.brown.cs.systems.baggage.datalayer;
 
 import java.nio.BufferUnderflowException;
 

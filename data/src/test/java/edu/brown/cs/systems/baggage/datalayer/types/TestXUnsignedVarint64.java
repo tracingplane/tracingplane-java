@@ -1,12 +1,13 @@
-package edu.brown.cs.systems.baggage.datatypes;
+package edu.brown.cs.systems.baggage.datalayer.types;
 
 import java.nio.ByteBuffer;
 import java.util.Random;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.baggage.data.DataLayerException;
-import edu.brown.cs.systems.baggage.data.DataUtils;
+import edu.brown.cs.systems.baggage.datalayer.DataLayerException;
+import edu.brown.cs.systems.baggage.datalayer.DataUtils;
+import edu.brown.cs.systems.baggage.datalayer.types.UnsignedLexVarInt;
 import junit.framework.TestCase;
 
 public class TestXUnsignedVarint64 extends TestCase {
