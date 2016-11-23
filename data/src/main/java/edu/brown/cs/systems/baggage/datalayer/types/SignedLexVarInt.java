@@ -16,16 +16,18 @@ import edu.brown.cs.systems.baggage.datalayer.DataLayerException;
  * 
  * So, for example, we get the following encodings:
  * 
- * -65: 0011 1111 1011 1111
- * -64: 0100 0000
- * -19: 0110 1101
- * -4:  0111 1100
- * -1:  0111 1111
- * 0:   1000 0000
- * 1:   1000 0001
- * 19:  1001 0011
- * 63:  1011 1111
- * 64:  1100 0000 0100 0000
+ * Long.MIN_VALUE:  0000 0000 0000 0000 0000 0000 ... (9 bytes worth of zeros)
+ * -65:             0011 1111 1011 1111
+ * -64:             0100 0000
+ * -19:             0110 1101
+ * -4:              0111 1100
+ * -1:              0111 1111
+ * 0:               1000 0000
+ * 1:               1000 0001
+ * 19:              1001 0011
+ * 63:              1011 1111
+ * 64:              1100 0000 0100 0000
+ * LONG.MAX_VALUE:  1111 1111 1111 1111 1111 1111 ... (9 bytes worth of ones)
  *
  */
 public class SignedLexVarInt {

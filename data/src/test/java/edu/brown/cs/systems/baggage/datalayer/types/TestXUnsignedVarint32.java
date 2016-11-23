@@ -247,9 +247,9 @@ public class TestXUnsignedVarint32 extends TestCase {
 	}
 	
 	@Test
-	public void testUnsignedVarint64Comparison() {
-		byte[] imax = UnsignedLexVarInt.writeLexVarUInt32(Integer.MAX_VALUE);
-		byte[] imax2 = UnsignedLexVarInt.writeLexVarUInt32(-1);
+	public void testUnsignedVarint32Comparison() {
+		byte[] imax = Lexicographic.writeVarUInt32(Integer.MAX_VALUE);
+		byte[] imax2 = Lexicographic.writeVarUInt32(-1);
 		
 		assertTrue(DataUtils.compare(imax, imax2) < 0);
 		

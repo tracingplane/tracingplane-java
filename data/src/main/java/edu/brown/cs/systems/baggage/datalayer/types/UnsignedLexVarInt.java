@@ -93,18 +93,6 @@ public class UnsignedLexVarInt {
 			return writeLexVarUInt64(buf, value);
 		}
 	}
-	
-	public static byte[] writeLexVarUInt32(int value) {
-		ByteBuffer buf = ByteBuffer.allocate(encodedLength(value));
-		writeLexVarUInt32(buf, value);
-		return buf.array();
-	}
-	
-	public static byte[] writeLexVarUInt64(long value) {
-		ByteBuffer buf = ByteBuffer.allocate(encodedLength(value));
-		writeLexVarUInt64(buf, value);
-		return buf.array();
-	}
 
 	public static int writeLexVarUInt64(ByteBuffer buf, long value) {
 		int size = encodedLength(value);
