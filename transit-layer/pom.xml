@@ -2,10 +2,10 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>edu.brown.cs.systems.baggage</groupId>
-    <artifactId>baggage-buffers</artifactId>
+    <artifactId>transit-layer</artifactId>
     <packaging>jar</packaging>
 
-    <name>Baggage - Baggage Buffers</name>
+    <name>Baggage - Transit Layer</name>
 
     <parent>
         <groupId>edu.brown.cs.systems</groupId>
