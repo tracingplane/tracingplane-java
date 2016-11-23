@@ -9,7 +9,7 @@ import java.util.List;
 
 import com.google.common.primitives.UnsignedBytes;
 
-import edu.brown.cs.systems.baggage.datalayer.DataLayerException;
+import edu.brown.cs.systems.baggage.datalayer.impl.DataLayerException;
 
 public class Lexicographic {
 

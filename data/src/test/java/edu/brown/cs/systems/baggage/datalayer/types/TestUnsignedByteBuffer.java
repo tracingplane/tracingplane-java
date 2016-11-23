@@ -5,7 +5,7 @@ import java.util.Comparator;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.baggage.datalayer.DataUtils;
+import edu.brown.cs.systems.baggage.datalayer.impl.Utils;
 import edu.brown.cs.systems.baggage.datalayer.types.UnsignedByteBuffer;
 import junit.framework.TestCase;
 
@@ -14,7 +14,7 @@ public class TestUnsignedByteBuffer extends TestCase {
 	private static ByteBuffer make(String... ss) {
 		ByteBuffer buf = ByteBuffer.allocate(ss.length);
 		for (String s : ss) {
-			buf.put(DataUtils.makeByte(s));
+			buf.put(Utils.makeByte(s));
 		}
 		buf.rewind();
 		return buf;

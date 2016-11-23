@@ -5,8 +5,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.baggage.datalayer.DataLayerException;
-import edu.brown.cs.systems.baggage.datalayer.DataUtils;
+import edu.brown.cs.systems.baggage.datalayer.impl.DataLayerException;
+import edu.brown.cs.systems.baggage.datalayer.impl.Utils;
 import edu.brown.cs.systems.baggage.datalayer.types.UnsignedLexVarInt;
 import junit.framework.TestCase;
 
@@ -188,7 +188,7 @@ public class TestXUnsignedVarint64 extends TestCase {
 		byte[] imax = Lexicographic.writeVarUInt64(Long.MAX_VALUE);
 		byte[] imax2 = Lexicographic.writeVarUInt64(-1);
 		
-		assertTrue(DataUtils.compare(imax, imax2) < 0);
+		assertTrue(Lexicographic.compare(imax, imax2) < 0);
 		
 
 		int numtests = 100;
@@ -208,9 +208,9 @@ public class TestXUnsignedVarint64 extends TestCase {
 
 					boolean a_smaller = a >= 0 ? (b < 0 || a < b) : (b < 0 && a < b);
 					
-					assertEquals(a==b, DataUtils.compare(bufa.array(), bufb.array()) == 0);
-					assertEquals(a_smaller, DataUtils.compare(bufa.array(), bufb.array()) < 0);
-					assertEquals(!a_smaller, DataUtils.compare(bufb.array(), bufa.array()) < 0);
+					assertEquals(a==b, Lexicographic.compare(bufa.array(), bufb.array()) == 0);
+					assertEquals(a_smaller, Lexicographic.compare(bufa.array(), bufb.array()) < 0);
+					assertEquals(!a_smaller, Lexicographic.compare(bufb.array(), bufa.array()) < 0);
 				}
 			}
 		}

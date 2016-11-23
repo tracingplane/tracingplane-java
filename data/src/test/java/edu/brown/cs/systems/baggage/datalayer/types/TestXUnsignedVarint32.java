@@ -6,8 +6,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.baggage.datalayer.DataLayerException;
-import edu.brown.cs.systems.baggage.datalayer.DataUtils;
+import edu.brown.cs.systems.baggage.datalayer.impl.DataLayerException;
+import edu.brown.cs.systems.baggage.datalayer.impl.Utils;
 import edu.brown.cs.systems.baggage.datalayer.types.UnsignedLexVarInt;
 import junit.framework.TestCase;
 
@@ -34,7 +34,7 @@ public class TestXUnsignedVarint32 extends TestCase {
 			b.rewind();
 			try {
 				UnsignedLexVarInt.readLexVarUInt32(b);
-				fail("Should not be able to read lexvarint " + DataUtils.toBinaryString((byte) i) + " due to insufficient bytes");
+				fail("Should not be able to read lexvarint " + Utils.toBinaryString((byte) i) + " due to insufficient bytes");
 			} catch (BufferUnderflowException e) {
 				// success
 			}
@@ -251,7 +251,7 @@ public class TestXUnsignedVarint32 extends TestCase {
 		byte[] imax = Lexicographic.writeVarUInt32(Integer.MAX_VALUE);
 		byte[] imax2 = Lexicographic.writeVarUInt32(-1);
 		
-		assertTrue(DataUtils.compare(imax, imax2) < 0);
+		assertTrue(Lexicographic.compare(imax, imax2) < 0);
 		
 
 		int numtests = 100;
@@ -271,9 +271,9 @@ public class TestXUnsignedVarint32 extends TestCase {
 
 					boolean a_smaller = a >= 0 ? (b < 0 || a < b) : (b < 0 && a < b);
 					
-					assertEquals(a==b, DataUtils.compare(bufa.array(), bufb.array()) == 0);
-					assertEquals(a_smaller, DataUtils.compare(bufa.array(), bufb.array()) < 0);
-					assertEquals(!a_smaller, DataUtils.compare(bufb.array(), bufa.array()) < 0);
+					assertEquals(a==b, Lexicographic.compare(bufa.array(), bufb.array()) == 0);
+					assertEquals(a_smaller, Lexicographic.compare(bufa.array(), bufb.array()) < 0);
+					assertEquals(!a_smaller, Lexicographic.compare(bufb.array(), bufa.array()) < 0);
 				}
 			}
 		}

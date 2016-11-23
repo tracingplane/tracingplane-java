@@ -2,7 +2,7 @@ package edu.brown.cs.systems.baggage.datalayer.types;
 
 import java.nio.ByteBuffer;
 
-import edu.brown.cs.systems.baggage.datalayer.DataLayerException;
+import edu.brown.cs.systems.baggage.datalayer.impl.DataLayerException;
 
 /**
  * Signed varint (32 bit and 64 bit) that is encoded in such a way that the

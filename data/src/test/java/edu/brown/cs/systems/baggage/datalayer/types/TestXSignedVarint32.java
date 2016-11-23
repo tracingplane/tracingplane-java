@@ -5,8 +5,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.baggage.datalayer.DataLayerException;
-import edu.brown.cs.systems.baggage.datalayer.DataUtils;
+import edu.brown.cs.systems.baggage.datalayer.impl.DataLayerException;
+import edu.brown.cs.systems.baggage.datalayer.impl.Utils;
 import edu.brown.cs.systems.baggage.datalayer.types.SignedLexVarInt;
 import junit.framework.TestCase;
 
@@ -15,7 +15,7 @@ public class TestXSignedVarint32 extends TestCase {
 	private static ByteBuffer make(String... ss) {
 		ByteBuffer buf = ByteBuffer.allocate(ss.length);
 		for (String s : ss) {
-			buf.put(DataUtils.makeByte(s));
+			buf.put(Utils.makeByte(s));
 		}
 		buf.rewind();
 		return buf;
@@ -34,7 +34,7 @@ public class TestXSignedVarint32 extends TestCase {
 		byte[] bytes = write(value);
 		String s = "";
 		for (byte b : bytes) {
-			s = s + DataUtils.toBinaryString(b);
+			s = s + Utils.toBinaryString(b);
 		}
 		return s;
 	}
@@ -193,9 +193,9 @@ public class TestXSignedVarint32 extends TestCase {
 							bufb.rewind();
 							assertEquals(sizeb, SignedLexVarInt.writeLexVarInt32(bufb, b));
 
-							assertEquals(Integer.compare(a, b) == 0, DataUtils.compare(bufa.array(), bufb.array()) == 0);
-							assertEquals(Integer.compare(a, b) < 0, DataUtils.compare(bufa.array(), bufb.array()) < 0);
-							assertEquals(Integer.compare(b, a) < 0, DataUtils.compare(bufb.array(), bufa.array()) < 0);
+							assertEquals(Integer.compare(a, b) == 0, Lexicographic.compare(bufa.array(), bufb.array()) == 0);
+							assertEquals(Integer.compare(a, b) < 0, Lexicographic.compare(bufa.array(), bufb.array()) < 0);
+							assertEquals(Integer.compare(b, a) < 0, Lexicographic.compare(bufb.array(), bufa.array()) < 0);
 						}
 					}
 				}
