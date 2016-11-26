@@ -1,15 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>edu.brown.cs.systems.baggage</groupId>
+    <groupId>edu.brown.cs.systems.tracingplane</groupId>
     <artifactId>transit-layer</artifactId>
     <packaging>jar</packaging>
 
-    <name>Baggage - Transit Layer</name>
+    <name>Tracing Plane - Transit Layer</name>
 
     <parent>
         <groupId>edu.brown.cs.systems</groupId>
-        <artifactId>baggage-project</artifactId>
+        <artifactId>tracingplane-project</artifactId>
         <version>0.1</version>
     </parent>
 
