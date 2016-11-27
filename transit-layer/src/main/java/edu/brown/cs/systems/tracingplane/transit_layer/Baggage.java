@@ -1,5 +1,6 @@
 package edu.brown.cs.systems.tracingplane.transit_layer;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -56,7 +57,7 @@ public interface Baggage {
 		return transit.deserialize(serialized, offset, length);
 	}
 
-	public static Baggage readFrom(InputStream in) {
+	public static Baggage readFrom(InputStream in) throws IOException {
 		return transit.readFrom(in);
 	}
 
@@ -69,7 +70,7 @@ public interface Baggage {
 		return transit.serialize(instance);
 	}
 
-	public static void writeTo(Baggage instance, OutputStream out) {
-		transit.writeTo(instance, out);
+	public static void writeTo(OutputStream out, Baggage instance) throws IOException {
+		transit.writeTo(out, instance);
 	}
 }

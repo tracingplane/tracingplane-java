@@ -41,7 +41,7 @@ public class TransitLayerNullImpl {
 		}
 
 		@Override
-		public void writeTo(Baggage instance, OutputStream out) {
+		public void writeTo(OutputStream out, Baggage instance) {
 		}
 	}
 

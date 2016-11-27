@@ -1,5 +1,6 @@
 package edu.brown.cs.systems.tracingplane.context_layer;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -74,14 +75,14 @@ public class ContextLayer implements TransitLayer {
 
 	@Override
 	public Baggage deserialize(byte[] serialized, int offset, int length) {
-		BaggageImpl deserialized = BaggageImpl.deserialize(serialized, offset, length);
+		BaggageImpl deserialized = BaggageImplSerialization.deserialize(serialized, offset, length);
 		listener.postDeserialize(deserialized);
 		return deserialized;
 	}
 
 	@Override
-	public Baggage readFrom(InputStream in) {
-		BaggageImpl deserialized = BaggageImpl.readFrom(in);
+	public Baggage readFrom(InputStream in) throws IOException {
+		BaggageImpl deserialized = BaggageImplSerialization.readFrom(in);
 		listener.postDeserialize(deserialized);
 		return deserialized;
 	}
@@ -98,22 +99,22 @@ public class ContextLayer implements TransitLayer {
 	
 	private byte[] doSerialize(BaggageImpl baggage) {
 		listener.preSerialize(baggage);
-		return baggage == null ? BaggageImpl.EMPTY_BYTES : baggage.serialize();
+		return baggage == null ? BaggageImpl.EMPTY_BYTES : BaggageImplSerialization.serialize(baggage);
 	}
 
 	@Override
-	public void writeTo(Baggage instance, OutputStream out) {
+	public void writeTo(OutputStream out, Baggage instance) throws IOException {
 		if (instance == null || instance instanceof BaggageImpl) {
-			doWriteTo((BaggageImpl) instance, out);
+			doWriteTo(out, (BaggageImpl) instance);
 		} else {
 			log.warn("writeto unknown Baggage implementation class {}", instance.getClass().getName());
 		}
 	}
 	
-	private void doWriteTo(BaggageImpl baggage, OutputStream out) {
+	private void doWriteTo(OutputStream out, BaggageImpl baggage) throws IOException {
 		listener.preSerialize(baggage);
 		if (baggage != null) {
-			baggage.writeTo(out);
+			BaggageImplSerialization.write(out, baggage);
 		}
 	}
 
