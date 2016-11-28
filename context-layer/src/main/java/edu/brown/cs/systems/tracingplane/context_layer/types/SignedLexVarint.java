@@ -30,7 +30,7 @@ import edu.brown.cs.systems.tracingplane.context_layer.DataLayerException;
  * LONG.MAX_VALUE:  1111 1111 1111 1111 1111 1111 ... (9 bytes worth of ones)
  *
  */
-public class SignedLexVarInt {
+public class SignedLexVarint {
 
 	/**
 	 * @param value Any integer value

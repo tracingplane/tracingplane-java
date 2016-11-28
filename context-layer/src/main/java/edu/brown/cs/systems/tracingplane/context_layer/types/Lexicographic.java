@@ -92,7 +92,7 @@ public class Lexicographic {
 	 * a lexicographically comparable varint
 	 */
 	public static int writeVarInt32(ByteBuffer buf, int value) {
-		return SignedLexVarInt.writeLexVarInt32(buf, value);
+		return SignedLexVarint.writeLexVarInt32(buf, value);
 	}
 
 	/**
@@ -100,7 +100,7 @@ public class Lexicographic {
 	 * a lexicographically comparable varint
 	 */
 	public static int writeVarInt64(ByteBuffer buf, long value) {
-		return SignedLexVarInt.writeLexVarInt64(buf, value);
+		return SignedLexVarint.writeLexVarInt64(buf, value);
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class Lexicographic {
 	 * as a lexicographically comparable varint
 	 */
 	public static int writeVarUInt32(ByteBuffer buf, int value) {
-		return UnsignedLexVarInt.writeLexVarUInt32(buf, value);
+		return UnsignedLexVarint.writeLexVarUInt32(buf, value);
 	}
 
 	/**
@@ -116,7 +116,7 @@ public class Lexicographic {
 	 * as a lexicographically comparable varint
 	 */
 	public static int writeVarUInt64(ByteBuffer buf, int value) {
-		return UnsignedLexVarInt.writeLexVarUInt64(buf, value);
+		return UnsignedLexVarint.writeLexVarUInt64(buf, value);
 	}
 
 	/**
@@ -124,8 +124,8 @@ public class Lexicographic {
 	 * encoded as a lexicographically comparable varint
 	 */
 	public static byte[] writeVarInt32(int value) {
-		ByteBuffer buf = ByteBuffer.allocate(SignedLexVarInt.encodedLength(value));
-		SignedLexVarInt.writeLexVarInt32(buf, value);
+		ByteBuffer buf = ByteBuffer.allocate(SignedLexVarint.encodedLength(value));
+		SignedLexVarint.writeLexVarInt32(buf, value);
 		return buf.array();
 	}
 
@@ -134,8 +134,8 @@ public class Lexicographic {
 	 * encoded as a lexicographically comparable varint
 	 */
 	public static byte[] writeVarInt64(long value) {
-		ByteBuffer buf = ByteBuffer.allocate(SignedLexVarInt.encodedLength(value));
-		SignedLexVarInt.writeLexVarInt64(buf, value);
+		ByteBuffer buf = ByteBuffer.allocate(SignedLexVarint.encodedLength(value));
+		SignedLexVarint.writeLexVarInt64(buf, value);
 		return buf.array();
 	}
 
@@ -144,8 +144,8 @@ public class Lexicographic {
 	 * encoded as a lexicographically comparable varint
 	 */
 	public static byte[] writeVarUInt32(int value) {
-		ByteBuffer buf = ByteBuffer.allocate(UnsignedLexVarInt.encodedLength(value));
-		UnsignedLexVarInt.writeLexVarUInt32(buf, value);
+		ByteBuffer buf = ByteBuffer.allocate(UnsignedLexVarint.encodedLength(value));
+		UnsignedLexVarint.writeLexVarUInt32(buf, value);
 		return buf.array();
 	}
 
@@ -154,8 +154,8 @@ public class Lexicographic {
 	 * encoded as a lexicographically comparable varint
 	 */
 	public static byte[] writeVarUInt64(long value) {
-		ByteBuffer buf = ByteBuffer.allocate(UnsignedLexVarInt.encodedLength(value));
-		UnsignedLexVarInt.writeLexVarUInt64(buf, value);
+		ByteBuffer buf = ByteBuffer.allocate(UnsignedLexVarint.encodedLength(value));
+		UnsignedLexVarint.writeLexVarUInt64(buf, value);
 		return buf.array();
 	}
 
@@ -163,56 +163,56 @@ public class Lexicographic {
 	 * Reads a 32 bit signed varint from the provided buffer
 	 */
 	public static int readVarInt32(ByteBuffer buf) throws DataLayerException {
-		return SignedLexVarInt.readLexVarInt32(buf);
+		return SignedLexVarint.readLexVarInt32(buf);
 	}
 
 	/**
 	 * Reads a 64 bit signed varint from the provided buffer
 	 */
 	public static long readVarInt64(ByteBuffer buf) throws DataLayerException {
-		return SignedLexVarInt.readLexVarInt64(buf);
+		return SignedLexVarint.readLexVarInt64(buf);
 	}
 
 	/**
 	 * Reads a 32 bit unsigned varint from the provided buffer
 	 */
 	public static int readVarUInt32(ByteBuffer buf) throws DataLayerException {
-		return UnsignedLexVarInt.readLexVarUInt32(buf);
+		return UnsignedLexVarint.readLexVarUInt32(buf);
 	}
 
 	/**
 	 * Reads a 64 bit unsigned varint from the provided buffer
 	 */
 	public static long readVarUInt64(ByteBuffer buf) throws DataLayerException {
-		return UnsignedLexVarInt.readLexVarUInt64(buf);
+		return UnsignedLexVarint.readLexVarUInt64(buf);
 	}
 
 	/**
 	 * Reads a 32 bit signed varint from the provided buffer
 	 */
 	public static int readVarInt32(byte[] bytes) throws DataLayerException {
-		return SignedLexVarInt.readLexVarInt32(ByteBuffer.wrap(bytes));
+		return SignedLexVarint.readLexVarInt32(ByteBuffer.wrap(bytes));
 	}
 
 	/**
 	 * Reads a 64 bit signed varint from the provided buffer
 	 */
 	public static long readVarInt64(byte[] bytes) throws DataLayerException {
-		return SignedLexVarInt.readLexVarInt64(ByteBuffer.wrap(bytes));
+		return SignedLexVarint.readLexVarInt64(ByteBuffer.wrap(bytes));
 	}
 
 	/**
 	 * Reads a 32 bit unsigned varint from the provided buffer
 	 */
 	public static int readVarUInt32(byte[] bytes) throws DataLayerException {
-		return UnsignedLexVarInt.readLexVarUInt32(ByteBuffer.wrap(bytes));
+		return UnsignedLexVarint.readLexVarUInt32(ByteBuffer.wrap(bytes));
 	}
 
 	/**
 	 * Reads a 64 bit unsigned varint from the provided buffer
 	 */
 	public static long readVarUInt64(byte[] bytes) throws DataLayerException {
-		return UnsignedLexVarInt.readLexVarUInt64(ByteBuffer.wrap(bytes));
+		return UnsignedLexVarint.readLexVarUInt64(ByteBuffer.wrap(bytes));
 	}
 
 }

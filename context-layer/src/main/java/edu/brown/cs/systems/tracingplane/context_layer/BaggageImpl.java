@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;
-import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarInt;
+import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarint;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 
 public class BaggageImpl implements Baggage {
@@ -25,7 +25,7 @@ public class BaggageImpl implements Baggage {
 	int serializedSize() {
 		int size = 0;
 		for (ByteBuffer bag : bags) {
-			size += bag.remaining() + ProtobufVarInt.sizeOf(bag.remaining());
+			size += bag.remaining() + ProtobufVarint.sizeOf(bag.remaining());
 		}
 		return size;
 	}

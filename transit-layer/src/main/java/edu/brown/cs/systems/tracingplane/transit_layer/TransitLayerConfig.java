@@ -10,7 +10,7 @@ public class TransitLayerConfig {
 
 	private static final Logger log = LoggerFactory.getLogger(TransitLayer.class);
 
-	private static final String TRANSIT_LAYER_IMPLEMENTATION_KEY = "tracing-plane.transit-layer.implementation";
+	private static final String TRANSIT_LAYER_IMPLEMENTATION_KEY = "tracingplane.transit-layer.implementation";
 
 	public String transitLayerImplementationClassName;
 

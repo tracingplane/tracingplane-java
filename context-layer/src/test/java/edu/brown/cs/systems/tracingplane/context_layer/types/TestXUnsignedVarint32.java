@@ -9,7 +9,7 @@ import org.junit.Test;
 import edu.brown.cs.systems.tracingplane.context_layer.DataLayerException;
 import edu.brown.cs.systems.tracingplane.context_layer.Utils;
 import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;
-import edu.brown.cs.systems.tracingplane.context_layer.types.UnsignedLexVarInt;
+import edu.brown.cs.systems.tracingplane.context_layer.types.UnsignedLexVarint;
 import junit.framework.TestCase;
 
 public class TestXUnsignedVarint32 extends TestCase {
@@ -22,11 +22,11 @@ public class TestXUnsignedVarint32 extends TestCase {
 			b.put((byte) i);
 			b.rewind();
 
-			assertEquals(i, UnsignedLexVarInt.readLexVarUInt32(b));
+			assertEquals(i, UnsignedLexVarint.readLexVarUInt32(b));
 			b.rewind();
-			assertEquals(i, UnsignedLexVarInt.readLexVarUInt64(b));
+			assertEquals(i, UnsignedLexVarint.readLexVarUInt64(b));
 			
-			assertEquals(1, UnsignedLexVarInt.encodedLength(i));
+			assertEquals(1, UnsignedLexVarint.encodedLength(i));
 		}
 		
 		for (int i = 128; i < 256; i++) {
@@ -34,7 +34,7 @@ public class TestXUnsignedVarint32 extends TestCase {
 			b.put((byte) i);
 			b.rewind();
 			try {
-				UnsignedLexVarInt.readLexVarUInt32(b);
+				UnsignedLexVarint.readLexVarUInt32(b);
 				fail("Should not be able to read lexvarint " + Utils.toBinaryString((byte) i) + " due to insufficient bytes");
 			} catch (BufferUnderflowException e) {
 				// success
@@ -55,11 +55,11 @@ public class TestXUnsignedVarint32 extends TestCase {
 				b.rewind();
 				
 				if (b0 > 128) {
-					assertEquals(2, UnsignedLexVarInt.encodedLength(expect));
+					assertEquals(2, UnsignedLexVarint.encodedLength(expect));
 				}
-				assertEquals(expect, UnsignedLexVarInt.readLexVarUInt32(b));
+				assertEquals(expect, UnsignedLexVarint.readLexVarUInt32(b));
 				b.rewind();
-				assertEquals(expect++, UnsignedLexVarInt.readLexVarUInt64(b));
+				assertEquals(expect++, UnsignedLexVarint.readLexVarUInt64(b));
 			}
 		}
 	}
@@ -79,11 +79,11 @@ public class TestXUnsignedVarint32 extends TestCase {
 					b.rewind();
 
 					if (b0 > 192) {
-						assertEquals(3, UnsignedLexVarInt.encodedLength(expect));
+						assertEquals(3, UnsignedLexVarint.encodedLength(expect));
 					}
-					assertEquals(expect, UnsignedLexVarInt.readLexVarUInt32(b));
+					assertEquals(expect, UnsignedLexVarint.readLexVarUInt32(b));
 					b.rewind();
-					assertEquals(expect++, UnsignedLexVarInt.readLexVarUInt64(b));
+					assertEquals(expect++, UnsignedLexVarint.readLexVarUInt64(b));
 				}
 			}
 		}
@@ -106,11 +106,11 @@ public class TestXUnsignedVarint32 extends TestCase {
 						b.rewind();
 
 						if (b0 > 224) {
-							assertEquals(4, UnsignedLexVarInt.encodedLength(expect));
+							assertEquals(4, UnsignedLexVarint.encodedLength(expect));
 						}
-						assertEquals(expect, UnsignedLexVarInt.readLexVarUInt32(b));
+						assertEquals(expect, UnsignedLexVarint.readLexVarUInt32(b));
 						b.rewind();
-						assertEquals(expect++, UnsignedLexVarInt.readLexVarUInt64(b));
+						assertEquals(expect++, UnsignedLexVarint.readLexVarUInt64(b));
 					}
 				}
 			}
@@ -123,13 +123,13 @@ public class TestXUnsignedVarint32 extends TestCase {
 		b.put((byte) -16);
 		b.putInt(Integer.MAX_VALUE);
 		b.rewind();
-		assertEquals(Integer.MAX_VALUE, UnsignedLexVarInt.readLexVarUInt32(b));
+		assertEquals(Integer.MAX_VALUE, UnsignedLexVarint.readLexVarUInt32(b));
 
 		b.rewind();
 		b.put((byte) -16);
 		b.putInt(Integer.MIN_VALUE);
 		b.rewind();
-		assertEquals(Integer.MIN_VALUE, UnsignedLexVarInt.readLexVarUInt32(b));
+		assertEquals(Integer.MIN_VALUE, UnsignedLexVarint.readLexVarUInt32(b));
 		
 		int[] bad_prefixes = { -8, -4, -2, -1 };
 		for (int bad : bad_prefixes) {
@@ -138,7 +138,7 @@ public class TestXUnsignedVarint32 extends TestCase {
 			b.putInt(Integer.MAX_VALUE);
 			b.rewind();
 			try {
-				UnsignedLexVarInt.readLexVarUInt32(b);
+				UnsignedLexVarint.readLexVarUInt32(b);
 				fail("Expected buffer underflow due to insufficient bits");
 			} catch (BufferUnderflowException e) {
 			}
@@ -148,41 +148,41 @@ public class TestXUnsignedVarint32 extends TestCase {
 	
 	@Test
 	public void testEstimatedSize() {
-		assertEquals(1, UnsignedLexVarInt.encodedLength(0));
-		assertEquals(2, UnsignedLexVarInt.encodedLength(128));
-		assertEquals(3, UnsignedLexVarInt.encodedLength(128*256));
-		assertEquals(4, UnsignedLexVarInt.encodedLength(128*256*256));
-		assertEquals(5, UnsignedLexVarInt.encodedLength(128*256*256*256));
-		assertEquals(5, UnsignedLexVarInt.encodedLength(Integer.MAX_VALUE));
-		assertEquals(5, UnsignedLexVarInt.encodedLength(Integer.MIN_VALUE));
-		assertEquals(5, UnsignedLexVarInt.encodedLength(-1));
+		assertEquals(1, UnsignedLexVarint.encodedLength(0));
+		assertEquals(2, UnsignedLexVarint.encodedLength(128));
+		assertEquals(3, UnsignedLexVarint.encodedLength(128*256));
+		assertEquals(4, UnsignedLexVarint.encodedLength(128*256*256));
+		assertEquals(5, UnsignedLexVarint.encodedLength(128*256*256*256));
+		assertEquals(5, UnsignedLexVarint.encodedLength(Integer.MAX_VALUE));
+		assertEquals(5, UnsignedLexVarint.encodedLength(Integer.MIN_VALUE));
+		assertEquals(5, UnsignedLexVarint.encodedLength(-1));
 	}
 	
 	
 	@Test
 	public void testLexVarPrefixSize() throws DataLayerException {
 		for (int i = 0; i < 128; i++) {
-			assertEquals(1, UnsignedLexVarInt.interpretSize((byte) i));
+			assertEquals(1, UnsignedLexVarint.interpretSize((byte) i));
 		}
 		for (int i = 128; i < 192; i++) {
-			assertEquals(2, UnsignedLexVarInt.interpretSize((byte) i));
+			assertEquals(2, UnsignedLexVarint.interpretSize((byte) i));
 		}
 		for (int i = 192; i < 224; i++) {
-			assertEquals(3, UnsignedLexVarInt.interpretSize((byte) i));
+			assertEquals(3, UnsignedLexVarint.interpretSize((byte) i));
 		}
 		for (int i = 224; i < 240; i++) {
-			assertEquals(4, UnsignedLexVarInt.interpretSize((byte) i));
+			assertEquals(4, UnsignedLexVarint.interpretSize((byte) i));
 		}
 		for (int i = 240; i < 248; i++) {
-			assertEquals(5, UnsignedLexVarInt.interpretSize((byte) i));
+			assertEquals(5, UnsignedLexVarint.interpretSize((byte) i));
 		}
 		for (int i = 248; i < 252; i++) {
-			assertEquals(6, UnsignedLexVarInt.interpretSize((byte) i));
+			assertEquals(6, UnsignedLexVarint.interpretSize((byte) i));
 		}
-		assertEquals(7, UnsignedLexVarInt.interpretSize((byte) 252));
-		assertEquals(7, UnsignedLexVarInt.interpretSize((byte) 253));
-		assertEquals(8, UnsignedLexVarInt.interpretSize((byte) 254));
-		assertEquals(9, UnsignedLexVarInt.interpretSize((byte) 255));
+		assertEquals(7, UnsignedLexVarint.interpretSize((byte) 252));
+		assertEquals(7, UnsignedLexVarint.interpretSize((byte) 253));
+		assertEquals(8, UnsignedLexVarint.interpretSize((byte) 254));
+		assertEquals(9, UnsignedLexVarint.interpretSize((byte) 255));
 	}
 	
 	
@@ -201,11 +201,11 @@ public class TestXUnsignedVarint32 extends TestCase {
 				assertTrue(value < max);
 				
 				b.rewind();
-				int sizeWritten = UnsignedLexVarInt.writeLexVarUInt32(b, value);
+				int sizeWritten = UnsignedLexVarint.writeLexVarUInt32(b, value);
 				assertEquals(size, sizeWritten);
 
 				b.rewind();
-				int valueRead = UnsignedLexVarInt.readLexVarUInt32(b);
+				int valueRead = UnsignedLexVarint.readLexVarUInt32(b);
 				assertEquals(value, valueRead);
 			}
 			
@@ -219,11 +219,11 @@ public class TestXUnsignedVarint32 extends TestCase {
 			assertTrue(value < 0);
 			
 			b.rewind();
-			int sizeWritten = UnsignedLexVarInt.writeLexVarUInt32(b, value);
+			int sizeWritten = UnsignedLexVarint.writeLexVarUInt32(b, value);
 			assertEquals(5, sizeWritten);
 
 			b.rewind();
-			long valueRead = UnsignedLexVarInt.readLexVarUInt32(b);
+			long valueRead = UnsignedLexVarint.readLexVarUInt32(b);
 			assertEquals(value, valueRead);
 			
 		}
@@ -265,10 +265,10 @@ public class TestXUnsignedVarint32 extends TestCase {
 					int b = generate(sizeb);
 					
 					bufa.rewind();
-					assertEquals(sizea, UnsignedLexVarInt.writeLexVarUInt32(bufa, a));
+					assertEquals(sizea, UnsignedLexVarint.writeLexVarUInt32(bufa, a));
 					
 					bufb.rewind();
-					assertEquals(sizeb, UnsignedLexVarInt.writeLexVarUInt32(bufb, b));
+					assertEquals(sizeb, UnsignedLexVarint.writeLexVarUInt32(bufb, b));
 
 					boolean a_smaller = a >= 0 ? (b < 0 || a < b) : (b < 0 && a < b);
 					

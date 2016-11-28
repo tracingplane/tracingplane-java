@@ -3,6 +3,7 @@ package edu.brown.cs.systems.tracingplane.context_layer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,11 +11,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.protobuf.CodedInputStream;
-
-import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarInt;
-import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarInt.EndOfStreamException;
-import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarInt.MalformedVarintException;
+import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarint;
+import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarint.EndOfStreamException;
+import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarint.MalformedVarintException;
 
 public class BaggageImplSerialization {
 
@@ -36,17 +35,21 @@ public class BaggageImplSerialization {
 			return null;
 		}
 		List<ByteBuffer> bags = new ArrayList<>();
-		CodedInputStream in = CodedInputStream.newInstance(bytes, offset, length);
 
-		while (in.getBytesUntilLimit() > 0) {
+		ByteBuffer in = ByteBuffer.wrap(bytes, offset, length);
+		while (in.remaining() > 0) {
 			try {
-				int bagLength = in.readRawVarint32();
-				ByteBuffer bag = ByteBuffer.wrap(bytes, offset + in.getTotalBytesRead(), bagLength);
-				in.skipRawBytes(bagLength);
-				bags.add(bag);
-			} catch (IndexOutOfBoundsException | IOException e) {
+				int bagSize = ProtobufVarint.readRawVarint32(in);
+				bags.add(ByteBuffer.wrap(bytes, offset + in.position(), bagSize));
+				in.position(in.position() + bagSize);
+			} catch (MalformedVarintException e) {
+				String msg = String.format("Malformed length prefix for bag %d (%d/%d bytes)", bags.size(),
+						in.position(), length);
+				log.warn(msg, e);
+				break;
+			} catch (BufferUnderflowException | IndexOutOfBoundsException | IllegalArgumentException e) {
 				String msg = String.format("Premature end of baggage at bag %d (%d/%d bytes)", bags.size(),
-						in.getTotalBytesRead(), length);
+						in.position(), length);
 				log.warn(msg, e);
 				break;
 			}
@@ -57,11 +60,10 @@ public class BaggageImplSerialization {
 		} else {
 			return new BaggageImpl(bags);
 		}
-
 	}
-	
+
 	static ByteBuffer readBag(InputStream input) throws EndOfStreamException, MalformedVarintException, IOException {
-		int bagSize = ProtobufVarInt.readRawVarint32(input);
+		int bagSize = ProtobufVarint.readRawVarint32(input);
 		byte[] bagData = new byte[bagSize];
 		int position = 0;
 		while (position < bagSize) {
@@ -83,7 +85,7 @@ public class BaggageImplSerialization {
 
 		final int length;
 		try {
-			length = ProtobufVarInt.readRawVarint32(input);
+			length = ProtobufVarint.readRawVarint32(input);
 		} catch (EndOfStreamException e) {
 			log.warn("Reached end of stream before baggage could be read");
 			return null;
@@ -112,7 +114,7 @@ public class BaggageImplSerialization {
 		}
 		ByteBuffer buf = ByteBuffer.allocate(baggage.serializedSize());
 		for (ByteBuffer bag : baggage.bags) {
-			ProtobufVarInt.writeRawVarint32(buf, bag.remaining());
+			ProtobufVarint.writeRawVarint32(buf, bag.remaining());
 			int position = bag.position();
 			buf.put(bag);
 			bag.position(position);
@@ -124,9 +126,9 @@ public class BaggageImplSerialization {
 		if (baggage == null || out == null || baggage.bags.size() == 0) {
 			return;
 		}
-		ProtobufVarInt.writeRawVarint32(out, baggage.serializedSize());
+		ProtobufVarint.writeRawVarint32(out, baggage.serializedSize());
 		for (ByteBuffer bag : baggage.bags) {
-			ProtobufVarInt.writeRawVarint32(out, bag.remaining());
+			ProtobufVarint.writeRawVarint32(out, bag.remaining());
 			out.write(bag.array(), bag.arrayOffset() + bag.position(), bag.remaining());
 		}
 	}

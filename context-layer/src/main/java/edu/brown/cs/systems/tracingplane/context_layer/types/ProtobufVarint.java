@@ -3,18 +3,19 @@ package edu.brown.cs.systems.tracingplane.context_layer.types;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-
-import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
  * Duplicates logic of Protocol Buffers variable length integer encoding, but
  * with different logic for exceptions. This enables us to handle end-of-stream
  * differently to malformed length prefix exceptions or other IO exceptions
  */
-public class ProtobufVarInt {
+public class ProtobufVarint {
 
-	public static final class EndOfStreamException extends InvalidProtocolBufferException {
+	public static final class EndOfStreamException extends Exception {
+		private static final long serialVersionUID = 6345452184385584778L;
+
 		public EndOfStreamException() {
 			super("While parsing a protocol message, the input ended unexpectedly "
 					+ "in the middle of a field.  This could mean either than the "
@@ -22,13 +23,15 @@ public class ProtobufVarInt {
 		}
 	}
 
-	public static final class MalformedVarintException extends InvalidProtocolBufferException {
-		public MalformedVarintException(int size) {
+	public static final class MalformedVarintException extends IOException {
+		private static final long serialVersionUID = 2602866726542766020L;
+
+		public MalformedVarintException() {
 			super("Encountered a malformed varint");
 		}
 	}
 
-	private ProtobufVarInt() {
+	private ProtobufVarint() {
 	}
 
 	private static byte readByte(InputStream in) throws EndOfStreamException, IOException {
@@ -66,7 +69,41 @@ public class ProtobufVarInt {
 								return result;
 							}
 						}
-						throw new MalformedVarintException(10);
+						throw new MalformedVarintException();
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	public static int readRawVarint32(ByteBuffer b) throws BufferUnderflowException, MalformedVarintException {
+		byte tmp = b.get();
+		if (tmp >= 0) {
+			return tmp;
+		}
+		int result = tmp & 0x7f;
+		if ((tmp = b.get()) >= 0) {
+			result |= tmp << 7;
+		} else {
+			result |= (tmp & 0x7f) << 7;
+			if ((tmp = b.get()) >= 0) {
+				result |= tmp << 14;
+			} else {
+				result |= (tmp & 0x7f) << 14;
+				if ((tmp = b.get()) >= 0) {
+					result |= tmp << 21;
+				} else {
+					result |= (tmp & 0x7f) << 21;
+					result |= (tmp = b.get()) << 28;
+					if (tmp < 0) {
+						// Discard upper 32 bits.
+						for (int i = 0; i < 5; i++) {
+							if (b.get() >= 0) {
+								return result;
+							}
+						}
+						throw new MalformedVarintException();
 					}
 				}
 			}
@@ -85,7 +122,7 @@ public class ProtobufVarInt {
 			}
 		}
 	}
-	
+
 	public static void writeRawVarint32(OutputStream out, int value) throws IOException {
 		while (true) {
 			if ((value & ~0x7F) == 0) {

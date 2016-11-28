@@ -39,7 +39,7 @@ import edu.brown.cs.systems.tracingplane.context_layer.DataLayerException;
  * @author jon
  *
  */
-public class UnsignedLexVarInt {
+public class UnsignedLexVarint {
 
 	/**
 	 * @param value

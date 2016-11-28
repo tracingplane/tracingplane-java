@@ -9,6 +9,14 @@ public interface Baggage {
 	public static final TransitLayer transit = TransitLayerConfig.newTransitLayer();
 
 	/**
+	 * Creates a new, empty baggage using the process's default configured
+	 * transit layer
+	 */
+	public static Baggage newInstance() {
+		return transit.newInstance();
+	}
+
+	/**
 	 * Uses the process's default configured transit layer.
 	 * 
 	 * Creates a new baggage instance based off the provided instance. The
