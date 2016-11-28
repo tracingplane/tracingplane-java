@@ -28,7 +28,16 @@ public class ContextLayer implements TransitLayer {
 
 	@Override
 	public Baggage newInstance() {
-		return new BaggageImpl();
+		return null; // Our context layer treats null baggage as empty baggage
+	}
+
+	@Override
+	public void discard(Baggage baggage) {
+		if (baggage instanceof BaggageImpl) {
+			((BaggageImpl) baggage).discard();
+		} else if (baggage != null) {
+			log.warn("discard unknown Baggage implementation class {}", baggage.getClass().getName());
+		}
 	}
 
 	@Override

@@ -109,11 +109,11 @@ public class BaggageImplSerialization {
 	}
 
 	static byte[] serialize(BaggageImpl baggage) {
-		if (baggage == null || baggage.bags.size() == 0) {
+		if (baggage == null || baggage.contents.bags.size() == 0) {
 			return null;
 		}
 		ByteBuffer buf = ByteBuffer.allocate(baggage.serializedSize());
-		for (ByteBuffer bag : baggage.bags) {
+		for (ByteBuffer bag : baggage.contents.bags) {
 			ProtobufVarint.writeRawVarint32(buf, bag.remaining());
 			int position = bag.position();
 			buf.put(bag);
@@ -123,11 +123,11 @@ public class BaggageImplSerialization {
 	}
 
 	static void write(OutputStream out, BaggageImpl baggage) throws IOException {
-		if (baggage == null || out == null || baggage.bags.size() == 0) {
+		if (baggage == null || out == null || baggage.contents.bags.size() == 0) {
 			return;
 		}
 		ProtobufVarint.writeRawVarint32(out, baggage.serializedSize());
-		for (ByteBuffer bag : baggage.bags) {
+		for (ByteBuffer bag : baggage.contents.bags) {
 			ProtobufVarint.writeRawVarint32(out, bag.remaining());
 			out.write(bag.array(), bag.arrayOffset() + bag.position(), bag.remaining());
 		}

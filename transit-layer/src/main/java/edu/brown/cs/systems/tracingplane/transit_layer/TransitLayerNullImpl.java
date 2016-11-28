@@ -4,17 +4,23 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class TransitLayerNullImpl {
-	
-	static final Baggage NULL_BAGGAGE = new NullBaggage();
-	
-	static class NullBaggage implements Baggage {
-		
+
+	private TransitLayerNullImpl() {
 	}
-	
-	static class NullTransitLayer implements TransitLayer {
+
+	public static final Baggage NULL_BAGGAGE = new NullBaggage();
+
+	public static class NullBaggage implements Baggage {
+
+	}
+
+	public static class NullTransitLayer implements TransitLayer {
 
 		public Baggage newInstance() {
 			return NULL_BAGGAGE;
+		}
+		
+		public void discard(Baggage baggage) {
 		}
 
 		public Baggage branch(Baggage from) {

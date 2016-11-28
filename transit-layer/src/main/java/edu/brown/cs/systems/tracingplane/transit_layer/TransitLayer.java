@@ -8,6 +8,8 @@ public interface TransitLayer {
 
 	public Baggage newInstance();
 	
+	public void discard(Baggage baggage);
+	
 	public Baggage branch(Baggage from);
 
 	public Baggage join(Baggage left, Baggage right);

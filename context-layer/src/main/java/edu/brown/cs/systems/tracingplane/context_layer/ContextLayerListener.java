@@ -24,8 +24,8 @@ public interface ContextLayerListener {
 	 */
 	static class ContextLayerListenerContainer implements ContextLayerListener {
 
-		private final int size;
-		private final ContextLayerListener[] listeners;
+		final int size;
+		final ContextLayerListener[] listeners;
 
 		ContextLayerListenerContainer(ContextLayerListener[] listeners) {
 			this.size = listeners.length;
