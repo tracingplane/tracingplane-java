@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-import edu.brown.cs.systems.tracingplane.context_layer.Utils;
 import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;
 import junit.framework.TestCase;
 
@@ -16,7 +15,7 @@ public class TestMerge extends TestCase {
 	private static ByteBuffer make(String... ss) {
 		ByteBuffer buf = ByteBuffer.allocate(ss.length);
 		for (String s : ss) {
-			buf.put(Utils.makeByte(s));
+			buf.put(TypeUtils.makeByte(s));
 		}
 		buf.rewind();
 		return buf;

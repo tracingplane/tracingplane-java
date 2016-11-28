@@ -5,8 +5,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.tracingplane.context_layer.DataLayerException;
-import edu.brown.cs.systems.tracingplane.context_layer.Utils;
 import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.context_layer.types.UnsignedLexVarint;
 import junit.framework.TestCase;
@@ -14,7 +12,7 @@ import junit.framework.TestCase;
 public class TestXUnsignedVarint64 extends TestCase {
 	
 	@Test
-	public void testReadUint64() throws DataLayerException {
+	public void testReadUint64() throws ContextLayerException {
 		ByteBuffer b = ByteBuffer.allocate(8);
 		
 		Random r = new Random(1);
@@ -49,7 +47,7 @@ public class TestXUnsignedVarint64 extends TestCase {
 	}
 	
 	@Test
-	public void testLexVarPrefixSize() throws DataLayerException {
+	public void testLexVarPrefixSize() throws ContextLayerException {
 		for (int i = 0; i < 128; i++) {
 			assertEquals(1, UnsignedLexVarint.interpretSize((byte) i));
 		}
@@ -111,7 +109,7 @@ public class TestXUnsignedVarint64 extends TestCase {
 	}
 	
 	@Test
-	public void testWriteReadLexVarUInt64() throws DataLayerException {
+	public void testWriteReadLexVarUInt64() throws ContextLayerException {
 		Random r = new Random(0);
 		int numtests = 1000;
 

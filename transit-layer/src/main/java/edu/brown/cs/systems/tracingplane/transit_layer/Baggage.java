@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import edu.brown.cs.systems.tracingplane.transit_layer.impl.TransitLayerConfig;
+
 public interface Baggage {
 
 	public static final TransitLayer transit = TransitLayerConfig.newTransitLayer();

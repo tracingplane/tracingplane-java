@@ -1,9 +1,10 @@
-package edu.brown.cs.systems.tracingplane.context_layer;
+package edu.brown.cs.systems.tracingplane.baggage_layer;
+
 
 import org.junit.Test;
 
+import edu.brown.cs.systems.tracingplane.context_layer.TransitLayerImpl;
 import edu.brown.cs.systems.tracingplane.context_layer.impl.BlindContextLayer;
-import edu.brown.cs.systems.tracingplane.context_layer.listener.ContextLayerNullListener;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 import edu.brown.cs.systems.tracingplane.transit_layer.impl.TransitLayerNullImpl;
 import junit.framework.TestCase;
@@ -20,12 +21,8 @@ public class TestDefaultTransitLayer extends TestCase {
 		
 		TransitLayerImpl transit = (TransitLayerImpl) Baggage.transit;
 		assertNotNull(transit.context);
-		assertTrue(transit.context instanceof BlindContextLayer);
-		assertNotNull(transit.listener);
-		assertTrue(transit.listener instanceof ContextLayerNullListener);
-		
-		Baggage baggage = Baggage.newInstance();
-		assertNull(baggage);
+		assertFalse(transit.context instanceof BlindContextLayer);
+		assertTrue(transit.context instanceof BaggageLayer);
 	}
 	
 }

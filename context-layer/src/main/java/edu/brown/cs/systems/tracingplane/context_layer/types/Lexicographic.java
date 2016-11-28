@@ -9,8 +9,6 @@ import java.util.List;
 
 import com.google.common.primitives.UnsignedBytes;
 
-import edu.brown.cs.systems.tracingplane.context_layer.DataLayerException;
-
 public class Lexicographic {
 
 	private static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = UnsignedBytes.lexicographicalComparator();
@@ -162,56 +160,56 @@ public class Lexicographic {
 	/**
 	 * Reads a 32 bit signed varint from the provided buffer
 	 */
-	public static int readVarInt32(ByteBuffer buf) throws DataLayerException {
+	public static int readVarInt32(ByteBuffer buf) throws ContextLayerException {
 		return SignedLexVarint.readLexVarInt32(buf);
 	}
 
 	/**
 	 * Reads a 64 bit signed varint from the provided buffer
 	 */
-	public static long readVarInt64(ByteBuffer buf) throws DataLayerException {
+	public static long readVarInt64(ByteBuffer buf) throws ContextLayerException {
 		return SignedLexVarint.readLexVarInt64(buf);
 	}
 
 	/**
 	 * Reads a 32 bit unsigned varint from the provided buffer
 	 */
-	public static int readVarUInt32(ByteBuffer buf) throws DataLayerException {
+	public static int readVarUInt32(ByteBuffer buf) throws ContextLayerException {
 		return UnsignedLexVarint.readLexVarUInt32(buf);
 	}
 
 	/**
 	 * Reads a 64 bit unsigned varint from the provided buffer
 	 */
-	public static long readVarUInt64(ByteBuffer buf) throws DataLayerException {
+	public static long readVarUInt64(ByteBuffer buf) throws ContextLayerException {
 		return UnsignedLexVarint.readLexVarUInt64(buf);
 	}
 
 	/**
 	 * Reads a 32 bit signed varint from the provided buffer
 	 */
-	public static int readVarInt32(byte[] bytes) throws DataLayerException {
+	public static int readVarInt32(byte[] bytes) throws ContextLayerException {
 		return SignedLexVarint.readLexVarInt32(ByteBuffer.wrap(bytes));
 	}
 
 	/**
 	 * Reads a 64 bit signed varint from the provided buffer
 	 */
-	public static long readVarInt64(byte[] bytes) throws DataLayerException {
+	public static long readVarInt64(byte[] bytes) throws ContextLayerException {
 		return SignedLexVarint.readLexVarInt64(ByteBuffer.wrap(bytes));
 	}
 
 	/**
 	 * Reads a 32 bit unsigned varint from the provided buffer
 	 */
-	public static int readVarUInt32(byte[] bytes) throws DataLayerException {
+	public static int readVarUInt32(byte[] bytes) throws ContextLayerException {
 		return UnsignedLexVarint.readLexVarUInt32(ByteBuffer.wrap(bytes));
 	}
 
 	/**
 	 * Reads a 64 bit unsigned varint from the provided buffer
 	 */
-	public static long readVarUInt64(byte[] bytes) throws DataLayerException {
+	public static long readVarUInt64(byte[] bytes) throws ContextLayerException {
 		return UnsignedLexVarint.readLexVarUInt64(ByteBuffer.wrap(bytes));
 	}
 

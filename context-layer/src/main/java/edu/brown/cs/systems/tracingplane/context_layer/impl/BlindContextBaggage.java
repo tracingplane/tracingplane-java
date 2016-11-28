@@ -1,28 +1,28 @@
-package edu.brown.cs.systems.tracingplane.context_layer;
+package edu.brown.cs.systems.tracingplane.context_layer.impl;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
+import edu.brown.cs.systems.tracingplane.context_layer.ContextBaggage;
 import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarint;
-import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 
-public class BaggageImpl implements Baggage {
+public class BlindContextBaggage implements ContextBaggage {
 
-	static final AtomicIntegerFieldUpdater<ActualBaggageContents> reffer = AtomicIntegerFieldUpdater
-			.newUpdater(ActualBaggageContents.class, "refcount");
+	static final AtomicIntegerFieldUpdater<SimpleBaggageContents> reffer = AtomicIntegerFieldUpdater
+			.newUpdater(SimpleBaggageContents.class, "refcount");
 
-	static class ActualBaggageContents {
+	static class SimpleBaggageContents{
 		volatile int refcount = 0;
 		List<ByteBuffer> bags;
 
-		public ActualBaggageContents() {
+		public SimpleBaggageContents() {
 			this(new ArrayList<>());
 		}
 
-		public ActualBaggageContents(List<ByteBuffer> bags) {
+		public SimpleBaggageContents(List<ByteBuffer> bags) {
 			this.bags = bags;
 		}
 
@@ -43,19 +43,18 @@ public class BaggageImpl implements Baggage {
 
 	static final byte[] EMPTY_BYTES = new byte[0];
 
-	ActualBaggageContents contents;
+	SimpleBaggageContents contents;
 
-	BaggageImpl() {
-		this(new ActualBaggageContents());
-	}
-
-	BaggageImpl(ActualBaggageContents contents) {
-		this.contents = contents;
-		this.contents.ref();
+	BlindContextBaggage() {
+		this(new SimpleBaggageContents());
 	}
 	
-	BaggageImpl(List<ByteBuffer> bags) {
-		this.contents = new ActualBaggageContents(bags);
+	BlindContextBaggage(List<ByteBuffer> bags) {
+		this(new SimpleBaggageContents(bags));
+	}
+
+	BlindContextBaggage(SimpleBaggageContents contents) {
+		this.contents = contents;
 		this.contents.ref();
 	}
 
@@ -72,11 +71,11 @@ public class BaggageImpl implements Baggage {
 		return size;
 	}
 
-	BaggageImpl branch() {
-		return new BaggageImpl(contents);
+	BlindContextBaggage branch() {
+		return new BlindContextBaggage(contents);
 	}
 
-	BaggageImpl mergeWith(BaggageImpl other) {
+	BlindContextBaggage mergeWith(BlindContextBaggage other) {
 		if (other == null) {
 			return this;
 		}
@@ -90,7 +89,7 @@ public class BaggageImpl implements Baggage {
 			List<ByteBuffer> merged = Lexicographic.merge(contents.bags, other.contents.bags);
 			this.contents.deref();
 			other.contents.deref();
-			this.contents = new ActualBaggageContents(merged);
+			this.contents = new SimpleBaggageContents(merged);
 			return this;
 		}
 	}

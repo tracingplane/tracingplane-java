@@ -6,8 +6,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.tracingplane.context_layer.DataLayerException;
-import edu.brown.cs.systems.tracingplane.context_layer.Utils;
 import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.context_layer.types.UnsignedLexVarint;
 import junit.framework.TestCase;
@@ -15,7 +13,7 @@ import junit.framework.TestCase;
 public class TestXUnsignedVarint32 extends TestCase {
 	
 	@Test
-	public void testLexVarInt32() throws DataLayerException {
+	public void testLexVarInt32() throws ContextLayerException {
 		ByteBuffer b = ByteBuffer.allocate(1);
 		for (int i = 0; i < 128; i++) {
 			b.rewind();
@@ -35,7 +33,7 @@ public class TestXUnsignedVarint32 extends TestCase {
 			b.rewind();
 			try {
 				UnsignedLexVarint.readLexVarUInt32(b);
-				fail("Should not be able to read lexvarint " + Utils.toBinaryString((byte) i) + " due to insufficient bytes");
+				fail("Should not be able to read lexvarint " + TypeUtils.toBinaryString((byte) i) + " due to insufficient bytes");
 			} catch (BufferUnderflowException e) {
 				// success
 			}
@@ -43,7 +41,7 @@ public class TestXUnsignedVarint32 extends TestCase {
 	}
 	
 	@Test
-	public void testLexVarInt32_2() throws DataLayerException {
+	public void testLexVarInt32_2() throws ContextLayerException {
 		ByteBuffer b = ByteBuffer.allocate(2);
 		
 		int expect = 0;
@@ -65,7 +63,7 @@ public class TestXUnsignedVarint32 extends TestCase {
 	}
 	
 	@Test
-	public void testLexVarInt32_3() throws DataLayerException {
+	public void testLexVarInt32_3() throws ContextLayerException {
 		ByteBuffer b = ByteBuffer.allocate(3);
 		
 		int expect = 0;
@@ -90,7 +88,7 @@ public class TestXUnsignedVarint32 extends TestCase {
 	}
 	
 	@Test
-	public void testLexVarInt32_4() throws DataLayerException {
+	public void testLexVarInt32_4() throws ContextLayerException {
 		ByteBuffer b = ByteBuffer.allocate(4);
 		
 		int expect = 0;
@@ -118,7 +116,7 @@ public class TestXUnsignedVarint32 extends TestCase {
 	}
 	
 	@Test
-	public void testBigLexVarInt32() throws DataLayerException {
+	public void testBigLexVarInt32() throws ContextLayerException {
 		ByteBuffer b = ByteBuffer.allocate(5);
 		b.put((byte) -16);
 		b.putInt(Integer.MAX_VALUE);
@@ -160,7 +158,7 @@ public class TestXUnsignedVarint32 extends TestCase {
 	
 	
 	@Test
-	public void testLexVarPrefixSize() throws DataLayerException {
+	public void testLexVarPrefixSize() throws ContextLayerException {
 		for (int i = 0; i < 128; i++) {
 			assertEquals(1, UnsignedLexVarint.interpretSize((byte) i));
 		}
@@ -187,7 +185,7 @@ public class TestXUnsignedVarint32 extends TestCase {
 	
 	
 	@Test
-	public void testWriteReadLexVarUInt32() throws DataLayerException {
+	public void testWriteReadLexVarUInt32() throws ContextLayerException {
 		Random r = new Random(0);
 		int numtests = 1000;
 

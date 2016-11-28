@@ -1,10 +1,12 @@
-package edu.brown.cs.systems.tracingplane.transit_layer;
+package edu.brown.cs.systems.tracingplane.transit_layer.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+
+import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
 
 public class TransitLayerConfig {
 

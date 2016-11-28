@@ -1,7 +1,8 @@
-package edu.brown.cs.systems.tracingplane.transit_layer;
+package edu.brown.cs.systems.tracingplane.transit_layer.impl;
 
 import org.junit.Test;
 
+import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 import junit.framework.TestCase;
 
 public class TestDefaultTransitLayer extends TestCase {

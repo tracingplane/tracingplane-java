@@ -5,7 +5,6 @@ import java.util.Comparator;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.tracingplane.context_layer.Utils;
 import edu.brown.cs.systems.tracingplane.context_layer.types.UnsignedByteBuffer;
 import junit.framework.TestCase;
 
@@ -14,7 +13,7 @@ public class TestUnsignedByteBuffer extends TestCase {
 	private static ByteBuffer make(String... ss) {
 		ByteBuffer buf = ByteBuffer.allocate(ss.length);
 		for (String s : ss) {
-			buf.put(Utils.makeByte(s));
+			buf.put(TypeUtils.makeByte(s));
 		}
 		buf.rewind();
 		return buf;

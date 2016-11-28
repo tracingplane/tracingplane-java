@@ -2,8 +2,6 @@ package edu.brown.cs.systems.tracingplane.context_layer.types;
 
 import java.nio.ByteBuffer;
 
-import edu.brown.cs.systems.tracingplane.context_layer.DataLayerException;
-
 /**
  * Unsigned varint (32 bit and 64 bit) that is encoded in such a way that the
  * lexicographic comparison of the binary encoding is consistent with the
@@ -105,14 +103,14 @@ public class UnsignedLexVarint {
 		return size;
 	}
 	
-	public static int readLexVarUInt32(ByteBuffer buf) throws DataLayerException {
+	public static int readLexVarUInt32(ByteBuffer buf) throws ContextLayerException {
 		return (int) readLexVarUInt64(buf);
 	}
 
 	/**
 	 * Reads a varint that is lexicographically comparable with other varints
 	 */
-	public static long readLexVarUInt64(ByteBuffer buf) throws DataLayerException {
+	public static long readLexVarUInt64(ByteBuffer buf) throws ContextLayerException {
 		byte b0 = buf.get();
 		int size = interpretSize(b0);
 		if (size == 1) {
@@ -136,9 +134,9 @@ public class UnsignedLexVarint {
 		return 9;
 	}
 
-	static long readUInt64(ByteBuffer buf, int numBytes) throws DataLayerException {
+	static long readUInt64(ByteBuffer buf, int numBytes) throws ContextLayerException {
 		if (numBytes > 8 || numBytes <= 0) {
-			throw new DataLayerException("Invalid UInt64 with " + numBytes + " bytes");
+			throw new ContextLayerException("Invalid UInt64 with " + numBytes + " bytes");
 		}
 		long result = 0;
 		for (int i = 0; i < numBytes; i++) {

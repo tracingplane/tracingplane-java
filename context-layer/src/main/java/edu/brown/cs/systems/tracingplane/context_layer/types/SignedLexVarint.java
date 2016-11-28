@@ -2,8 +2,6 @@ package edu.brown.cs.systems.tracingplane.context_layer.types;
 
 import java.nio.ByteBuffer;
 
-import edu.brown.cs.systems.tracingplane.context_layer.DataLayerException;
-
 /**
  * Signed varint (32 bit and 64 bit) that is encoded in such a way that the
  * lexicographic comparison of the binary encoding is consistent with the
@@ -115,11 +113,11 @@ public class SignedLexVarint {
 		return size;
 	}
 	
-	public static int readLexVarInt32(ByteBuffer buf) throws DataLayerException {
+	public static int readLexVarInt32(ByteBuffer buf) throws ContextLayerException {
 		return (int) readLexVarInt64(buf);
 	}
 
-	public static long readLexVarInt64(ByteBuffer buf) throws DataLayerException {
+	public static long readLexVarInt64(ByteBuffer buf) throws ContextLayerException {
 		byte b0 = buf.get();
 		int size = interpretSize(b0);
 		if (size == 1) {
@@ -172,9 +170,9 @@ public class SignedLexVarint {
 		return 8;
 	}
 
-	static long readInt64(ByteBuffer buf, int numBytes, boolean negative) throws DataLayerException {
+	static long readInt64(ByteBuffer buf, int numBytes, boolean negative) throws ContextLayerException {
 		if (numBytes > 8 || numBytes <= 0) {
-			throw new DataLayerException("Invalid Int64 with " + numBytes + " bytes");
+			throw new ContextLayerException("Invalid Int64 with " + numBytes + " bytes");
 		}
 		long result = 0;
 		if (negative) {

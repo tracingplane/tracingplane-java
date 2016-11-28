@@ -5,8 +5,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.tracingplane.context_layer.DataLayerException;
-import edu.brown.cs.systems.tracingplane.context_layer.Utils;
 import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.context_layer.types.SignedLexVarint;
 import junit.framework.TestCase;
@@ -16,7 +14,7 @@ public class TestXSignedVarint64 extends TestCase {
 	private static ByteBuffer make(String... ss) {
 		ByteBuffer buf = ByteBuffer.allocate(ss.length);
 		for (String s : ss) {
-			buf.put(Utils.makeByte(s));
+			buf.put(TypeUtils.makeByte(s));
 		}
 		buf.rewind();
 		return buf;
@@ -35,13 +33,13 @@ public class TestXSignedVarint64 extends TestCase {
 		byte[] bytes = write(value);
 		String s = "";
 		for (byte b : bytes) {
-			s = s + Utils.toBinaryString(b);
+			s = s + TypeUtils.toBinaryString(b);
 		}
 		return s;
 	}
 	
 	@Test
-	public void testXSignedVarint64Simple() throws DataLayerException {
+	public void testXSignedVarint64Simple() throws ContextLayerException {
 		assertEquals(Long.MIN_VALUE, SignedLexVarint.readLexVarInt64(make("00000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000")));
 		assertEquals(-65, SignedLexVarint.readLexVarInt64(make("0011 1111", "1011 1111")));
 		assertEquals(-64, SignedLexVarint.readLexVarInt64(make("0100 0000")));
@@ -57,7 +55,7 @@ public class TestXSignedVarint64 extends TestCase {
 	}
 	
 	@Test
-	public void testXSignedVarint64Simple2() throws DataLayerException {
+	public void testXSignedVarint64Simple2() throws ContextLayerException {
 		assertEquals("000000000000000000000000000000000000000000000000000000000000000000000000", writeString(Long.MIN_VALUE));
 		assertEquals("0011111110111111", writeString(-65));
 		assertEquals("01000000", writeString(-64));
@@ -125,7 +123,7 @@ public class TestXSignedVarint64 extends TestCase {
 	}
 	
 	@Test
-	public void testXSignedVarInt64EncodeDecode() throws DataLayerException {
+	public void testXSignedVarInt64EncodeDecode() throws ContextLayerException {
 		int numtests = 1000;
 		Random r = new Random(0);
 		

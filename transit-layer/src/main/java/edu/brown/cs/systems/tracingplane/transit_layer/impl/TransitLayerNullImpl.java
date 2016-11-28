@@ -1,7 +1,10 @@
-package edu.brown.cs.systems.tracingplane.transit_layer;
+package edu.brown.cs.systems.tracingplane.transit_layer.impl;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
+import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
 
 public class TransitLayerNullImpl {
 

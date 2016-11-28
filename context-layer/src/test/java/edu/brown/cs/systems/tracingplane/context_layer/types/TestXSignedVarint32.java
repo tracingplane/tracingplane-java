@@ -5,8 +5,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.tracingplane.context_layer.DataLayerException;
-import edu.brown.cs.systems.tracingplane.context_layer.Utils;
 import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.context_layer.types.SignedLexVarint;
 import junit.framework.TestCase;
@@ -16,7 +14,7 @@ public class TestXSignedVarint32 extends TestCase {
 	private static ByteBuffer make(String... ss) {
 		ByteBuffer buf = ByteBuffer.allocate(ss.length);
 		for (String s : ss) {
-			buf.put(Utils.makeByte(s));
+			buf.put(TypeUtils.makeByte(s));
 		}
 		buf.rewind();
 		return buf;
@@ -35,13 +33,13 @@ public class TestXSignedVarint32 extends TestCase {
 		byte[] bytes = write(value);
 		String s = "";
 		for (byte b : bytes) {
-			s = s + Utils.toBinaryString(b);
+			s = s + TypeUtils.toBinaryString(b);
 		}
 		return s;
 	}
 	
 	@Test
-	public void testXSignedVarint32Simple() throws DataLayerException {
+	public void testXSignedVarint32Simple() throws ContextLayerException {
 		assertEquals(Integer.MIN_VALUE, SignedLexVarint.readLexVarInt32(make("00000111", "10000000", "00000000", "00000000", "00000000")));
 		assertEquals(-65, SignedLexVarint.readLexVarInt32(make("0011 1111", "1011 1111")));
 		assertEquals(-64, SignedLexVarint.readLexVarInt32(make("0100 0000")));
@@ -57,7 +55,7 @@ public class TestXSignedVarint32 extends TestCase {
 	}
 	
 	@Test
-	public void testXSignedVarint32Simple2() throws DataLayerException {
+	public void testXSignedVarint32Simple2() throws ContextLayerException {
 		assertEquals("0000011110000000000000000000000000000000", writeString(Integer.MIN_VALUE));
 		assertEquals("0011111110111111", writeString(-65));
 		assertEquals("01000000", writeString(-64));
@@ -101,7 +99,7 @@ public class TestXSignedVarint32 extends TestCase {
 	}
 	
 	@Test
-	public void testXSignedVarInt32EncodeDecode() throws DataLayerException {
+	public void testXSignedVarInt32EncodeDecode() throws ContextLayerException {
 		int numtests = 1000;
 		Random r = new Random(0);
 		

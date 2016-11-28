@@ -1,6 +1,6 @@
-package edu.brown.cs.systems.tracingplane.context_layer;
+package edu.brown.cs.systems.tracingplane.context_layer.types;
 
-public class Utils {
+public class TypeUtils {
 	
 	public static String toBinaryString(byte b) {
 		return String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');

@@ -15,14 +15,14 @@ import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarint;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarint.EndOfStreamException;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarint.MalformedVarintException;
 
-public class BaggageImplSerialization {
+public class ContextLayerSerialization {
 
-	static final Logger log = LoggerFactory.getLogger(BaggageImplSerialization.class);
+	static final Logger log = LoggerFactory.getLogger(ContextLayerSerialization.class);
 
-	private BaggageImplSerialization() {
+	private ContextLayerSerialization() {
 	}
 
-	static BaggageImpl deserialize(byte[] bytes) {
+	static List<ByteBuffer> deserialize(byte[] bytes) {
 		if (bytes == null) {
 			return null;
 		} else {
@@ -30,7 +30,7 @@ public class BaggageImplSerialization {
 		}
 	}
 
-	static BaggageImpl deserialize(byte[] bytes, int offset, int length) {
+	static List<ByteBuffer> deserialize(byte[] bytes, int offset, int length) {
 		if (bytes == null || length <= 0) {
 			return null;
 		}
@@ -58,7 +58,7 @@ public class BaggageImplSerialization {
 		if (bags.size() == 0) {
 			return null;
 		} else {
-			return new BaggageImpl(bags);
+			return bags;
 		}
 	}
 
@@ -78,7 +78,7 @@ public class BaggageImplSerialization {
 		return ByteBuffer.wrap(bagData);
 	}
 
-	static BaggageImpl readFrom(InputStream input) throws IOException {
+	static List<ByteBuffer> readFrom(InputStream input) throws IOException {
 		if (input == null) {
 			return null;
 		}
@@ -107,13 +107,21 @@ public class BaggageImplSerialization {
 
 		return deserialize(bytes);
 	}
+	
+	static int serializedSize(List<ByteBuffer> bags) {
+		int size = 0;
+		for (ByteBuffer bag : bags) {
+			size += bag.remaining() + ProtobufVarint.sizeOf(bag.remaining());
+		}
+		return size;
+	}
 
-	static byte[] serialize(BaggageImpl baggage) {
-		if (baggage == null || baggage.contents.bags.size() == 0) {
+	static byte[] serialize(List<ByteBuffer> bags) {
+		if (bags == null || bags.size() == 0) {
 			return null;
 		}
-		ByteBuffer buf = ByteBuffer.allocate(baggage.serializedSize());
-		for (ByteBuffer bag : baggage.contents.bags) {
+		ByteBuffer buf = ByteBuffer.allocate(serializedSize(bags));
+		for (ByteBuffer bag : bags) {
 			ProtobufVarint.writeRawVarint32(buf, bag.remaining());
 			int position = bag.position();
 			buf.put(bag);
@@ -122,12 +130,12 @@ public class BaggageImplSerialization {
 		return buf.array();
 	}
 
-	static void write(OutputStream out, BaggageImpl baggage) throws IOException {
-		if (baggage == null || out == null || baggage.contents.bags.size() == 0) {
+	static void write(OutputStream out, List<ByteBuffer> bags) throws IOException {
+		if (out == null || bags == null || bags.size() == 0) {
 			return;
 		}
-		ProtobufVarint.writeRawVarint32(out, baggage.serializedSize());
-		for (ByteBuffer bag : baggage.contents.bags) {
+		ProtobufVarint.writeRawVarint32(out, serializedSize(bags));
+		for (ByteBuffer bag : bags) {
 			ProtobufVarint.writeRawVarint32(out, bag.remaining());
 			out.write(bag.array(), bag.arrayOffset() + bag.position(), bag.remaining());
 		}

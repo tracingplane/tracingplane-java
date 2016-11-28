@@ -1,44 +1,41 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer;
 
-import edu.brown.cs.systems.tracingplane.context_layer.BaggageImpl;
-import edu.brown.cs.systems.tracingplane.context_layer.ContextLayerListener;
+import java.nio.ByteBuffer;
+import java.util.List;
 
-public class BaggageLayer implements ContextLayerListener {
+import edu.brown.cs.systems.tracingplane.context_layer.ContextBaggage;
+import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
+
+public class BaggageLayer implements ContextLayer {
 
 	@Override
-	public void preBranch(BaggageImpl baggage) {
+	public void discard(ContextBaggage baggage) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void postBranch(BaggageImpl original, BaggageImpl branched) {
+	public ContextBaggage branch(ContextBaggage from) {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
 	@Override
-	public void preJoin(BaggageImpl left, BaggageImpl right) {
+	public ContextBaggage join(ContextBaggage left, ContextBaggage right) {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
 	@Override
-	public void postJoin(BaggageImpl joined) {
+	public ContextBaggage wrap(List<ByteBuffer> bags) {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
 	@Override
-	public void preSerialize(BaggageImpl baggage) {
+	public List<ByteBuffer> bags(ContextBaggage baggage) {
 		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void postDeserialize(BaggageImpl baggage) {
-		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
 }
