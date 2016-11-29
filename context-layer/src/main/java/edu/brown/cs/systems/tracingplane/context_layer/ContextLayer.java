@@ -5,6 +5,8 @@ import java.util.List;
 
 public interface ContextLayer {
 	
+	public static final ByteBuffer OVERFLOW_MARKER = ByteBuffer.allocate(0);
+	
 	public void discard(ContextBaggage baggage);
 
 	public ContextBaggage branch(ContextBaggage from);

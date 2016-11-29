@@ -108,12 +108,69 @@ public class ContextLayerSerialization {
 		return deserialize(bytes);
 	}
 	
+	static int serializedSize(ByteBuffer bag) {
+		return bag.remaining() + ProtobufVarint.sizeOf(bag.remaining());
+	}
+	
 	static int serializedSize(List<ByteBuffer> bags) {
 		int size = 0;
 		for (ByteBuffer bag : bags) {
-			size += bag.remaining() + ProtobufVarint.sizeOf(bag.remaining());
+			size += serializedSize(bag);
 		}
 		return size;
+	}
+	
+	private static final class TrimExtent {
+		int bagCount = 0;
+		int serializedSize = 0;
+		boolean overflow = false;
+		public TrimExtent(int bagCount, int serializedSize, boolean overflow) {
+			this.bagCount = bagCount;
+			this.serializedSize = serializedSize;
+			this.overflow = overflow;
+		}
+	}
+	
+	static TrimExtent determineTrimExtent(List<ByteBuffer> bags, int limit) {
+		if (limit <= 0) {
+			return new TrimExtent(bags.size(), serializedSize(bags), false);
+		}
+		int[] serializationCutoffs = new int[bags.size()];
+		int size = 0;
+		for (int i = 0; i < bags.size(); i++) {
+			size += serializedSize(bags.get(i));
+			serializationCutoffs[i] = size;
+		}
+		if (size <= limit) {
+			return new TrimExtent(bags.size(), size, false);
+		}
+		int overflowMarkerSize = serializedSize(ContextLayer.OVERFLOW_MARKER);
+		for (int i = bags.size()-1; i > 0; i--) {
+			size = serializationCutoffs[i-1] + overflowMarkerSize;
+			if (size <= limit) {
+				return new TrimExtent(i, size, true);
+			}
+		}
+		return new TrimExtent(0, overflowMarkerSize, true);
+	}
+	
+	static List<ByteBuffer> trimToSize(List<ByteBuffer> bags, int limit) {
+		TrimExtent extent = determineTrimExtent(bags, limit);
+		if (extent.overflow) {
+			List<ByteBuffer> subList = new ArrayList<>(extent.bagCount+1);
+			subList.addAll(bags.subList(0, extent.bagCount));
+			subList.add(ContextLayer.OVERFLOW_MARKER);
+			return subList;
+		} else {
+			return bags;
+		}
+	}
+	
+	static void writeBag(ByteBuffer bag, ByteBuffer to) {
+		ProtobufVarint.writeRawVarint32(to, bag.remaining());
+		int position = bag.position();
+		to.put(bag);
+		bag.position(position);
 	}
 
 	static byte[] serialize(List<ByteBuffer> bags) {
@@ -122,10 +179,22 @@ public class ContextLayerSerialization {
 		}
 		ByteBuffer buf = ByteBuffer.allocate(serializedSize(bags));
 		for (ByteBuffer bag : bags) {
-			ProtobufVarint.writeRawVarint32(buf, bag.remaining());
-			int position = bag.position();
-			buf.put(bag);
-			bag.position(position);
+			writeBag(bag, buf);
+		}
+		return buf.array();
+	}
+
+	static byte[] serialize(List<ByteBuffer> bags, int limit) {
+		if (bags == null || bags.size() == 0) {
+			return null;
+		}
+		TrimExtent trim = determineTrimExtent(bags, limit);
+		ByteBuffer buf = ByteBuffer.allocate(trim.serializedSize);
+		for (int i = 0; i < trim.bagCount; i++) {
+			writeBag(bags.get(i), buf);
+		}
+		if (trim.overflow) {
+			writeBag(ContextLayer.OVERFLOW_MARKER, buf);
 		}
 		return buf.array();
 	}
