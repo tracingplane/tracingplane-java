@@ -39,7 +39,7 @@ public class BagParser {
 		currentBag = null;
 	}
 	
-	public Bag parse(List<ByteBuffer> baggage) {
+	public static Bag parse(List<ByteBuffer> baggage) {
 		return new BagParser(baggage).readBag(-1);
 	}
 
