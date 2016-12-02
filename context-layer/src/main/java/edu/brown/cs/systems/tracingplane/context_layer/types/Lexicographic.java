@@ -11,8 +11,8 @@ import com.google.common.primitives.UnsignedBytes;
 
 public class Lexicographic {
 
-	private static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = UnsignedBytes.lexicographicalComparator();
-	private static final Comparator<ByteBuffer> BYTE_BUFFER_COMPARATOR = UnsignedByteBuffer.lexicographicalComparator();
+	public static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = UnsignedBytes.lexicographicalComparator();
+	public static final Comparator<ByteBuffer> BYTE_BUFFER_COMPARATOR = UnsignedByteBuffer.lexicographicalComparator();
 
 	/** Compares the two byte arrays lexicographically */
 	public static int compare(byte[] a, byte[] b) {

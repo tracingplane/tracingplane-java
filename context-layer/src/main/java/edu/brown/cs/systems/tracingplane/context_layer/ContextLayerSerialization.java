@@ -34,48 +34,48 @@ public class ContextLayerSerialization {
 		if (bytes == null || length <= 0) {
 			return null;
 		}
-		List<ByteBuffer> bags = new ArrayList<>();
+		List<ByteBuffer> atoms = new ArrayList<>();
 
 		ByteBuffer in = ByteBuffer.wrap(bytes, offset, length);
 		while (in.remaining() > 0) {
 			try {
-				int bagSize = ProtobufVarint.readRawVarint32(in);
-				bags.add(ByteBuffer.wrap(bytes, offset + in.position(), bagSize));
-				in.position(in.position() + bagSize);
+				int atomSize = ProtobufVarint.readRawVarint32(in);
+				atoms.add(ByteBuffer.wrap(bytes, offset + in.position(), atomSize));
+				in.position(in.position() + atomSize);
 			} catch (MalformedVarintException e) {
-				String msg = String.format("Malformed length prefix for bag %d (%d/%d bytes)", bags.size(),
+				String msg = String.format("Malformed length prefix for atom %d (%d/%d bytes)", atoms.size(),
 						in.position(), length);
 				log.warn(msg, e);
 				break;
 			} catch (BufferUnderflowException | IndexOutOfBoundsException | IllegalArgumentException e) {
-				String msg = String.format("Premature end of baggage at bag %d (%d/%d bytes)", bags.size(),
+				String msg = String.format("Premature end of baggage at atom %d (%d/%d bytes)", atoms.size(),
 						in.position(), length);
 				log.warn(msg, e);
 				break;
 			}
 		}
 
-		if (bags.size() == 0) {
+		if (atoms.size() == 0) {
 			return null;
 		} else {
-			return bags;
+			return atoms;
 		}
 	}
 
-	static ByteBuffer readBag(InputStream input) throws EndOfStreamException, MalformedVarintException, IOException {
-		int bagSize = ProtobufVarint.readRawVarint32(input);
-		byte[] bagData = new byte[bagSize];
+	static ByteBuffer readAtom(InputStream input) throws EndOfStreamException, MalformedVarintException, IOException {
+		int atomSize = ProtobufVarint.readRawVarint32(input);
+		byte[] atomData = new byte[atomSize];
 		int position = 0;
-		while (position < bagSize) {
-			int numRead = input.read(bagData, position, bagSize - position);
+		while (position < atomSize) {
+			int numRead = input.read(atomData, position, atomSize - position);
 			if (numRead < 0) {
-				log.warn("Premature end of bag after %d/%d bytes", position, bagSize);
+				log.warn("Premature end of atom after %d/%d bytes", position, atomSize);
 				return null;
 			} else {
 				position += numRead;
 			}
 		}
-		return ByteBuffer.wrap(bagData);
+		return ByteBuffer.wrap(atomData);
 	}
 
 	static List<ByteBuffer> readFrom(InputStream input) throws IOException {
@@ -108,44 +108,44 @@ public class ContextLayerSerialization {
 		return deserialize(bytes);
 	}
 	
-	static int serializedSize(ByteBuffer bag) {
-		return bag.remaining() + ProtobufVarint.sizeOf(bag.remaining());
+	static int serializedSize(ByteBuffer atom) {
+		return atom.remaining() + ProtobufVarint.sizeOf(atom.remaining());
 	}
 	
-	static int serializedSize(List<ByteBuffer> bags) {
+	static int serializedSize(List<ByteBuffer> atoms) {
 		int size = 0;
-		for (ByteBuffer bag : bags) {
-			size += serializedSize(bag);
+		for (ByteBuffer atom : atoms) {
+			size += serializedSize(atom);
 		}
 		return size;
 	}
 	
 	private static final class TrimExtent {
-		int bagCount = 0;
+		int atomCount = 0;
 		int serializedSize = 0;
 		boolean overflow = false;
-		public TrimExtent(int bagCount, int serializedSize, boolean overflow) {
-			this.bagCount = bagCount;
+		public TrimExtent(int atomCount, int serializedSize, boolean overflow) {
+			this.atomCount = atomCount;
 			this.serializedSize = serializedSize;
 			this.overflow = overflow;
 		}
 	}
 	
-	static TrimExtent determineTrimExtent(List<ByteBuffer> bags, int limit) {
+	static TrimExtent determineTrimExtent(List<ByteBuffer> atoms, int limit) {
 		if (limit <= 0) {
-			return new TrimExtent(bags.size(), serializedSize(bags), false);
+			return new TrimExtent(atoms.size(), serializedSize(atoms), false);
 		}
-		int[] serializationCutoffs = new int[bags.size()];
+		int[] serializationCutoffs = new int[atoms.size()];
 		int size = 0;
-		for (int i = 0; i < bags.size(); i++) {
-			size += serializedSize(bags.get(i));
+		for (int i = 0; i < atoms.size(); i++) {
+			size += serializedSize(atoms.get(i));
 			serializationCutoffs[i] = size;
 		}
 		if (size <= limit) {
-			return new TrimExtent(bags.size(), size, false);
+			return new TrimExtent(atoms.size(), size, false);
 		}
 		int overflowMarkerSize = serializedSize(ContextLayer.OVERFLOW_MARKER);
-		for (int i = bags.size()-1; i > 0; i--) {
+		for (int i = atoms.size()-1; i > 0; i--) {
 			size = serializationCutoffs[i-1] + overflowMarkerSize;
 			if (size <= limit) {
 				return new TrimExtent(i, size, true);
@@ -154,59 +154,59 @@ public class ContextLayerSerialization {
 		return new TrimExtent(0, overflowMarkerSize, true);
 	}
 	
-	static List<ByteBuffer> trimToSize(List<ByteBuffer> bags, int limit) {
-		TrimExtent extent = determineTrimExtent(bags, limit);
+	static List<ByteBuffer> trimToSize(List<ByteBuffer> atoms, int limit) {
+		TrimExtent extent = determineTrimExtent(atoms, limit);
 		if (extent.overflow) {
-			List<ByteBuffer> subList = new ArrayList<>(extent.bagCount+1);
-			subList.addAll(bags.subList(0, extent.bagCount));
+			List<ByteBuffer> subList = new ArrayList<>(extent.atomCount+1);
+			subList.addAll(atoms.subList(0, extent.atomCount));
 			subList.add(ContextLayer.OVERFLOW_MARKER);
 			return subList;
 		} else {
-			return bags;
+			return atoms;
 		}
 	}
 	
-	static void writeBag(ByteBuffer bag, ByteBuffer to) {
-		ProtobufVarint.writeRawVarint32(to, bag.remaining());
-		int position = bag.position();
-		to.put(bag);
-		bag.position(position);
+	static void writeAtom(ByteBuffer atom, ByteBuffer to) {
+		ProtobufVarint.writeRawVarint32(to, atom.remaining());
+		int position = atom.position();
+		to.put(atom);
+		atom.position(position);
 	}
 
-	static byte[] serialize(List<ByteBuffer> bags) {
-		if (bags == null || bags.size() == 0) {
+	static byte[] serialize(List<ByteBuffer> atoms) {
+		if (atoms == null || atoms.size() == 0) {
 			return null;
 		}
-		ByteBuffer buf = ByteBuffer.allocate(serializedSize(bags));
-		for (ByteBuffer bag : bags) {
-			writeBag(bag, buf);
+		ByteBuffer buf = ByteBuffer.allocate(serializedSize(atoms));
+		for (ByteBuffer atom : atoms) {
+			writeAtom(atom, buf);
 		}
 		return buf.array();
 	}
 
-	static byte[] serialize(List<ByteBuffer> bags, int limit) {
-		if (bags == null || bags.size() == 0) {
+	static byte[] serialize(List<ByteBuffer> atoms, int limit) {
+		if (atoms == null || atoms.size() == 0) {
 			return null;
 		}
-		TrimExtent trim = determineTrimExtent(bags, limit);
+		TrimExtent trim = determineTrimExtent(atoms, limit);
 		ByteBuffer buf = ByteBuffer.allocate(trim.serializedSize);
-		for (int i = 0; i < trim.bagCount; i++) {
-			writeBag(bags.get(i), buf);
+		for (int i = 0; i < trim.atomCount; i++) {
+			writeAtom(atoms.get(i), buf);
 		}
 		if (trim.overflow) {
-			writeBag(ContextLayer.OVERFLOW_MARKER, buf);
+			writeAtom(ContextLayer.OVERFLOW_MARKER, buf);
 		}
 		return buf.array();
 	}
 
-	static void write(OutputStream out, List<ByteBuffer> bags) throws IOException {
-		if (out == null || bags == null || bags.size() == 0) {
+	static void write(OutputStream out, List<ByteBuffer> atoms) throws IOException {
+		if (out == null || atoms == null || atoms.size() == 0) {
 			return;
 		}
-		ProtobufVarint.writeRawVarint32(out, serializedSize(bags));
-		for (ByteBuffer bag : bags) {
-			ProtobufVarint.writeRawVarint32(out, bag.remaining());
-			out.write(bag.array(), bag.arrayOffset() + bag.position(), bag.remaining());
+		ProtobufVarint.writeRawVarint32(out, serializedSize(atoms));
+		for (ByteBuffer atom : atoms) {
+			ProtobufVarint.writeRawVarint32(out, atom.remaining());
+			out.write(atom.array(), atom.arrayOffset() + atom.position(), atom.remaining());
 		}
 	}
 

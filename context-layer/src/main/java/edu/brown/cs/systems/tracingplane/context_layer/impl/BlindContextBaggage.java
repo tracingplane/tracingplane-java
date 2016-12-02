@@ -16,14 +16,14 @@ public class BlindContextBaggage implements ContextBaggage {
 
 	static class SimpleBaggageContents{
 		volatile int refcount = 0;
-		List<ByteBuffer> bags;
+		List<ByteBuffer> atoms;
 
 		public SimpleBaggageContents() {
 			this(new ArrayList<>());
 		}
 
-		public SimpleBaggageContents(List<ByteBuffer> bags) {
-			this.bags = bags;
+		public SimpleBaggageContents(List<ByteBuffer> atoms) {
+			this.atoms = atoms;
 		}
 
 		void ref() {
@@ -32,7 +32,7 @@ public class BlindContextBaggage implements ContextBaggage {
 
 		void deref() {
 			if (reffer.decrementAndGet(this) == 0) {
-				bags = null;
+				atoms = null;
 			}
 		}
 
@@ -49,8 +49,8 @@ public class BlindContextBaggage implements ContextBaggage {
 		this(new SimpleBaggageContents());
 	}
 	
-	BlindContextBaggage(List<ByteBuffer> bags) {
-		this(new SimpleBaggageContents(bags));
+	BlindContextBaggage(List<ByteBuffer> atoms) {
+		this(new SimpleBaggageContents(atoms));
 	}
 
 	BlindContextBaggage(SimpleBaggageContents contents) {
@@ -65,8 +65,8 @@ public class BlindContextBaggage implements ContextBaggage {
 
 	int serializedSize() {
 		int size = 0;
-		for (ByteBuffer bag : contents.bags) {
-			size += bag.remaining() + ProtobufVarint.sizeOf(bag.remaining());
+		for (ByteBuffer atom : contents.atoms) {
+			size += atom.remaining() + ProtobufVarint.sizeOf(atom.remaining());
 		}
 		return size;
 	}
@@ -80,13 +80,13 @@ public class BlindContextBaggage implements ContextBaggage {
 			return this;
 		}
 		if (contents.editableInPlace()) {
-			contents.bags = Lexicographic.merge(contents.bags, other.contents.bags);
+			contents.atoms = Lexicographic.merge(contents.atoms, other.contents.atoms);
 			other.contents.deref();
 			return this;
 		} else if (other.contents.editableInPlace()) {
 			return other.mergeWith(this);
 		} else {
-			List<ByteBuffer> merged = Lexicographic.merge(contents.bags, other.contents.bags);
+			List<ByteBuffer> merged = Lexicographic.merge(contents.atoms, other.contents.atoms);
 			this.contents.deref();
 			other.contents.deref();
 			this.contents = new SimpleBaggageContents(merged);

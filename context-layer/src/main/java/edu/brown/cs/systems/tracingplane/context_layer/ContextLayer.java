@@ -13,8 +13,8 @@ public interface ContextLayer {
 
 	public ContextBaggage join(ContextBaggage left, ContextBaggage right);
 	
-	public ContextBaggage wrap(List<ByteBuffer> bags);
+	public ContextBaggage wrap(List<ByteBuffer> atoms);
 	
-	public List<ByteBuffer> bags(ContextBaggage baggage);
+	public List<ByteBuffer> atoms(ContextBaggage baggage);
 	
 }

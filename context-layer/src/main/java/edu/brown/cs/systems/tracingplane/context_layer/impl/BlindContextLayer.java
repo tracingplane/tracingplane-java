@@ -74,24 +74,24 @@ public class BlindContextLayer implements ContextLayer {
 	}
 
 	@Override
-	public ContextBaggage wrap(List<ByteBuffer> bags) {
-		if (bags == null || bags.size() == 0) {
+	public ContextBaggage wrap(List<ByteBuffer> atoms) {
+		if (atoms == null || atoms.size() == 0) {
 			return null;
 		} else {
-			return new BlindContextBaggage(bags);
+			return new BlindContextBaggage(atoms);
 		}
 	}
 
 	@Override
-	public List<ByteBuffer> bags(ContextBaggage baggage) {
+	public List<ByteBuffer> atoms(ContextBaggage baggage) {
 		if (baggage == null) {
 			return null;
 		} else if (baggage instanceof BlindContextBaggage) {
-			List<ByteBuffer> bags = ((BlindContextBaggage) baggage).contents.bags;
-			if (bags == null || bags.size() == 0) {
+			List<ByteBuffer> atoms = ((BlindContextBaggage) baggage).contents.atoms;
+			if (atoms == null || atoms.size() == 0) {
 				return null;
 			} else {
-				return bags;
+				return atoms;
 			}
 		} else {
 			log.warn("bags unknown ContextBaggage implementation class {}", baggage.getClass().getName());

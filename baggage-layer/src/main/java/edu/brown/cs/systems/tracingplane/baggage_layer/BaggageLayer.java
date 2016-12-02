@@ -33,7 +33,7 @@ public class BaggageLayer implements ContextLayer {
 	}
 
 	@Override
-	public List<ByteBuffer> bags(ContextBaggage baggage) {
+	public List<ByteBuffer> atoms(ContextBaggage baggage) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -104,7 +104,7 @@ public class TransitLayerImpl implements TransitLayer {
 		if (baggage == null || baggage instanceof ContextBaggage) {
 			ContextBaggage contextBaggage = (ContextBaggage) baggage;
 			listener.preSerialize(contextBaggage);
-			return ContextLayerSerialization.serialize(context.bags(contextBaggage));
+			return ContextLayerSerialization.serialize(context.atoms(contextBaggage));
 		} else {
 			log.warn("serialize unknown Baggage implementation class {}", baggage.getClass().getName());
 			return null;
@@ -116,7 +116,7 @@ public class TransitLayerImpl implements TransitLayer {
 		if (baggage == null || baggage instanceof ContextBaggage) {
 			ContextBaggage contextBaggage = (ContextBaggage) baggage;
 			listener.preSerialize(contextBaggage);
-			ContextLayerSerialization.write(out, context.bags(contextBaggage));
+			ContextLayerSerialization.write(out, context.atoms(contextBaggage));
 		} else {
 			log.warn("writeTo unknown Baggage implementation class {}", baggage.getClass().getName());
 		}

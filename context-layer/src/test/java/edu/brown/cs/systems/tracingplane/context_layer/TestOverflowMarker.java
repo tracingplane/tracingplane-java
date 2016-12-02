@@ -17,7 +17,7 @@ public class TestOverflowMarker extends TestCase {
 		assertEquals(1, overflowMarkerSerializedSize);
 		
 		ByteBuffer buf = ByteBuffer.allocate(overflowMarkerSerializedSize);
-		ContextLayerSerialization.writeBag(ContextLayer.OVERFLOW_MARKER, buf);
+		ContextLayerSerialization.writeAtom(ContextLayer.OVERFLOW_MARKER, buf);
 		
 		assertEquals(0, buf.remaining());
 		
