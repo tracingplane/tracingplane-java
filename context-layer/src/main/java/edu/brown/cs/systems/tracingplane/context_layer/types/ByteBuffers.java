@@ -13,6 +13,9 @@ public class ByteBuffers {
 	 * modifying the src's position. However, the dest's position is updated.
 	 */
 	public static void copyTo(ByteBuffer src, ByteBuffer dest) {
+		if (src == null || dest == null) {
+			return;
+		}
 		if (src.hasArray()) {
 			byte[] array = src.array();
 			int offset = src.arrayOffset() + src.position();

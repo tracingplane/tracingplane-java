@@ -11,7 +11,7 @@ import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ContextLayerException;
 import edu.brown.cs.systems.tracingplane.context_layer.types.UnsignedLexVarint;
 
-public abstract class Parser2<T> {
+public abstract class Parser<T> {
 
 	public T parseFrom(Iterator<ByteBuffer> it) throws ContextLayerException {
 		return parse(new ParsingContext(it), -1);
@@ -36,9 +36,9 @@ public abstract class Parser2<T> {
 
 	protected abstract void childOverflow(T instance);
 
-	protected abstract Parser2<?> getParserForChild(int childIndex, ByteBuffer childOptions);
+	protected abstract Parser<?> getParserForChild(int childIndex, ByteBuffer childOptions);
 
-	protected abstract Parser2<?> getParserForChild(ByteBuffer childKey, ByteBuffer childOptions);
+	protected abstract Parser<?> getParserForChild(ByteBuffer childKey, ByteBuffer childOptions);
 
 	protected abstract <C> T setChild(T instance, int childIndex, ByteBuffer childOptions, C childData);
 
@@ -71,7 +71,7 @@ public abstract class Parser2<T> {
 			currentBag = null;
 		}
 
-		<T> T parseData(Parser2<T> parser, byte expectedPrefix) {
+		<T> T parseData(Parser<T> parser, byte expectedPrefix) {
 			dataIterator.reset(expectedPrefix);
 			T instance = parser.parseData(dataIterator);
 			dataIterator.drainRemaining();
@@ -81,15 +81,15 @@ public abstract class Parser2<T> {
 			return instance;
 		}
 
-		<T> void parseInlineChildren(Parser2<T> parser, T instance) {
+		<T> void parseInlineChildren(Parser<T> parser, T instance) {
 			while (InlineFieldPrefix.isInlineData(firstByte) && currentBag != null) {
 				byte childIndex = firstByte;
-				Parser2<?> childParser = parser.getParserForChild(childIndex, null);
+				Parser<?> childParser = parser.getParserForChild(childIndex, null);
 				parseInlineChild(parser, childParser, instance, childIndex);
 			}
 		}
 
-		<P, C> void parseInlineChild(Parser2<P> parentParser, Parser2<C> childParser, P parent, byte childIndex) {
+		<P, C> void parseInlineChild(Parser<P> parentParser, Parser<C> childParser, P parent, byte childIndex) {
 			if (childParser != null) {
 				C child = childParser.parseInline(this, childIndex);
 				if (child != null) {
@@ -98,19 +98,19 @@ public abstract class Parser2<T> {
 			}
 		}
 
-		<T> void parseIndexedChildren(Parser2<T> parser, T instance, int currentLevel) throws ContextLayerException {
+		<T> void parseIndexedChildren(Parser<T> parser, T instance, int currentLevel) throws ContextLayerException {
 			int childLevel;
 			while ((childLevel = IndexedHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null) {
 				// TODO: what to do when exception thrown here
 				int childIndex = UnsignedLexVarint.readLexVarUInt32(currentBag);
 				ByteBuffer childOptions = currentBag;
-				Parser2<?> childParser = parser.getParserForChild(childIndex, childOptions);
+				Parser<?> childParser = parser.getParserForChild(childIndex, childOptions);
 				advance();
 				parseIndexedChild(parser, childParser, instance, childIndex, childOptions, childLevel);
 			}
 		}
 
-		<P, C> void parseIndexedChild(Parser2<P> parentParser, Parser2<C> childParser, P parent, int childIndex,
+		<P, C> void parseIndexedChild(Parser<P> parentParser, Parser<C> childParser, P parent, int childIndex,
 				ByteBuffer childOptions, int childLevel) throws ContextLayerException {
 			if (childParser != null) {
 				C child = childParser.parse(this, childLevel);
@@ -120,7 +120,7 @@ public abstract class Parser2<T> {
 			}
 		}
 
-		<T> void parseKeyedChildren(Parser2<T> parser, T instance, int currentLevel) throws ContextLayerException {
+		<T> void parseKeyedChildren(Parser<T> parser, T instance, int currentLevel) throws ContextLayerException {
 			int childLevel;
 			while ((childLevel = KeyedHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null) {
 				// TODO: what to do when exception thrown here
@@ -129,13 +129,13 @@ public abstract class Parser2<T> {
 				childKey.limit(childKey.position() + childKeyLength);
 				ByteBuffer childOptions = currentBag;
 				childOptions.position(childKey.limit());
-				Parser2<?> childParser = parser.getParserForChild(childKey, childOptions);
+				Parser<?> childParser = parser.getParserForChild(childKey, childOptions);
 				advance();
 				parseKeyedChild(parser, childParser, instance, childKey, childOptions, childLevel);
 			}
 		}
 
-		<P, C> void parseKeyedChild(Parser2<P> parentParser, Parser2<C> childParser, P parent, ByteBuffer childKey,
+		<P, C> void parseKeyedChild(Parser<P> parentParser, Parser<C> childParser, P parent, ByteBuffer childKey,
 				ByteBuffer childOptions, int childLevel) throws ContextLayerException {
 			if (childParser != null) {
 				C child = childParser.parse(this, childLevel);
@@ -145,7 +145,7 @@ public abstract class Parser2<T> {
 			}
 		}
 		
-		<T> void finalize(Parser2<T> parser, T instance) {
+		<T> void finalize(Parser<T> parser, T instance) {
 			if (overflow) {
 				parser.childOverflow(instance);
 			}

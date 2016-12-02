@@ -7,9 +7,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.Parser2;
+import edu.brown.cs.systems.tracingplane.baggage_layer.impl.Parser;
 
-public class XTraceParser2 extends Parser2<XTrace> {
+public class XTraceParser2 extends Parser<XTrace> {
 
 	static final Logger log = LoggerFactory.getLogger(XTraceParser2.class);
 
@@ -37,7 +37,7 @@ public class XTraceParser2 extends Parser2<XTrace> {
 	}
 
 	@Override
-	public Parser2<?> getParserForChild(int childIndex, ByteBuffer childOptions) {
+	public Parser<?> getParserForChild(int childIndex, ByteBuffer childOptions) {
 		switch(childIndex) {
 //		case 0: return taskIdParser;
 //		case 1: return parentEventIdsParser;
@@ -46,7 +46,7 @@ public class XTraceParser2 extends Parser2<XTrace> {
 	}
 
 	@Override
-	public Parser2<?> getParserForChild(ByteBuffer childKey, ByteBuffer childOptions) {
+	public Parser<?> getParserForChild(ByteBuffer childKey, ByteBuffer childOptions) {
 		return null;
 	}
 
