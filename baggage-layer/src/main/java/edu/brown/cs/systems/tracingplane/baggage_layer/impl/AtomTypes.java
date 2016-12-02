@@ -9,7 +9,7 @@ public class AtomTypes {
 	private static final AtomType[] bagTypes = new AtomType[8];
 
 	public enum AtomType {
-		Data(0), Overflow(1), IndexedField(2), NamedField(3);
+		Data(0), Overflow(1), IndexedHeader(2), KeyedHeader(3);
 
 		public final int id;
 		public final byte byteValue;

@@ -4,9 +4,9 @@ import java.nio.ByteBuffer;
 import java.util.Iterator;
 
 import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.DataPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.IndexedBagHeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.IndexedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.InlineFieldPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.KeyedBagHeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.KeyedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ContextLayerException;
 import edu.brown.cs.systems.tracingplane.context_layer.types.UnsignedLexVarint;
@@ -100,7 +100,7 @@ public abstract class Parser2<T> {
 
 		<T> void parseIndexedChildren(Parser2<T> parser, T instance, int currentLevel) throws ContextLayerException {
 			int childLevel;
-			while ((childLevel = IndexedBagHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null) {
+			while ((childLevel = IndexedHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null) {
 				// TODO: what to do when exception thrown here
 				int childIndex = UnsignedLexVarint.readLexVarUInt32(currentBag);
 				ByteBuffer childOptions = currentBag;
@@ -122,7 +122,7 @@ public abstract class Parser2<T> {
 
 		<T> void parseKeyedChildren(Parser2<T> parser, T instance, int currentLevel) throws ContextLayerException {
 			int childLevel;
-			while ((childLevel = KeyedBagHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null) {
+			while ((childLevel = KeyedHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null) {
 				// TODO: what to do when exception thrown here
 				int childKeyLength = UnsignedLexVarint.readLexVarUInt32(currentBag);
 				ByteBuffer childKey = currentBag.duplicate();

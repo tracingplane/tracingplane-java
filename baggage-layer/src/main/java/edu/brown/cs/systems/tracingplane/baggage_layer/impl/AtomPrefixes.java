@@ -11,11 +11,11 @@ public class AtomPrefixes {
 	 * NamedField and IndexedField use remaining five bits for field level.
 	 * Lowest level (eg root) is lexicographically highest
 	 */
-	public static class IndexedBagHeaderPrefix {
+	public static class IndexedHeaderPrefix {
 		
-		private IndexedBagHeaderPrefix() {}
+		private IndexedHeaderPrefix() {}
 
-		public static final AtomType bagType = AtomType.IndexedField;
+		public static final AtomType bagType = AtomType.IndexedHeader;
 		
 		public static final byte[] prefixes = new byte[LEVELS];
 
@@ -47,11 +47,11 @@ public class AtomPrefixes {
 	 * NamedField and IndexedField use remaining five bits for field level.
 	 * Lowest level (eg root) is lexicographically highest
 	 */
-	public static class KeyedBagHeaderPrefix {
+	public static class KeyedHeaderPrefix {
 		
-		private KeyedBagHeaderPrefix() {}
+		private KeyedHeaderPrefix() {}
 
-		public static final AtomType bagType = AtomType.NamedField;
+		public static final AtomType bagType = AtomType.KeyedHeader;
 		
 		public static final byte[] prefixes = new byte[LEVELS];
 

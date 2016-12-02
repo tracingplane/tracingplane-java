@@ -5,9 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.DataPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.IndexedBagHeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.IndexedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.InlineFieldPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.KeyedBagHeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.KeyedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ContextLayerException;
 import edu.brown.cs.systems.tracingplane.context_layer.types.UnsignedLexVarint;
@@ -107,7 +107,7 @@ public class Parser<T> {
 	
 	private <C> void parseIndexedChildren(BagParser<C> parentParser, C parent, int parentLevel) throws ContextLayerException {
 		int childLevel;
-		while ((childLevel = IndexedBagHeaderPrefix.level(firstByte)) > parentLevel && currentBag != null) {
+		while ((childLevel = IndexedHeaderPrefix.level(firstByte)) > parentLevel && currentBag != null) {
 			int childIndex = UnsignedLexVarint.readLexVarUInt32(currentBag); // TODO: what to do when exception thrown here
 			ByteBuffer childOptions = currentBag;
 			BagParser<?> childParser = parentParser.getParserForChild(childIndex, childOptions);
@@ -122,7 +122,7 @@ public class Parser<T> {
 	
 	private <C> void parseKeyedChildren(BagParser<C> parentParser, C parent, int parentLevel) throws ContextLayerException {
 		int childLevel;
-		while ((childLevel = KeyedBagHeaderPrefix.level(firstByte)) > parentLevel && currentBag != null) {
+		while ((childLevel = KeyedHeaderPrefix.level(firstByte)) > parentLevel && currentBag != null) {
 			int childKeyLength = UnsignedLexVarint.readLexVarUInt32(currentBag);
 			ByteBuffer childKey = currentBag.duplicate();
 			childKey.limit(childKey.position() + childKeyLength);
@@ -141,9 +141,9 @@ public class Parser<T> {
 	/** Skips all bags at or above the specified level */
 	private <C> C skipFullBag(int level) {
 		while (currentBag != null) {
-			if (IndexedBagHeaderPrefix.bagType.match(firstByte) && IndexedBagHeaderPrefix.level(firstByte) < level) {
+			if (IndexedHeaderPrefix.bagType.match(firstByte) && IndexedHeaderPrefix.level(firstByte) < level) {
 				break;
-			} else if (KeyedBagHeaderPrefix.bagType.match(firstByte) && KeyedBagHeaderPrefix.level(firstByte) < level) {
+			} else if (KeyedHeaderPrefix.bagType.match(firstByte) && KeyedHeaderPrefix.level(firstByte) < level) {
 				break;
 			} else {
 				advance();

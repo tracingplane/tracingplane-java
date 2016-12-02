@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.DataPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.IndexedBagHeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.IndexedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.InlineFieldPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.KeyedBagHeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.KeyedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.impl_old.Bag.ChildElement;
 import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
 
@@ -91,7 +91,7 @@ public class BagParser {
 	}
 
 	private List<ChildElement> readIndexedBags(final int currentLevel, List<ChildElement> children) {
-		if (IndexedBagHeaderPrefix.level(firstByte) <= currentLevel || currentBag == null) {
+		if (IndexedHeaderPrefix.level(firstByte) <= currentLevel || currentBag == null) {
 			return children;
 		}
 
@@ -99,7 +99,7 @@ public class BagParser {
 		if (children == null) {
 			children = new ArrayList<>();
 		}
-		for (; (childLevel = IndexedBagHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null; advance()) {
+		for (; (childLevel = IndexedHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null; advance()) {
 			ByteBuffer childId = currentBag;
 			children.add(new ChildElement(childId, readBag(childLevel)));
 		}
@@ -108,7 +108,7 @@ public class BagParser {
 	}
 
 	private List<ChildElement> readNamedBags(final int currentLevel, List<ChildElement> children) {
-		if (KeyedBagHeaderPrefix.level(firstByte) <= currentLevel || currentBag == null) {
+		if (KeyedHeaderPrefix.level(firstByte) <= currentLevel || currentBag == null) {
 			return children;
 		}
 
@@ -116,7 +116,7 @@ public class BagParser {
 		if (children == null) {
 			children = new ArrayList<>();
 		}
-		for (; (childLevel = KeyedBagHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null; advance()) {
+		for (; (childLevel = KeyedHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null; advance()) {
 			ByteBuffer childId = currentBag;
 			children.add(new ChildElement(childId, readBag(childLevel)));
 		}
