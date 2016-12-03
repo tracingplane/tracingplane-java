@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import edu.brown.cs.systems.tracingplane.baggage_layer.impl.Parser;
 
-public class XTraceParser2 extends Parser<XTrace> {
+public class XTraceParser extends Parser<XTrace> {
 
-	static final Logger log = LoggerFactory.getLogger(XTraceParser2.class);
+	static final Logger log = LoggerFactory.getLogger(XTraceParser.class);
 
 	@Override
 	public XTrace parseData(Iterator<ByteBuffer> data) {
