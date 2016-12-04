@@ -7,11 +7,15 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.brown.cs.systems.tracingplane.baggage_buffers.impl.Parsers;
 import edu.brown.cs.systems.tracingplane.baggage_layer.impl.Parser;
 
 public class XTraceParser extends Parser<XTrace> {
 
 	static final Logger log = LoggerFactory.getLogger(XTraceParser.class);
+	
+	static final Parser<Long> taskIdParser = Parsers.firstLong();
+	static final Parser<List<Long>> parentEventIdsParser = Parsers.listOfLongs();
 
 	@Override
 	public XTrace parseData(Iterator<ByteBuffer> data) {
@@ -39,8 +43,8 @@ public class XTraceParser extends Parser<XTrace> {
 	@Override
 	public Parser<?> getParserForChild(int childIndex, ByteBuffer childOptions) {
 		switch(childIndex) {
-//		case 0: return taskIdParser;
-//		case 1: return parentEventIdsParser;
+		case 0: return taskIdParser;
+		case 1: return parentEventIdsParser;
 		default: return null;
 		}
 	}
