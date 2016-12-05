@@ -9,6 +9,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
+import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.ByteBuffers;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.UnsignedLexVarint;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.InlineFieldPrefix;
@@ -16,10 +20,6 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.Key
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BagHeader.IndexedBagHeader;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BagHeader.InlineBagHeader;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BagHeader.KeyedBagHeader;
-import edu.brown.cs.systems.tracingplane.context_layer.BaggageAtoms;
-import edu.brown.cs.systems.tracingplane.context_layer.types.ByteBuffers;
-import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;
-import edu.brown.cs.systems.tracingplane.context_layer.types.UnsignedLexVarint;
 
 public abstract class Serializer<T> {
 

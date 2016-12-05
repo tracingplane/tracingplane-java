@@ -10,11 +10,11 @@ public class TestDefaultTransitLayer extends TestCase {
 	@Test
 	public void testNullTransitLayerImpl() {
 		assertNotNull(Baggage.transit);
-		assertTrue(Baggage.transit instanceof TransitLayerNullImpl.NullTransitLayer);
+		assertTrue(Baggage.transit instanceof NullTransitLayer);
 
 		Baggage baggage = Baggage.newInstance();
 		assertNotNull(baggage);
-		assertEquals(baggage, TransitLayerNullImpl.NULL_BAGGAGE);
+		assertEquals(baggage, NullBaggage.INSTANCE);
 	}
 
 }

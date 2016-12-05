@@ -3,21 +3,21 @@ package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 
+import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.UnsignedLexVarint;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.InlineFieldPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
-import edu.brown.cs.systems.tracingplane.context_layer.BaggageAtoms;
-import edu.brown.cs.systems.tracingplane.context_layer.types.ContextLayerException;
-import edu.brown.cs.systems.tracingplane.context_layer.types.UnsignedLexVarint;
 
 public abstract class Parser<T> {
 
-	public T parseFrom(Iterator<ByteBuffer> it) throws ContextLayerException {
+	public T parseFrom(Iterator<ByteBuffer> it) throws AtomLayerException {
 		return parse(new ParsingContext(it), -1);
 	}
 
-	private final T parse(ParsingContext ctx, int currentLevel) throws ContextLayerException {
+	private final T parse(ParsingContext ctx, int currentLevel) throws AtomLayerException {
 		T instance = ctx.parseData(this, DataPrefix.prefix);
 		ctx.parseInlineChildren(this, instance);
 		ctx.parseIndexedChildren(this, instance, currentLevel);
@@ -98,7 +98,7 @@ public abstract class Parser<T> {
 			}
 		}
 
-		<T> void parseIndexedChildren(Parser<T> parser, T instance, int currentLevel) throws ContextLayerException {
+		<T> void parseIndexedChildren(Parser<T> parser, T instance, int currentLevel) throws AtomLayerException {
 			int childLevel;
 			while ((childLevel = IndexedHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null) {
 				// TODO: what to do when exception thrown here
@@ -111,7 +111,7 @@ public abstract class Parser<T> {
 		}
 
 		<P, C> void parseIndexedChild(Parser<P> parentParser, Parser<C> childParser, P parent, int childIndex,
-				ByteBuffer childOptions, int childLevel) throws ContextLayerException {
+				ByteBuffer childOptions, int childLevel) throws AtomLayerException {
 			if (childParser != null) {
 				C child = childParser.parse(this, childLevel);
 				if (child != null) {
@@ -120,7 +120,7 @@ public abstract class Parser<T> {
 			}
 		}
 
-		<T> void parseKeyedChildren(Parser<T> parser, T instance, int currentLevel) throws ContextLayerException {
+		<T> void parseKeyedChildren(Parser<T> parser, T instance, int currentLevel) throws AtomLayerException {
 			int childLevel;
 			while ((childLevel = KeyedHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null) {
 				// TODO: what to do when exception thrown here
@@ -136,7 +136,7 @@ public abstract class Parser<T> {
 		}
 
 		<P, C> void parseKeyedChild(Parser<P> parentParser, Parser<C> childParser, P parent, ByteBuffer childKey,
-				ByteBuffer childOptions, int childLevel) throws ContextLayerException {
+				ByteBuffer childOptions, int childLevel) throws AtomLayerException {
 			if (childParser != null) {
 				C child = childParser.parse(this, childLevel);
 				if (child != null) {

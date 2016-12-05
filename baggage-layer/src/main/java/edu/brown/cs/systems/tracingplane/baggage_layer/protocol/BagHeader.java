@@ -2,7 +2,7 @@ package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
 import java.nio.ByteBuffer;
 
-import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
 
 /**
  * BagHeaders are atoms that demarcate the beginning of a child bag

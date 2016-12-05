@@ -3,7 +3,7 @@ package edu.brown.cs.systems.tracingplane.transit_layer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.brown.cs.systems.tracingplane.transit_layer.impl.TransitLayerNullImpl;
+import edu.brown.cs.systems.tracingplane.transit_layer.impl.NullTransitLayerFactory;
 
 public interface TransitLayerFactory {
 
@@ -15,8 +15,8 @@ public interface TransitLayerFactory {
 			return createTransitLayer(config);
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			log.error(String.format("Unable to instantiate default transit layer factory %s, defaulting to %s",
-					config.transitLayerFactory, TransitLayerNullImpl.NullTransitLayerFactory.class.getName()));
-			return new TransitLayerNullImpl.NullTransitLayerFactory().newTransitLayer();
+					config.transitLayerFactory, NullTransitLayerFactory.class.getName()));
+			return new NullTransitLayerFactory().newTransitLayer();
 		}
 	}
 
