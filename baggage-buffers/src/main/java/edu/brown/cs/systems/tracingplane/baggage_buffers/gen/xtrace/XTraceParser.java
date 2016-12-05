@@ -1,4 +1,4 @@
-package edu.brown.cs.systems.tracingplane.baggage_layer.prototype.baggage_buffers.xtrace;
+package edu.brown.cs.systems.tracingplane.baggage_buffers.gen.xtrace;
 
 import java.nio.ByteBuffer;
 import java.util.Iterator;
@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.brown.cs.systems.tracingplane.baggage_buffers.impl.Parsers;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.Parser;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Parser;
 
 public class XTraceParser extends Parser<XTrace> {
 

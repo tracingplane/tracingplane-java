@@ -1,4 +1,4 @@
-package edu.brown.cs.systems.tracingplane.context_layer;
+package edu.brown.cs.systems.tracingplane.context_layer.protocol;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,6 +7,9 @@ import java.io.OutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.brown.cs.systems.tracingplane.context_layer.ContextBaggage;
+import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
+import edu.brown.cs.systems.tracingplane.context_layer.ContextLayerConfig;
 import edu.brown.cs.systems.tracingplane.context_layer.listener.ContextLayerListener;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;

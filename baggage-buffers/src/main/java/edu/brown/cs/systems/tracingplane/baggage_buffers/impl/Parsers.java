@@ -12,7 +12,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.Parser;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Parser;
 
 public class Parsers {
 	

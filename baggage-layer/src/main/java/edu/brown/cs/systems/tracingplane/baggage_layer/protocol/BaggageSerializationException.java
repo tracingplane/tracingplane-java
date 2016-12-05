@@ -1,4 +1,4 @@
-package edu.brown.cs.systems.tracingplane.baggage_layer.impl;
+package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
 public class BaggageSerializationException extends Exception {
 

@@ -1,12 +1,12 @@
-package edu.brown.cs.systems.tracingplane.baggage_layer.impl;
+package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.DataPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.IndexedHeaderPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.InlineFieldPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.KeyedHeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.InlineFieldPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ContextLayerException;
 import edu.brown.cs.systems.tracingplane.context_layer.types.UnsignedLexVarint;

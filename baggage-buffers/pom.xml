@@ -15,6 +15,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>edu.brown.cs.systems.tracingplane</groupId>
+            <artifactId>baggage-layer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>

@@ -1,5 +1,7 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer;
 
-public interface ApplicationBaggage {
+import edu.brown.cs.systems.tracingplane.context_layer.ContextBaggage;
+
+public class ApplicationBaggage implements ContextBaggage {
 
 }

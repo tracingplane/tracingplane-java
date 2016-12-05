@@ -1,6 +1,6 @@
-package edu.brown.cs.systems.tracingplane.baggage_layer.impl;
+package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomTypes.AtomType;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomTypes.AtomType;
 
 /** Logic for byte prefixes of serialized bags */
 public class AtomPrefixes {

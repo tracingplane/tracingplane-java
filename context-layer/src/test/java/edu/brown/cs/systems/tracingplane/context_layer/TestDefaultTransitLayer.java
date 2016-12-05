@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import edu.brown.cs.systems.tracingplane.context_layer.impl.BlindContextLayer;
 import edu.brown.cs.systems.tracingplane.context_layer.listener.ContextLayerNullListener;
+import edu.brown.cs.systems.tracingplane.context_layer.protocol.TransitLayerImpl;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 import edu.brown.cs.systems.tracingplane.transit_layer.impl.TransitLayerNullImpl;
 import junit.framework.TestCase;

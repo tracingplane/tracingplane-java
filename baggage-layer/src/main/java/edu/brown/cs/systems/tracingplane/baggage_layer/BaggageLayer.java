@@ -3,39 +3,23 @@ package edu.brown.cs.systems.tracingplane.baggage_layer;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import edu.brown.cs.systems.tracingplane.context_layer.ContextBaggage;
-import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Parser;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Serializer;
 
-public class BaggageLayer implements ContextLayer {
+public interface BaggageLayer<T> {
+	
+	public Parser<T> parser();
+	
+	public Serializer<T> serializer();
+	
+	public void discard(ApplicationBaggage baggage);
 
-	@Override
-	public void discard(ContextBaggage baggage) {
-		// TODO Auto-generated method stub
-		
-	}
+	public ApplicationBaggage branch(ApplicationBaggage baggage);
 
-	@Override
-	public ContextBaggage branch(ContextBaggage from) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ContextBaggage join(ContextBaggage left, ContextBaggage right) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ContextBaggage wrap(List<ByteBuffer> bags) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<ByteBuffer> atoms(ContextBaggage baggage) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public ApplicationBaggage join(ApplicationBaggage left, ApplicationBaggage right);
+	
+	public ApplicationBaggage wrap(List<ByteBuffer> atoms);
+	
+	public List<ByteBuffer> atoms(ApplicationBaggage baggage);
 
 }

@@ -1,4 +1,4 @@
-package edu.brown.cs.systems.tracingplane.baggage_layer.prototype.baggage_buffers.xtrace;
+package edu.brown.cs.systems.tracingplane.baggage_buffers.gen.xtrace;
 
 import java.util.List;
 

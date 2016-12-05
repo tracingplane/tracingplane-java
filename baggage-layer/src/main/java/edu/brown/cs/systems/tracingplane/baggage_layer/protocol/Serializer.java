@@ -1,4 +1,4 @@
-package edu.brown.cs.systems.tracingplane.baggage_layer.impl;
+package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -9,13 +9,13 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.DataPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.IndexedHeaderPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.InlineFieldPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.KeyedHeaderPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.BagHeader.IndexedBagHeader;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.BagHeader.InlineBagHeader;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.BagHeader.KeyedBagHeader;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.InlineFieldPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BagHeader.IndexedBagHeader;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BagHeader.InlineBagHeader;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BagHeader.KeyedBagHeader;
 import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ByteBuffers;
 import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;

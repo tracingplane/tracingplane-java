@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import edu.brown.cs.systems.tracingplane.context_layer.protocol.ContextLayerSerialization;
 import junit.framework.TestCase;
 
 public class TestSerialization extends TestCase {

@@ -2,11 +2,11 @@ package edu.brown.cs.systems.tracingplane.baggage_layer.impl;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.DataPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.IndexedHeaderPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.InlineFieldPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomPrefixes.KeyedHeaderPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.AtomTypes.AtomType;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.InlineFieldPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomTypes.AtomType;
 import junit.framework.TestCase;
 
 public class TestElementType extends TestCase {
