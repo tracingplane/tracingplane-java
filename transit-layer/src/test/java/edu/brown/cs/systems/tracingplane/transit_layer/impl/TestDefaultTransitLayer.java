@@ -2,19 +2,19 @@ package edu.brown.cs.systems.tracingplane.transit_layer.impl;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
+import edu.brown.cs.systems.tracingplane.transit_layer.Baggage2;
 import junit.framework.TestCase;
 
 public class TestDefaultTransitLayer extends TestCase {
-	
+
 	@Test
 	public void testNullTransitLayerImpl() {
-		assertNotNull(Baggage.transit);
-		assertTrue(Baggage.transit instanceof TransitLayerNullImpl.NullTransitLayer);
-		
-		Baggage baggage = Baggage.newInstance();
+		assertNotNull(Baggage2.transit);
+		assertTrue(Baggage2.transit instanceof TransitLayerNullImpl2.NullTransitLayer);
+
+		Baggage2 baggage = Baggage2.newInstance();
 		assertNotNull(baggage);
-		assertEquals(baggage, TransitLayerNullImpl.NULL_BAGGAGE);
+		assertEquals(baggage, TransitLayerNullImpl2.NULL_BAGGAGE);
 	}
 
 }

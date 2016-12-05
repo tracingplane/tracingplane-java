@@ -1,4 +1,4 @@
-package edu.brown.cs.systems.tracingplane.context_layer.protocol;
+package edu.brown.cs.systems.tracingplane.context_layer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +11,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarint;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarint.EndOfStreamException;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarint.MalformedVarintException;

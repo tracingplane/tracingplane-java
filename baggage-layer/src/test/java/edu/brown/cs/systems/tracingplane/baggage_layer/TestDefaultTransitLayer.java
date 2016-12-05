@@ -3,9 +3,8 @@ package edu.brown.cs.systems.tracingplane.baggage_layer;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.ContextLayerImpl;
-import edu.brown.cs.systems.tracingplane.context_layer.impl.BlindContextLayer;
-import edu.brown.cs.systems.tracingplane.context_layer.protocol.TransitLayerImpl;
+import edu.brown.cs.systems.tracingplane.context_layer.TransitLayerImpl;
+import edu.brown.cs.systems.tracingplane.context_layer.impl.RawAtomsContextLayer;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 import edu.brown.cs.systems.tracingplane.transit_layer.impl.TransitLayerNullImpl;
 import junit.framework.TestCase;
@@ -22,7 +21,7 @@ public class TestDefaultTransitLayer extends TestCase {
 		
 		TransitLayerImpl transit = (TransitLayerImpl) Baggage.transit;
 		assertNotNull(transit.context);
-		assertFalse(transit.context instanceof BlindContextLayer);
+		assertFalse(transit.context instanceof RawAtomsContextLayer);
 		assertTrue(transit.context instanceof ContextLayerImpl);
 	}
 	

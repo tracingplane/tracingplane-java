@@ -1,4 +1,4 @@
-package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
+package edu.brown.cs.systems.tracingplane.baggage_layer;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -6,8 +6,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayer;
-import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayerConfig;
 import edu.brown.cs.systems.tracingplane.context_layer.ContextBaggage;
 import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
 

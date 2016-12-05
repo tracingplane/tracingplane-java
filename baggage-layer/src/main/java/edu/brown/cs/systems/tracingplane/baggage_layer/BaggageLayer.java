@@ -1,25 +1,47 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.List;
 
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Parser;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Serializer;
-
-public interface BaggageLayer<T> {
+public interface BaggageLayer {
 	
-	public Parser<T> parser();
+	public boolean contentsDidOverflow(BaggageContents bag);
 	
-	public Serializer<T> serializer();
+	public boolean contentsWereTrimmed(BaggageContents bag);
 	
-	public void discard(ApplicationBaggage baggage);
-
-	public ApplicationBaggage branch(ApplicationBaggage baggage);
-
-	public ApplicationBaggage join(ApplicationBaggage left, ApplicationBaggage right);
+	public boolean childrenDidOverflow(BaggageContents bag);
 	
-	public ApplicationBaggage wrap(List<ByteBuffer> atoms);
+	public boolean childrenWereTrimmed(BaggageContents bag);
 	
-	public List<ByteBuffer> atoms(ApplicationBaggage baggage);
+	public boolean hasData(BaggageContents bag);
+	
+	public List<ByteBuffer> getData(BaggageContents bag);
+	
+	public void addData(BaggageContents bag, List<ByteBuffer> additionalData);
+	
+	public void replaceData(BaggageContents bag, List<ByteBuffer> newData);
+	
+	public void removeData(BaggageContents bag);
+	
+	public boolean hasIndexedChild(BaggageContents bag, ByteBuffer child);
+	
+	public boolean hasKeyedChild(BaggageContents bag, ByteBuffer child);
+	
+	public BaggageContents getIndexedChild(BaggageContents bag, ByteBuffer child);
+	
+	public BaggageContents getKeyedChild(BaggageContents bag, ByteBuffer child);
+	
+	public BaggageContents addIndexedChild(BaggageContents bag, ByteBuffer child);
+	
+	public BaggageContents addKeyedChild(BaggageContents bag, ByteBuffer child);
+	
+	public void removeIndexedChild(BaggageContents bag, ByteBuffer child);
+	
+	public void removeKeyedChild(BaggageContents bag, ByteBuffer child);
+	
+	public Collection<ByteBuffer> indexedChildren(BaggageContents bag);
+	
+	public Collection<ByteBuffer> keyedChildren(BaggageContents bag);
 
 }

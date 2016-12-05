@@ -9,7 +9,7 @@ import edu.brown.cs.systems.tracingplane.context_layer.ContextBaggage;
 import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarint;
 
-public class BlindContextBaggage implements ContextBaggage {
+public class RawAtomsBaggage implements ContextBaggage {
 
 	static final AtomicIntegerFieldUpdater<SimpleBaggageContents> reffer = AtomicIntegerFieldUpdater
 			.newUpdater(SimpleBaggageContents.class, "refcount");
@@ -45,15 +45,15 @@ public class BlindContextBaggage implements ContextBaggage {
 
 	SimpleBaggageContents contents;
 
-	BlindContextBaggage() {
+	RawAtomsBaggage() {
 		this(new SimpleBaggageContents());
 	}
 	
-	BlindContextBaggage(List<ByteBuffer> atoms) {
+	RawAtomsBaggage(List<ByteBuffer> atoms) {
 		this(new SimpleBaggageContents(atoms));
 	}
 
-	BlindContextBaggage(SimpleBaggageContents contents) {
+	RawAtomsBaggage(SimpleBaggageContents contents) {
 		this.contents = contents;
 		this.contents.ref();
 	}
@@ -71,11 +71,11 @@ public class BlindContextBaggage implements ContextBaggage {
 		return size;
 	}
 
-	BlindContextBaggage branch() {
-		return new BlindContextBaggage(contents);
+	RawAtomsBaggage branch() {
+		return new RawAtomsBaggage(contents);
 	}
 
-	BlindContextBaggage mergeWith(BlindContextBaggage other) {
+	RawAtomsBaggage mergeWith(RawAtomsBaggage other) {
 		if (other == null) {
 			return this;
 		}
