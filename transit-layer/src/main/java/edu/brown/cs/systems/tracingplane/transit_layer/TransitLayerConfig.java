@@ -6,15 +6,15 @@ import org.slf4j.LoggerFactory;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
-public class TransitLayerConfig2 {
+public class TransitLayerConfig {
 
-	private static final Logger log = LoggerFactory.getLogger(TransitLayerConfig2.class);
+	private static final Logger log = LoggerFactory.getLogger(TransitLayerConfig.class);
 
 	private static final String TRANSIT_LAYER_IMPLEMENTATION_KEY = "tracingplane.transit-layer.factory";
 
 	public String transitLayerFactory;
 
-	public TransitLayerConfig2() {
+	public TransitLayerConfig() {
 		Config config = ConfigFactory.load();
 
 		transitLayerFactory = config.getString(TRANSIT_LAYER_IMPLEMENTATION_KEY);

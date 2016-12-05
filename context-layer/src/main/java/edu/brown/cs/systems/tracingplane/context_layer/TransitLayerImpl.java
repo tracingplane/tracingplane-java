@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import edu.brown.cs.systems.tracingplane.transit_layer.Baggage2;
-import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer2;
+import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
+import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
 
-public class TransitLayerImpl<T extends ContextBaggage> implements TransitLayer2<T> {
+public class TransitLayerImpl<T extends ContextBaggage> implements TransitLayer<T> {
 
 	public final ContextLayerConfig config;
 	public final ContextLayer<T> contextLayer;
@@ -18,7 +18,7 @@ public class TransitLayerImpl<T extends ContextBaggage> implements TransitLayer2
 	}
 
 	@Override
-	public boolean isInstance(Baggage2 baggage) {
+	public boolean isInstance(Baggage baggage) {
 		if (baggage == null || baggage instanceof ContextBaggage) {
 			return contextLayer.isInstance((ContextBaggage) baggage);
 		} else {

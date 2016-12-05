@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.brown.cs.systems.tracingplane.context_layer.impl.RawAtomsContextLayerFactory;
-import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer2;
+import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
 import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayerFactory;
 
 public interface ContextLayerFactory extends TransitLayerFactory {
@@ -33,17 +33,17 @@ public interface ContextLayerFactory extends TransitLayerFactory {
 	}
 
 	@Override
-	public default TransitLayer2<?> newTransitLayer() {
+	public default TransitLayer<?> newTransitLayer() {
 		ContextLayerConfig config = new ContextLayerConfig();
 		ContextLayer<?> contextLayer = ContextLayerFactory.createDefaultContextLayer(config);
 		return newTransitLayer(config, contextLayer);
 	}
 	
-	public static TransitLayer2<?> newTransitLayer(ContextLayerConfig config) {
+	public static TransitLayer<?> newTransitLayer(ContextLayerConfig config) {
 		return newTransitLayer(config, createDefaultContextLayer(config));
 	}
 
-	public static <T extends ContextBaggage> TransitLayer2<T> newTransitLayer(ContextLayerConfig config,
+	public static <T extends ContextBaggage> TransitLayer<T> newTransitLayer(ContextLayerConfig config,
 			ContextLayer<T> contextLayer) {
 		return new TransitLayerImpl<T>(config, contextLayer);
 	}

@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public interface TransitLayer2<B extends Baggage2> {
+public interface TransitLayer<B extends Baggage> {
 
-	public boolean isInstance(Baggage2 baggage);
+	public boolean isInstance(Baggage baggage);
 
 	public B newInstance();
 

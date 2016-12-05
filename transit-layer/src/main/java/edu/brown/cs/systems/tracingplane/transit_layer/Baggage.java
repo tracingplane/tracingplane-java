@@ -4,16 +4,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public interface Baggage2 {
+public interface Baggage {
 
-	public static final TransitLayer2<?> transit = TransitLayerFactory.createDefaultTransitLayer();
+	public static final TransitLayer<?> transit = TransitLayerFactory.createDefaultTransitLayer();
 
 	/**
 	 * Creates a new, empty baggage using the process's default configured
 	 * transit layer
 	 */
-	public static Baggage2 newInstance() {
-		return TransitLayer2Compatibility.newInstance(transit);
+	public static Baggage newInstance() {
+		return TransitLayerCompatibility.newInstance(transit);
 	}
 
 	/**
@@ -32,8 +32,8 @@ public interface Baggage2 {
 	 *            a baggage instance
 	 * @return a baggage instance
 	 */
-	public static Baggage2 branch(Baggage2 from) {
-		return TransitLayer2Compatibility.branch(transit, from);
+	public static Baggage branch(Baggage from) {
+		return TransitLayerCompatibility.branch(transit, from);
 	}
 
 	/**
@@ -52,8 +52,8 @@ public interface Baggage2 {
 	 *            a baggage instance
 	 * @return a baggage instance
 	 */
-	public static Baggage2 join(Baggage2 left, Baggage2 right) {
-		return TransitLayer2Compatibility.join(transit, left, right);
+	public static Baggage join(Baggage left, Baggage right) {
+		return TransitLayerCompatibility.join(transit, left, right);
 	}
 
 	/**
@@ -61,12 +61,12 @@ public interface Baggage2 {
 	 * 
 	 * Deserialize a baggage instance from the provided bytes.
 	 */
-	public static Baggage2 deserialize(byte[] serialized, int offset, int length) {
-		return TransitLayer2Compatibility.deserialize(transit, serialized, offset, length);
+	public static Baggage deserialize(byte[] serialized, int offset, int length) {
+		return TransitLayerCompatibility.deserialize(transit, serialized, offset, length);
 	}
 
-	public static Baggage2 readFrom(InputStream in) throws IOException {
-		return TransitLayer2Compatibility.readFrom(transit, in);
+	public static Baggage readFrom(InputStream in) throws IOException {
+		return TransitLayerCompatibility.readFrom(transit, in);
 	}
 
 	/**
@@ -74,11 +74,11 @@ public interface Baggage2 {
 	 * 
 	 * Serialize a baggage instance to its byte representation
 	 */
-	public static byte[] serialize(Baggage2 baggage) {
-		return TransitLayer2Compatibility.serialize(transit, baggage);
+	public static byte[] serialize(Baggage baggage) {
+		return TransitLayerCompatibility.serialize(transit, baggage);
 	}
 
-	public static void writeTo(OutputStream out, Baggage2 baggage) throws IOException {
-		TransitLayer2Compatibility.writeTo(transit, out, baggage);
+	public static void writeTo(OutputStream out, Baggage baggage) throws IOException {
+		TransitLayerCompatibility.writeTo(transit, out, baggage);
 	}
 }

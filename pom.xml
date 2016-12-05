@@ -253,7 +253,7 @@
                     <version>2.19.1</version>
                     <configuration>
                         <systemPropertyVariables>
-                            <log4j.configuration>file:${project.parent.parent.basedir}/resources/log4j-surefire.properties</log4j.configuration>
+                            <log4j.configuration>file:${project.parent.basedir}/resources/log4j-surefire.properties</log4j.configuration>
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>
