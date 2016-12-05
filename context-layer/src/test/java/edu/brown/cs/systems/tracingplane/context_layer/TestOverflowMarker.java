@@ -13,11 +13,11 @@ public class TestOverflowMarker extends TestCase {
 	
 	@Test
 	public void testSerializedOverflowMarker() {
-		int overflowMarkerSerializedSize = ContextLayerSerialization.serializedSize(ContextLayer.OVERFLOW_MARKER);
+		int overflowMarkerSerializedSize = ContextLayerSerialization.serializedSize(BaggageAtoms.OVERFLOW_MARKER);
 		assertEquals(1, overflowMarkerSerializedSize);
 		
 		ByteBuffer buf = ByteBuffer.allocate(overflowMarkerSerializedSize);
-		ContextLayerSerialization.writeAtom(ContextLayer.OVERFLOW_MARKER, buf);
+		ContextLayerSerialization.writeAtom(BaggageAtoms.OVERFLOW_MARKER, buf);
 		
 		assertEquals(0, buf.remaining());
 		
@@ -29,7 +29,7 @@ public class TestOverflowMarker extends TestCase {
 		List<ByteBuffer> deserialized = ContextLayerSerialization.deserialize(buf.array(), buf.position(), buf.remaining());
 		assertNotNull(deserialized);
 		assertEquals(1, deserialized.size());
-		assertEquals(ContextLayer.OVERFLOW_MARKER, deserialized.get(0));
+		assertEquals(BaggageAtoms.OVERFLOW_MARKER, deserialized.get(0));
 	}
 	
 	@Test
@@ -51,7 +51,7 @@ public class TestOverflowMarker extends TestCase {
 			assertNotNull(trimmed);
 			assertEquals(1, trimmed.size());
 			assertFalse(b1.equals(trimmed.get(0)));
-			assertEquals(ContextLayer.OVERFLOW_MARKER, trimmed.get(0));
+			assertEquals(BaggageAtoms.OVERFLOW_MARKER, trimmed.get(0));
 		}
 		
 		for (int i = 6; i < 10; i++) {
@@ -60,7 +60,7 @@ public class TestOverflowMarker extends TestCase {
 			assertEquals(2, trimmed.size());
 			assertEquals(b1, trimmed.get(0));
 			assertFalse(b2.equals(trimmed.get(1)));
-			assertEquals(ContextLayer.OVERFLOW_MARKER, trimmed.get(1));
+			assertEquals(BaggageAtoms.OVERFLOW_MARKER, trimmed.get(1));
 		}
 		
 		for (int i = 10; i < 20; i++) {

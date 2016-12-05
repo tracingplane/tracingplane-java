@@ -3,7 +3,7 @@ package edu.brown.cs.systems.tracingplane.context_layer.impl;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import edu.brown.cs.systems.tracingplane.context_layer.ContextBaggage;
+import edu.brown.cs.systems.tracingplane.context_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
 
 /**
@@ -14,7 +14,7 @@ import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
 public class RawAtomsContextLayer implements ContextLayer<RawAtomsBaggage> {
 
 	@Override
-	public boolean isInstance(ContextBaggage baggage) {
+	public boolean isInstance(BaggageAtoms baggage) {
 		return baggage == null || baggage instanceof RawAtomsBaggage;
 	}
 

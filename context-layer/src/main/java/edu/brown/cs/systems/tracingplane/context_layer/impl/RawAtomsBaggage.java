@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
-import edu.brown.cs.systems.tracingplane.context_layer.ContextBaggage;
+import edu.brown.cs.systems.tracingplane.context_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ProtobufVarint;
 
-public class RawAtomsBaggage implements ContextBaggage {
+public class RawAtomsBaggage implements BaggageAtoms {
 
 	static final AtomicIntegerFieldUpdater<SimpleBaggageContents> reffer = AtomicIntegerFieldUpdater
 			.newUpdater(SimpleBaggageContents.class, "refcount");

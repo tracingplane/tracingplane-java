@@ -9,14 +9,14 @@ import org.slf4j.LoggerFactory;
 
 class TransitLayerCompatibility {
 
-	static final Logger log = LoggerFactory.getLogger(TransitLayer.class);
+	static final Logger log = LoggerFactory.getLogger(TransitLayerCompatibility.class);
 
-	static <B extends Baggage> B newInstance(TransitLayer<B> transit) {
+	public static <B extends Baggage> B newInstance(TransitLayer<B> transit) {
 		return transit.newInstance();
 	}
 
 	@SuppressWarnings("unchecked")
-	static <B extends Baggage> Baggage branch(TransitLayer<B> transit, Baggage from) {
+	public static <B extends Baggage> Baggage branch(TransitLayer<B> transit, Baggage from) {
 		if (transit.isInstance(from)) {
 			return transit.branch((B) from);
 		} else {
@@ -27,7 +27,7 @@ class TransitLayerCompatibility {
 	}
 
 	@SuppressWarnings("unchecked")
-	static <B extends Baggage> Baggage join(TransitLayer<B> transit, Baggage left, Baggage right) {
+	public static <B extends Baggage> Baggage join(TransitLayer<B> transit, Baggage left, Baggage right) {
 		if (transit.isInstance(left) && transit.isInstance(right)) {
 			return transit.join((B) left, (B) right);
 		} else if (transit.isInstance(left)) {
@@ -45,16 +45,16 @@ class TransitLayerCompatibility {
 		return null;
 	}
 
-	static <B extends Baggage> B deserialize(TransitLayer<B> transit, byte[] data, int offset, int length) {
+	public static <B extends Baggage> B deserialize(TransitLayer<B> transit, byte[] data, int offset, int length) {
 		return transit.deserialize(data, offset, length);
 	}
 
-	static <B extends Baggage> B readFrom(TransitLayer<B> transit, InputStream in) throws IOException {
+	public static <B extends Baggage> B readFrom(TransitLayer<B> transit, InputStream in) throws IOException {
 		return transit.readFrom(in);
 	}
 
 	@SuppressWarnings("unchecked")
-	static <B extends Baggage> byte[] serialize(TransitLayer<B> transit, Baggage baggage) {
+	public static <B extends Baggage> byte[] serialize(TransitLayer<B> transit, Baggage baggage) {
 		if (transit.isInstance(baggage)) {
 			return transit.serialize((B) baggage);
 		} else {
@@ -65,12 +65,22 @@ class TransitLayerCompatibility {
 	}
 
 	@SuppressWarnings("unchecked")
-	static <B extends Baggage> void writeTo(TransitLayer<B> transit, OutputStream out, Baggage baggage)
+	public static <B extends Baggage> void writeTo(TransitLayer<B> transit, OutputStream out, Baggage baggage)
 			throws IOException {
 		if (transit.isInstance(baggage)) {
 			transit.writeTo(out, (B) baggage);
 		} else {
 			log.warn("discarding incompatible baggage to {}.writeTo; baggage class is {}", transit.getClass().getName(),
+					baggage.getClass().getName());
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <B extends Baggage> void discard(TransitLayer<B> transit, Baggage baggage) {
+		if (transit.isInstance(baggage)) {
+			transit.discard((B) baggage);
+		} else {
+			log.warn("discarding incompatible baggage to {}.discard, baggage class is {}", transit.getClass().getName(),
 					baggage.getClass().getName());
 		}
 	}

@@ -7,20 +7,18 @@ import java.io.OutputStream;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
 
-public class TransitLayerImpl<T extends ContextBaggage> implements TransitLayer<T> {
+public class TransitLayerImpl<T extends BaggageAtoms> implements TransitLayer<T> {
 
-	public final ContextLayerConfig config;
 	public final ContextLayer<T> contextLayer;
 
-	public TransitLayerImpl(ContextLayerConfig config, ContextLayer<T> contextLayer) {
-		this.config = config;
+	public TransitLayerImpl(ContextLayer<T> contextLayer) {
 		this.contextLayer = contextLayer;
 	}
 
 	@Override
 	public boolean isInstance(Baggage baggage) {
-		if (baggage == null || baggage instanceof ContextBaggage) {
-			return contextLayer.isInstance((ContextBaggage) baggage);
+		if (baggage == null || baggage instanceof BaggageAtoms) {
+			return contextLayer.isInstance((BaggageAtoms) baggage);
 		} else {
 			return false;
 		}

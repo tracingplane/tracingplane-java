@@ -7,7 +7,7 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.Dat
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.InlineFieldPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
-import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
+import edu.brown.cs.systems.tracingplane.context_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ContextLayerException;
 import edu.brown.cs.systems.tracingplane.context_layer.types.UnsignedLexVarint;
 
@@ -61,7 +61,7 @@ public abstract class Parser<T> {
 		void advance() {
 			while (it.hasNext()) {
 				currentBag = it.next();
-				if (ContextLayer.OVERFLOW_MARKER.equals(currentBag)) {
+				if (BaggageAtoms.OVERFLOW_MARKER.equals(currentBag)) {
 					overflow = true;
 				} else {
 					firstByte = currentBag.get();

@@ -17,6 +17,14 @@ public interface Baggage {
 	}
 
 	/**
+	 * Discards the provided baggage, which should not be used again after
+	 * calling this method.
+	 */
+	public static void discard(Baggage baggage) {
+		TransitLayerCompatibility.discard(transit, baggage);
+	}
+
+	/**
 	 * Uses the process's default configured transit layer.
 	 * 
 	 * Creates a new baggage instance based off the provided instance. The
@@ -80,5 +88,39 @@ public interface Baggage {
 
 	public static void writeTo(OutputStream out, Baggage baggage) throws IOException {
 		TransitLayerCompatibility.writeTo(transit, out, baggage);
+	}
+
+	/**
+	 * Gets the Baggage instance, if any, being stored for the current thread
+	 * 
+	 * @return a Baggage instance, possibly null
+	 */
+	public static Baggage get() {
+		return ThreadLocalBaggage.get();
+	}
+	
+	/**
+	 * Removes the baggage instance being stored in the current thread
+	 */
+	public static void discard() {
+		ThreadLocalBaggage.discard();
+	}
+
+	/**
+	 * Removes and returns the baggage instance being stored in the current
+	 * thread
+	 */
+	public static Baggage take() {
+		return ThreadLocalBaggage.take();
+	}
+
+	/**
+	 * Set the Baggage instance for the current thread
+	 * 
+	 * @param baggage
+	 *            a Baggage instance, possibly null
+	 */
+	public static void set(Baggage baggage) {
+		ThreadLocalBaggage.set(baggage);
 	}
 }

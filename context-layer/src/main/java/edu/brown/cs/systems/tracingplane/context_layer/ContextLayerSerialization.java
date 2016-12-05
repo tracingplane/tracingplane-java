@@ -144,7 +144,7 @@ public class ContextLayerSerialization {
 		if (size <= limit) {
 			return new TrimExtent(atoms.size(), size, false);
 		}
-		int overflowMarkerSize = serializedSize(ContextLayer.OVERFLOW_MARKER);
+		int overflowMarkerSize = serializedSize(BaggageAtoms.OVERFLOW_MARKER);
 		for (int i = atoms.size()-1; i > 0; i--) {
 			size = serializationCutoffs[i-1] + overflowMarkerSize;
 			if (size <= limit) {
@@ -159,7 +159,7 @@ public class ContextLayerSerialization {
 		if (extent.overflow) {
 			List<ByteBuffer> subList = new ArrayList<>(extent.atomCount+1);
 			subList.addAll(atoms.subList(0, extent.atomCount));
-			subList.add(ContextLayer.OVERFLOW_MARKER);
+			subList.add(BaggageAtoms.OVERFLOW_MARKER);
 			return subList;
 		} else {
 			return atoms;
@@ -194,7 +194,7 @@ public class ContextLayerSerialization {
 			writeAtom(atoms.get(i), buf);
 		}
 		if (trim.overflow) {
-			writeAtom(ContextLayer.OVERFLOW_MARKER, buf);
+			writeAtom(BaggageAtoms.OVERFLOW_MARKER, buf);
 		}
 		return buf.array();
 	}

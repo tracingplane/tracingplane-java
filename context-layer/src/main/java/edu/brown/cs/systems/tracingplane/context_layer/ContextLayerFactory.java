@@ -14,10 +14,7 @@ public interface ContextLayerFactory extends TransitLayerFactory {
 	static final Logger log = LoggerFactory.getLogger(ContextLayerFactory.class);
 
 	public static ContextLayer<?> createDefaultContextLayer() {
-		return createDefaultContextLayer(new ContextLayerConfig());
-	}
-
-	public static ContextLayer<?> createDefaultContextLayer(ContextLayerConfig config) {
+		ContextLayerConfig config = new ContextLayerConfig();
 		try {
 			return createContextLayer(config);
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
@@ -34,18 +31,11 @@ public interface ContextLayerFactory extends TransitLayerFactory {
 
 	@Override
 	public default TransitLayer<?> newTransitLayer() {
-		ContextLayerConfig config = new ContextLayerConfig();
-		ContextLayer<?> contextLayer = ContextLayerFactory.createDefaultContextLayer(config);
-		return newTransitLayer(config, contextLayer);
-	}
-	
-	public static TransitLayer<?> newTransitLayer(ContextLayerConfig config) {
-		return newTransitLayer(config, createDefaultContextLayer(config));
+		return newTransitLayer(BaggageAtoms.contextLayer);
 	}
 
-	public static <T extends ContextBaggage> TransitLayer<T> newTransitLayer(ContextLayerConfig config,
-			ContextLayer<T> contextLayer) {
-		return new TransitLayerImpl<T>(config, contextLayer);
+	public static <T extends BaggageAtoms> TransitLayer<T> newTransitLayer(ContextLayer<T> contextLayer) {
+		return new TransitLayerImpl<T>(contextLayer);
 	}
 
 }

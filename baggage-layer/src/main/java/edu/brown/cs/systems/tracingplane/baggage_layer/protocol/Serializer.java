@@ -16,7 +16,7 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.Key
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BagHeader.IndexedBagHeader;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BagHeader.InlineBagHeader;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BagHeader.KeyedBagHeader;
-import edu.brown.cs.systems.tracingplane.context_layer.ContextLayer;
+import edu.brown.cs.systems.tracingplane.context_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.context_layer.types.ByteBuffers;
 import edu.brown.cs.systems.tracingplane.context_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.context_layer.types.UnsignedLexVarint;
@@ -113,7 +113,7 @@ public abstract class Serializer<T> {
 			builder.reset(prefix);
 			if (!hasMarkedOverflow && serializer.dataDidOverflow()) {
 				hasMarkedOverflow = true;
-				atoms.add(ContextLayer.OVERFLOW_MARKER);
+				atoms.add(BaggageAtoms.OVERFLOW_MARKER);
 			}
 			int startIndex = atoms.size();
 			serializer.serializeAtoms(instance, builder);
@@ -141,7 +141,7 @@ public abstract class Serializer<T> {
 
 			if (!hasMarkedOverflow && serializer.childrenDidOverflow()) {
 				hasMarkedOverflow = true;
-				atoms.add(ContextLayer.OVERFLOW_MARKER);
+				atoms.add(BaggageAtoms.OVERFLOW_MARKER);
 			}
 		}
 
