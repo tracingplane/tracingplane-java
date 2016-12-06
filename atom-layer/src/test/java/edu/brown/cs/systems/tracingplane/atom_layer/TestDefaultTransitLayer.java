@@ -16,9 +16,9 @@ public class TestDefaultTransitLayer extends TestCase {
 
 		assertNotNull(Baggage.transit);
 		assertFalse(Baggage.transit instanceof NullTransitLayer);
-		assertTrue(Baggage.transit instanceof AtomLayerImpl);
+		assertTrue(Baggage.transit instanceof AtomTransitLayerImpl);
 
-		AtomLayerImpl<?> transit = (AtomLayerImpl<?>) Baggage.transit;
+		AtomTransitLayerImpl<?> transit = (AtomTransitLayerImpl<?>) Baggage.transit;
 		assertNotNull(transit.contextLayer);
 		assertTrue(transit.contextLayer instanceof RawAtomLayerImpl);
 

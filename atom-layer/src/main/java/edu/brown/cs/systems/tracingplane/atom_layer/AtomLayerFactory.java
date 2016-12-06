@@ -35,7 +35,7 @@ public interface AtomLayerFactory extends TransitLayerFactory {
 	}
 
 	public static <T extends BaggageAtoms> TransitLayer<T> newTransitLayer(AtomLayer<T> contextLayer) {
-		return new AtomLayerImpl<T>(contextLayer);
+		return new AtomTransitLayerImpl<T>(contextLayer);
 	}
 
 }

@@ -7,11 +7,11 @@ import java.io.OutputStream;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
 
-public class AtomLayerImpl<T extends BaggageAtoms> implements TransitLayer<T> {
+public class AtomTransitLayerImpl<T extends BaggageAtoms> implements TransitLayer<T> {
 
 	public final AtomLayer<T> contextLayer;
 
-	public AtomLayerImpl(AtomLayer<T> contextLayer) {
+	public AtomTransitLayerImpl(AtomLayer<T> contextLayer) {
 		this.contextLayer = contextLayer;
 	}
 
