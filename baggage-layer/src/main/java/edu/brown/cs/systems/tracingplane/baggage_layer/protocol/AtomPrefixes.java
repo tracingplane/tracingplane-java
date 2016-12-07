@@ -8,9 +8,9 @@ import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomTypes.AtomType;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomTypes.HeaderType;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomTypes.Level;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.AtomType;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.HeaderType;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
 
 /**
  * Logic for byte prefixes of serialized bags
@@ -25,16 +25,16 @@ public class AtomPrefixes {
 		// Initialize all prefixes as unsupported
 		prefixes = new AtomPrefix[256];
 		for (int i = 0; i < prefixes.length; i++) {
-			prefixes[i] = new UnsupportedPrefixAtom((byte) i);
+			prefixes[i] = new UnsupportedPrefix((byte) i);
 		}
 
 		// Construct all valid prefixes
 		List<AtomPrefix> allowedAtoms = new ArrayList<>(256);
-		allowedAtoms.add(DataAtom.prefix());
-		for (IndexedHeaderAtom atom : IndexedHeaderAtom.prefixes) {
+		allowedAtoms.add(DataPrefix.prefix());
+		for (IndexedHeaderPrefix atom : IndexedHeaderPrefix.prefixes) {
 			allowedAtoms.add(atom);
 		}
-		for (KeyedHeaderAtom atom : KeyedHeaderAtom.prefixes) {
+		for (KeyedHeaderPrefix atom : KeyedHeaderPrefix.prefixes) {
 			allowedAtoms.add(atom);
 		}
 
@@ -46,6 +46,9 @@ public class AtomPrefixes {
 				prefixes[256 + atom.prefix] = atom;
 			}
 		}
+	}
+
+	private AtomPrefixes() {
 	}
 
 	public static AtomPrefix get(byte prefix) {
@@ -88,14 +91,14 @@ public class AtomPrefixes {
 		}
 	}
 
-	public static abstract class HeaderAtom extends AtomPrefix {
+	public static abstract class HeaderPrefix extends AtomPrefix {
 
 		public static final AtomType atomType = AtomType.Header;
 
 		protected final Level level;
 		protected final HeaderType headerType;
 
-		public HeaderAtom(Level level, HeaderType headerType) {
+		public HeaderPrefix(Level level, HeaderType headerType) {
 			super(AtomType.Header, (byte) (AtomType.Header.byteValue | level.byteValue | headerType.byteValue));
 			this.level = level;
 			this.headerType = headerType;
@@ -105,7 +108,7 @@ public class AtomPrefixes {
 		boolean isHeader() {
 			return true;
 		}
-		
+
 		int level() {
 			return this.level.level;
 		}
@@ -119,30 +122,30 @@ public class AtomPrefixes {
 
 	}
 
-	public static class IndexedHeaderAtom extends HeaderAtom {
+	public static class IndexedHeaderPrefix extends HeaderPrefix {
 
 		public static final HeaderType headerType = HeaderType.Indexed;
 
-		private static final IndexedHeaderAtom[] prefixes;
+		private static final IndexedHeaderPrefix[] prefixes;
 
 		static {
-			prefixes = new IndexedHeaderAtom[Level.LEVELS];
+			prefixes = new IndexedHeaderPrefix[Level.LEVELS];
 			for (int level = 0; level < Level.LEVELS; level++) {
-				prefixes[level] = new IndexedHeaderAtom(Level.get(level));
+				prefixes[level] = new IndexedHeaderPrefix(Level.get(level));
 			}
 		}
 
-		public static IndexedHeaderAtom prefixFor(int level) {
+		public static IndexedHeaderPrefix prefixFor(int level) {
 			return prefixes[level];
 		}
 
-		private IndexedHeaderAtom(Level level) {
+		private IndexedHeaderPrefix(Level level) {
 			super(level, headerType);
 		}
 
 		@Override
 		public String toString() {
-			return String.format("[IndexedHeaderAtom prefix=%s level=%d]", TypeUtils.toBinaryString(prefix),
+			return String.format("[IndexedHeaderPrefix prefix=%s level=%d]", TypeUtils.toBinaryString(prefix),
 					level.level);
 		}
 
@@ -153,30 +156,30 @@ public class AtomPrefixes {
 
 	}
 
-	public static class KeyedHeaderAtom extends HeaderAtom {
+	public static class KeyedHeaderPrefix extends HeaderPrefix {
 
 		public static final HeaderType headerType = HeaderType.Keyed;
 
-		private static final KeyedHeaderAtom[] prefixes;
+		private static final KeyedHeaderPrefix[] prefixes;
 
 		static {
-			prefixes = new KeyedHeaderAtom[Level.LEVELS];
+			prefixes = new KeyedHeaderPrefix[Level.LEVELS];
 			for (int level = 0; level < Level.LEVELS; level++) {
-				prefixes[level] = new KeyedHeaderAtom(Level.get(level));
+				prefixes[level] = new KeyedHeaderPrefix(Level.get(level));
 			}
 		}
 
-		public static KeyedHeaderAtom prefixFor(int level) {
+		public static KeyedHeaderPrefix prefixFor(int level) {
 			return prefixes[level];
 		}
 
-		private KeyedHeaderAtom(Level level) {
+		private KeyedHeaderPrefix(Level level) {
 			super(level, headerType);
 		}
 
 		@Override
 		public String toString() {
-			return String.format("[KeyedHeaderAtom   prefix=%s level=%d]", TypeUtils.toBinaryString(prefix),
+			return String.format("[KeyedHeaderPrefix   prefix=%s level=%d]", TypeUtils.toBinaryString(prefix),
 					level.level);
 		}
 
@@ -187,17 +190,17 @@ public class AtomPrefixes {
 
 	}
 
-	public static class DataAtom extends AtomPrefix {
+	public static class DataPrefix extends AtomPrefix {
 
 		public static final AtomType atomType = AtomType.Data;
 		public static final byte prefix = atomType.byteValue;
-		private static final DataAtom instance = new DataAtom();
+		private static final DataPrefix instance = new DataPrefix();
 
-		private DataAtom() {
-			super(atomType, DataAtom.prefix);
+		private DataPrefix() {
+			super(atomType, DataPrefix.prefix);
 		}
 
-		public static DataAtom prefix() {
+		public static DataPrefix prefix() {
 			return instance;
 		}
 
@@ -208,14 +211,14 @@ public class AtomPrefixes {
 
 		@Override
 		public String toString() {
-			return String.format("[DataAtom prefix=%s]", TypeUtils.toBinaryString(super.prefix));
+			return String.format("[DataPrefix prefix=%s]", TypeUtils.toBinaryString(super.prefix));
 		}
 
 	}
 
-	public static class UnsupportedPrefixAtom extends AtomPrefix {
+	public static class UnsupportedPrefix extends AtomPrefix {
 
-		private UnsupportedPrefixAtom(byte prefix) {
+		private UnsupportedPrefix(byte prefix) {
 			super(null, prefix);
 		}
 
@@ -226,7 +229,7 @@ public class AtomPrefixes {
 
 		@Override
 		public String toString() {
-			return String.format("[UnsupportedAtom   prefix=%s]", TypeUtils.toBinaryString(prefix));
+			return String.format("[UnsupportedPrefix   prefix=%s]", TypeUtils.toBinaryString(prefix));
 		}
 
 	}

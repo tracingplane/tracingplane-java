@@ -6,7 +6,7 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.Dat
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.InlineFieldPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomTypes.AtomType;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.AtomType;
 import junit.framework.TestCase;
 
 public class TestElementType extends TestCase {

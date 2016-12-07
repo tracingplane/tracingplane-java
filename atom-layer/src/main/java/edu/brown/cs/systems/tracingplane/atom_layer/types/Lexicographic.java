@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.primitives.UnsignedBytes;
@@ -13,7 +14,7 @@ public class Lexicographic {
 
 	public static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = UnsignedBytes.lexicographicalComparator();
 	public static final Comparator<ByteBuffer> BYTE_BUFFER_COMPARATOR = UnsignedByteBuffer.lexicographicalComparator();
-	
+
 	public static int compare(byte a, byte b) {
 		return UnsignedBytes.compare(a, b);
 	}
@@ -73,19 +74,40 @@ public class Lexicographic {
 				different = true;
 			}
 		}
-		
+
 		while (ia < size_a) {
 			merged.add(a.get(ia++));
 		}
-		
+
 		while (ib < size_b) {
 			merged.add(b.get(ib++));
 		}
-		
+
 		if (different) {
 			return merged;
 		} else {
 			return a;
+		}
+	}
+
+	@SafeVarargs
+	public static Iterator<ByteBuffer> merge(Iterator<ByteBuffer> a,
+			Iterator<ByteBuffer> b, Iterator<ByteBuffer>... moreIterators) {
+		List<Iterator<ByteBuffer>> iterators = new ArrayList<>(moreIterators.length + 2);
+		if (a != null && a.hasNext())
+			iterators.add(a);
+		if (b != null && b.hasNext())
+			iterators.add(b);
+		for (Iterator<ByteBuffer> it : moreIterators) {
+			if (it != null && it.hasNext())
+				iterators.add(it);
+		}
+		if (iterators.size() > 1) {
+			return new MergeIterator<ByteBuffer>(iterators, BYTE_BUFFER_COMPARATOR);
+		} else if (iterators.size() == 1) {
+			return iterators.get(0);
+		} else {
+			return null;
 		}
 	}
 

@@ -3,12 +3,13 @@ package edu.brown.cs.systems.tracingplane.baggage_layer;
 import java.nio.ByteBuffer;
 
 import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataAtom;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataPrefix;
 
 //TODO: description and method documentation
 public interface BaggageContents extends BaggageAtoms {
 	
-	public static final ByteBuffer TRIM_MARKER = ByteBuffer.wrap(new byte[] { DataAtom.prefix().prefix });
+	public static final ByteBuffer TRIMMARKER_ATOM = ByteBuffer.wrap(new byte[] { DataPrefix.prefix });
+	public static final ByteBuffer TRIMMARKER_CONTENTS = (ByteBuffer) TRIMMARKER_ATOM.duplicate().position(1);
 
 	public static final BaggageLayer<?> baggageLayer = BaggageLayerFactory.createDefaultBaggageLayer();
 	

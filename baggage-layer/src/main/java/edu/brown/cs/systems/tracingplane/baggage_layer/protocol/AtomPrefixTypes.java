@@ -1,9 +1,9 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
 /** Only the first two bits are used for the bag type */
-public class AtomTypes {
+public class AtomPrefixTypes {
 
-	private AtomTypes() {
+	private AtomPrefixTypes() {
 	}
 
 	private static final AtomType[] bagTypes = new AtomType[4];

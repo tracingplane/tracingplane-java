@@ -13,12 +13,11 @@ import com.google.common.collect.Queues;
 
 import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.AtomPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.HeaderAtom;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderAtom;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderAtom;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomTypes.Level;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.HeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
 
 /**
  * TODO: documentation, tests, test exceptions and so forth
@@ -81,7 +80,7 @@ public class BaggageReader {
 	 * Assumes the current atom is a header and enters the child bag,
 	 * incrementing the current level and adding the header to the current path
 	 */
-	private void enter() {
+	private void enterNextBag() {
 		// Save the header
 		rewindAtom();
 		currentLevel = nextAtomPrefix.level(currentLevel);
@@ -93,7 +92,10 @@ public class BaggageReader {
 	}
 
 	/**
-	 * Iterates over atoms until we reach a non-data atom. Atoms are dropped.
+	 * Skips and drops remaining data atoms in this bag.
+	 * 
+	 * Advances to either the a child bag, or the end of bag if there are no
+	 * children.
 	 */
 	private void skipData() {
 		while (hasData()) {
@@ -106,7 +108,7 @@ public class BaggageReader {
 	 * are treated as unprocessed and added to the list of unprocessed atoms.
 	 */
 	private void skipChild() {
-		enter();
+		enterNextBag();
 		while (hasData()) {
 			rewindAtom();
 			unprocessedAtoms.add(nextAtom);
@@ -115,10 +117,10 @@ public class BaggageReader {
 		while (hasChild()) {
 			skipChild();
 		}
-		exit();
+		exitCurrentBag();
 	}
 
-	private void exit() {
+	private void exitCurrentBag() {
 		// Pop down a level
 		ByteBuffer previousHeaderAtom = currentPath.pollLast();
 
@@ -192,29 +194,26 @@ public class BaggageReader {
 	 * If this method returns false, we are at the first bag after where the
 	 * expected bag would be
 	 */
-	public boolean enterBag(BagKey expect) {
+	public boolean enter(BagKey expect) {
 		// If the data atoms of the current bag aren't exhausted, drop them
 		skipData();
 
 		// Get the prefix we are looking for
-		final AtomPrefix expectedPrefix;
-		if (expect instanceof BagKey.Indexed) {
-			expectedPrefix = IndexedHeaderAtom.prefixFor(currentLevel + 1);
-		} else if (expect instanceof BagKey.Keyed) {
-			expectedPrefix = KeyedHeaderAtom.prefixFor(currentLevel + 1);
-		} else {
-			expectedPrefix = null; // will force NPE in compareTo
-		}
+		AtomPrefix expectedPrefix = expect.atomPrefix(currentLevel + 1);
 
-		// Keep going until we hit a prefix >= the prefix we are looking for
 		while (hasChild()) {
-			int prefixComparison = nextAtomPrefix.compareTo(expectedPrefix);
-			if (prefixComparison == 0) {
-				// Found the bag
-				enter();
+			// Compare the prefix then the payload
+			int comparison = nextAtomPrefix.compareTo(expectedPrefix);
+			if (comparison == 0) {
+				comparison = Lexicographic.compare(expect.atomPayload(), nextAtom);
+			}
+
+			if (comparison == 0) {
+				// Found the bag!
+				enterNextBag();
 				return true;
-			} else if (prefixComparison > 0) {
-				// Didn't find the bag
+			} else if (comparison > 0) {
+				// Didn't find the bag, reached a bag past it
 				return false;
 			} else {
 				// Skip the bag then continue to check the next one
@@ -232,17 +231,17 @@ public class BaggageReader {
 	 * 
 	 * Otherwise, advances to the next child, enters it, and returns its key.
 	 */
-	public BagKey enterBag() {
+	public BagKey enter() {
 		// If the data atoms of the current bag aren't exhausted, drop them
 		skipData();
 
 		while (hasChild()) {
 			try {
-				BagKey key = BagKeySerialization.parse((HeaderAtom) nextAtomPrefix, nextAtom);
-				enter();
+				BagKey key = BagKeySerialization.parse((HeaderPrefix) nextAtomPrefix, nextAtom);
+				enterNextBag();
 				return key;
 			} catch (AtomLayerException e) {
-				log.error(String.format("Unable to parse bag key for header %s %s, skipping"), e);
+				log.error(String.format("Unable to parse bag key for header %s %s", nextAtomPrefix, nextAtom), e);
 				skipChild();
 				continue;
 			}
@@ -259,7 +258,7 @@ public class BaggageReader {
 	 * either a sibling, or a sibling of some parent, grandparent, or other
 	 * ancester.
 	 */
-	public void exitBag() {
+	public void exit() {
 		// Skip any data atoms remaining in the bag
 		skipData();
 
@@ -269,7 +268,7 @@ public class BaggageReader {
 		}
 
 		// Exit the bag
-		exit();
+		exitCurrentBag();
 	}
 
 	/**
@@ -281,7 +280,7 @@ public class BaggageReader {
 	public void finish() {
 		// Exit any bags that were left open
 		while (currentLevel != -1) {
-			exitBag();
+			exit();
 		}
 
 		// Finish child bags at the root level

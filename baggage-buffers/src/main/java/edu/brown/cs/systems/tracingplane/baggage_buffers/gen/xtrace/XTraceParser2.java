@@ -5,9 +5,9 @@ import java.util.List;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.impl.ReaderHelpers;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Parser2;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Parser;
 
-public class XTraceParser2 implements Parser2<XTrace> {
+public class XTraceParser2 implements Parser<XTrace> {
 
 	public static final BagKey taskIdKey = BagKey.indexed(0);
 	public static final BagKey parentEventIdsKey = BagKey.indexed(1);
@@ -16,23 +16,18 @@ public class XTraceParser2 implements Parser2<XTrace> {
 	public XTrace parse(BaggageReader reader) {
 		Long taskId = null;
 		List<Long> parentEventIds = null;
-		
-		int hasTaskId = 1;
-		while ((hasTaskId = reader.enterBag(taskIdKey)) < 0) {
-			// Unknown field, do something
-		}
-		if (hasTaskId == 0) {
+
+		if (reader.enter(taskIdKey)) {
 			taskId = ReaderHelpers.firstLong(reader);
-			reader.exitBag();
+			reader.exit();
 		}
-		
-		if (reader.enterBag(parentEventIdsKey)) {
+
+		if (reader.enter(parentEventIdsKey)) {
 			parentEventIds = ReaderHelpers.longs(reader);
-			reader.exitBag();
+			reader.exit();
 		}
+
 		return new XTrace(taskId, parentEventIds, reader.didOverflow());
 	}
-	
-	
 
 }
