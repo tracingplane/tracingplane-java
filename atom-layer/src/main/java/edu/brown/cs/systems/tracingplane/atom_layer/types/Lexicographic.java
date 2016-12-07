@@ -13,6 +13,10 @@ public class Lexicographic {
 
 	public static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = UnsignedBytes.lexicographicalComparator();
 	public static final Comparator<ByteBuffer> BYTE_BUFFER_COMPARATOR = UnsignedByteBuffer.lexicographicalComparator();
+	
+	public static int compare(byte a, byte b) {
+		return UnsignedBytes.compare(a, b);
+	}
 
 	/** Compares the two byte arrays lexicographically */
 	public static int compare(byte[] a, byte[] b) {

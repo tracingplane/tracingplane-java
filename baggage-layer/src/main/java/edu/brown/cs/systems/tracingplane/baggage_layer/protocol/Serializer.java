@@ -10,17 +10,12 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 
 import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.ByteBuffers;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.UnsignedLexVarint;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.InlineFieldPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BagHeader.IndexedBagHeader;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BagHeader.InlineBagHeader;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BagHeader.KeyedBagHeader;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.AtomPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataAtom;
 
+// TODO: documentation, description, handling of trim marker, handling of exceptions
 public abstract class Serializer<T> {
 
 	static final Logger log = LoggerFactory.getLogger(Serializer.class);
@@ -66,15 +61,15 @@ public abstract class Serializer<T> {
 	 * differ from the order they are returned in. This method can return null,
 	 * in which case no children are serialized.
 	 */
-	protected abstract List<BagHeader> getSerializableChildren(T instance);
+	protected abstract List<BagKey> getSerializableChildren(T instance);
 
 	/**
-	 * Serialize the data for a child. Typically this means getting a
-	 * {@link Serializer} instance for the child, then calling
-	 * {@link serializeTo(C instance, SerializerContext ctx)} for the child
-	 * serializer.
+	 * Serialize all atoms for the child -- both its data as well as its
+	 * subsequent children. Typically this means getting a {@link Serializer}
+	 * instance for the child, then calling {@link serializeTo(C instance,
+	 * SerializerContext ctx)} for the child serializer.
 	 */
-	protected abstract void serializeChildAtoms(T instance, BagHeader childField, SerializerContext ctx);
+	protected abstract void serializeChildAtoms(T instance, BagKey childField, SerializerContext ctx);
 
 	/**
 	 * This method should return true if the data overflowed for the instance
@@ -104,12 +99,12 @@ public abstract class Serializer<T> {
 
 		<T> void serialize(Serializer<T> serializer, T instance) {
 			currentLevel++;
-			serializeData(serializer, instance, DataPrefix.prefix);
+			serializeData(serializer, instance, DataAtom.prefix());
 			serializeChildren(serializer, instance);
 			currentLevel--;
 		}
 
-		<T> void serializeData(Serializer<T> serializer, T instance, byte prefix) {
+		<T> void serializeData(Serializer<T> serializer, T instance, AtomPrefix prefix) {
 			builder.reset(prefix);
 			if (!hasMarkedOverflow && serializer.dataDidOverflow()) {
 				hasMarkedOverflow = true;
@@ -126,16 +121,14 @@ public abstract class Serializer<T> {
 		}
 
 		<T> void serializeChildren(Serializer<T> serializer, T instance) {
-			List<BagHeader> children = serializer.getSerializableChildren(instance);
+			List<BagKey> children = serializer.getSerializableChildren(instance);
 			Collections.sort(children);
 
-			for (BagHeader child : children) {
-				if (child instanceof InlineBagHeader) {
-					serializeInlineChild(serializer, instance, (InlineBagHeader) child);
-				} else if (child instanceof IndexedBagHeader) {
-					serializeIndexedField(serializer, instance, (IndexedBagHeader) child);
-				} else if (child instanceof KeyedBagHeader) {
-					serializeKeyedField(serializer, instance, (KeyedBagHeader) child);
+			for (BagKey child : children) {
+				if (child instanceof BagKey.Indexed) {
+					serializeIndexedField(serializer, instance, (BagKey.Indexed) child);
+				} else if (child instanceof BagKey.Keyed) {
+					serializeKeyedField(serializer, instance, (BagKey.Keyed) child);
 				}
 			}
 
@@ -145,35 +138,25 @@ public abstract class Serializer<T> {
 			}
 		}
 
-		<T> void serializeInlineChild(Serializer<T> serializer, T instance, InlineBagHeader childField) {
-			builder.reset(InlineFieldPrefix.prefixFor(childField.index));
-			int startIndex = atoms.size();
-			serializer.serializeTo(instance, this);
-			builder.finish();
-			int endIndex = atoms.size();
-			// TODO: only sort if an option of some kind is specified?
-			if (endIndex - startIndex > 1) {
-				Collections.sort(atoms.subList(startIndex, endIndex), Lexicographic.BYTE_BUFFER_COMPARATOR);
-			}
-		}
-
-		<T> void serializeIndexedField(Serializer<T> serializer, T instance, IndexedBagHeader childField) {
+		<T> void serializeIndexedField(Serializer<T> serializer, T instance, BagKey.Indexed childField) {
 			builder.writeIndexedHeader(childField, currentLevel);
 			int startIndex = atoms.size();
 			serializer.serializeTo(instance, this);
 			int endIndex = atoms.size();
-			// Make sure the child wrote something; if not, then remove the header
+			// Make sure the child wrote something; if not, then remove the
+			// header
 			if (endIndex == startIndex) {
 				atoms.remove(atoms.size() - 1);
 			}
 		}
 
-		<T> void serializeKeyedField(Serializer<T> serializer, T instance, KeyedBagHeader childField) {
+		<T> void serializeKeyedField(Serializer<T> serializer, T instance, BagKey.Keyed childField) {
 			builder.writeKeyedHeader(childField, currentLevel);
 			int startIndex = atoms.size();
 			serializer.serializeTo(instance, this);
 			int endIndex = atoms.size();
-			// Make sure the child wrote something; if not, then remove the header
+			// Make sure the child wrote something; if not, then remove the
+			// header
 			if (endIndex == startIndex) {
 				atoms.remove(atoms.size() - 1);
 			}
@@ -182,7 +165,7 @@ public abstract class Serializer<T> {
 		final class BaggageBuilderImpl implements BaggageBuilder {
 			final int backingBufferSize;
 
-			byte currentPrefix;
+			AtomPrefix currentPrefix;
 			ByteBuffer current;
 			ByteBuffer backingBuffer;
 
@@ -190,7 +173,7 @@ public abstract class Serializer<T> {
 				this.backingBufferSize = backingBufferSize;
 			}
 
-			void reset(byte prefix) {
+			void reset(AtomPrefix prefix) {
 				finish();
 				currentPrefix = prefix;
 			}
@@ -216,7 +199,7 @@ public abstract class Serializer<T> {
 			@Override
 			public ByteBuffer newAtom(int expectedSize) {
 				ByteBuffer buf = emptyBag(expectedSize + 1);
-				buf.put(currentPrefix);
+				buf.put(currentPrefix.prefix);
 				return buf;
 			}
 
@@ -227,35 +210,16 @@ public abstract class Serializer<T> {
 				return current;
 			}
 
-			void writeIndexedHeader(IndexedBagHeader header, int level) {
-				final ByteBuffer buf;
-				if (header.options != null) {
-					buf = emptyBag(10 + header.options.remaining());
-				} else {
-					buf = emptyBag(10);
-				}
-
-				buf.put(IndexedHeaderPrefix.prefixFor(level));
-				UnsignedLexVarint.writeLexVarUInt32(buf, header.index);
-				ByteBuffers.copyTo(header.options, buf);
+			void writeIndexedHeader(BagKey.Indexed field, int level) {
+				ByteBuffer buf = emptyBag(10 + BagOptionsSerialization.serializedSize(field.options));
+				BagKeySerialization.write(level, field, buf);
 				finish();
 			}
 
-			void writeKeyedHeader(KeyedBagHeader header, int level) {
-				int keyLength = 0;
-				if (header.key != null) {
-					keyLength = header.key.remaining();
-				}
-				int serializedSize = 10 + keyLength;
-				if (header.options != null) {
-					serializedSize += header.options.remaining();
-				}
-				ByteBuffer buf = emptyBag(serializedSize);
-
-				buf.put(KeyedHeaderPrefix.prefixFor(level));
-				UnsignedLexVarint.writeLexVarUInt32(buf, keyLength);
-				ByteBuffers.copyTo(header.key, buf);
-				ByteBuffers.copyTo(header.options, buf);
+			void writeKeyedHeader(BagKey.Keyed field, int level) {
+				ByteBuffer buf = emptyBag(
+						field.key.remaining() + BagOptionsSerialization.serializedSize(field.options));
+				BagKeySerialization.write(level, field, buf);
 				finish();
 			}
 

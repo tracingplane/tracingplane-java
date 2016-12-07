@@ -9,33 +9,33 @@ import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayerFactory;
 
 public interface AtomLayerFactory extends TransitLayerFactory {
 
-	AtomLayer<?> newContextLayer();
+	AtomLayer<?> newAtomLayer();
 
 	static final Logger log = LoggerFactory.getLogger(AtomLayerFactory.class);
 
-	public static AtomLayer<?> createDefaultContextLayer() {
+	public static AtomLayer<?> createDefaultAtomLayer() {
 		AtomLayerConfig config = new AtomLayerConfig();
 		try {
-			return createContextLayer(config);
+			return createAtomLayer(config);
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			log.error(String.format("Unable to instantiate default context layer factory %s, defaulting to %s",
-					config.contextLayerFactory, RawAtomLayerFactory.class.getName()));
-			return new RawAtomLayerFactory().newContextLayer();
+			log.error(String.format("Unable to instantiate default atom layer factory %s, defaulting to %s",
+					config.atomLayerFactory, RawAtomLayerFactory.class.getName()));
+			return new RawAtomLayerFactory().newAtomLayer();
 		}
 	}
 
-	public static AtomLayer<?> createContextLayer(AtomLayerConfig config)
+	public static AtomLayer<?> createAtomLayer(AtomLayerConfig config)
 			throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-		return ((AtomLayerFactory) Class.forName(config.contextLayerFactory).newInstance()).newContextLayer();
+		return ((AtomLayerFactory) Class.forName(config.atomLayerFactory).newInstance()).newAtomLayer();
 	}
 
 	@Override
 	public default TransitLayer<?> newTransitLayer() {
-		return newTransitLayer(BaggageAtoms.contextLayer);
+		return newTransitLayer(BaggageAtoms.atomLayer);
 	}
 
-	public static <T extends BaggageAtoms> TransitLayer<T> newTransitLayer(AtomLayer<T> contextLayer) {
-		return new AtomTransitLayerImpl<T>(contextLayer);
+	public static <T extends BaggageAtoms> TransitLayer<T> newTransitLayer(AtomLayer<T> atomLayer) {
+		return new AtomTransitLayerImpl<T>(atomLayer);
 	}
 
 }

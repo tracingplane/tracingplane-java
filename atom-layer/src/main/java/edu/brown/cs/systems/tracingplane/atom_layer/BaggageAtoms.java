@@ -10,13 +10,13 @@ public interface BaggageAtoms extends Baggage {
 	
 	public static final ByteBuffer OVERFLOW_MARKER = ByteBuffer.allocate(0);
 
-	public static final AtomLayer<?> contextLayer = AtomLayerFactory.createDefaultContextLayer();
+	public static final AtomLayer<?> atomLayer = AtomLayerFactory.createDefaultAtomLayer();
 
 	/**
 	 * Create a BaggageAtoms object by wrapping the raw bytes provided
 	 */
 	public static BaggageAtoms wrap(List<ByteBuffer> atoms) {
-		return AtomLayerCompatibility.wrap(contextLayer, atoms);
+		return AtomLayerCompatibility.wrap(atomLayer, atoms);
 	}
 
 	/**
@@ -24,7 +24,7 @@ public interface BaggageAtoms extends Baggage {
 	 * representation.
 	 */
 	public static List<ByteBuffer> atoms(BaggageAtoms atoms) {
-		return AtomLayerCompatibility.atoms(contextLayer, atoms);
+		return AtomLayerCompatibility.atoms(atomLayer, atoms);
 	}
 
 	/**
@@ -33,7 +33,7 @@ public interface BaggageAtoms extends Baggage {
 	 * byte-array representation.
 	 */
 	public static List<ByteBuffer> atoms() {
-		return AtomLayerCompatibility.atoms(contextLayer, ThreadLocalBaggage.get());
+		return AtomLayerCompatibility.atoms(atomLayer, ThreadLocalBaggage.get());
 	}
 
 }

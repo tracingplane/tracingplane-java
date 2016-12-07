@@ -6,10 +6,10 @@ import java.util.Iterator;
 import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.UnsignedLexVarint;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.InlineFieldPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.AtomPrefix;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataAtom;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderAtom;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderAtom;
 
 public abstract class Parser<T> {
 
@@ -18,16 +18,11 @@ public abstract class Parser<T> {
 	}
 
 	private final T parse(ParsingContext ctx, int currentLevel) throws AtomLayerException {
-		T instance = ctx.parseData(this, DataPrefix.prefix);
-		ctx.parseInlineChildren(this, instance);
+		T instance = ctx.parseData(this, DataAtom.prefix());
 		ctx.parseIndexedChildren(this, instance, currentLevel);
 		ctx.parseKeyedChildren(this, instance, currentLevel);
 		ctx.finalize(this, instance);
 		return instance;
-	}
-
-	private final T parseInline(ParsingContext ctx, byte prefix) {
-		return ctx.parseData(this, prefix);
 	}
 
 	protected abstract T parseData(Iterator<ByteBuffer> data);
@@ -49,7 +44,7 @@ public abstract class Parser<T> {
 		final Iterator<ByteBuffer> it;
 		final DataIterator dataIterator = new DataIterator();
 
-		byte firstByte;
+		AtomPrefix prefix = null;
 		ByteBuffer currentBag = null;
 
 		boolean overflow = false;
@@ -64,14 +59,15 @@ public abstract class Parser<T> {
 				if (BaggageAtoms.OVERFLOW_MARKER.equals(currentBag)) {
 					overflow = true;
 				} else {
-					firstByte = currentBag.get();
+					prefix = AtomPrefixes.get(currentBag.get());
 					return;
 				}
 			}
 			currentBag = null;
+			prefix = null;
 		}
 
-		<T> T parseData(Parser<T> parser, byte expectedPrefix) {
+		<T> T parseData(Parser<T> parser, AtomPrefix expectedPrefix) {
 			dataIterator.reset(expectedPrefix);
 			T instance = parser.parseData(dataIterator);
 			dataIterator.drainRemaining();
@@ -81,32 +77,20 @@ public abstract class Parser<T> {
 			return instance;
 		}
 
-		<T> void parseInlineChildren(Parser<T> parser, T instance) {
-			while (InlineFieldPrefix.isInlineData(firstByte) && currentBag != null) {
-				byte childIndex = firstByte;
-				Parser<?> childParser = parser.getParserForChild(childIndex, null);
-				parseInlineChild(parser, childParser, instance, childIndex);
-			}
-		}
-
-		<P, C> void parseInlineChild(Parser<P> parentParser, Parser<C> childParser, P parent, byte childIndex) {
-			if (childParser != null) {
-				C child = childParser.parseInline(this, childIndex);
-				if (child != null) {
-					parentParser.setChild(parent, childIndex, null, child);
-				}
-			}
-		}
-
 		<T> void parseIndexedChildren(Parser<T> parser, T instance, int currentLevel) throws AtomLayerException {
-			int childLevel;
-			while ((childLevel = IndexedHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null) {
-				// TODO: what to do when exception thrown here
-				int childIndex = UnsignedLexVarint.readLexVarUInt32(currentBag);
-				ByteBuffer childOptions = currentBag;
-				Parser<?> childParser = parser.getParserForChild(childIndex, childOptions);
-				advance();
-				parseIndexedChild(parser, childParser, instance, childIndex, childOptions, childLevel);
+			while (prefix != null) {
+				if (prefix instanceof IndexedHeaderAtom) {
+					IndexedHeaderAtom childHeader = (IndexedHeaderAtom) prefix;
+					if (childHeader.level > currentLevel) {
+						int childIndex = UnsignedLexVarint.readLexVarUInt32(currentBag);
+						ByteBuffer childOptions = currentBag;
+						Parser<?> childParser = parser.getParserForChild(childIndex, childOptions);
+						advance();
+						parseIndexedChild(parser, childParser, instance, childIndex, childOptions, childHeader.level);
+						continue;
+					}
+				}
+				return;
 			}
 		}
 
@@ -121,17 +105,23 @@ public abstract class Parser<T> {
 		}
 
 		<T> void parseKeyedChildren(Parser<T> parser, T instance, int currentLevel) throws AtomLayerException {
-			int childLevel;
-			while ((childLevel = KeyedHeaderPrefix.level(firstByte)) > currentLevel && currentBag != null) {
-				// TODO: what to do when exception thrown here
-				int childKeyLength = UnsignedLexVarint.readLexVarUInt32(currentBag);
-				ByteBuffer childKey = currentBag.duplicate();
-				childKey.limit(childKey.position() + childKeyLength);
-				ByteBuffer childOptions = currentBag;
-				childOptions.position(childKey.limit());
-				Parser<?> childParser = parser.getParserForChild(childKey, childOptions);
-				advance();
-				parseKeyedChild(parser, childParser, instance, childKey, childOptions, childLevel);
+			while (prefix != null) {
+				if (prefix instanceof KeyedHeaderAtom) {
+					KeyedHeaderAtom childHeader = (KeyedHeaderAtom) prefix;
+					if (childHeader.level > currentLevel) {
+						// TODO: what to do when exception thrown here
+						int childKeyLength = UnsignedLexVarint.readLexVarUInt32(currentBag);
+						ByteBuffer childKey = currentBag.duplicate();
+						childKey.limit(childKey.position() + childKeyLength);
+						ByteBuffer childOptions = currentBag;
+						childOptions.position(childKey.limit());
+						Parser<?> childParser = parser.getParserForChild(childKey, childOptions);
+						advance();
+						parseKeyedChild(parser, childParser, instance, childKey, childOptions, childHeader.level);
+						continue;
+					}
+				}
+				return;
 			}
 		}
 
@@ -152,9 +142,9 @@ public abstract class Parser<T> {
 		}
 
 		final class DataIterator implements Iterator<ByteBuffer> {
-			byte expectedPrefix;
+			AtomPrefix expectedPrefix;
 
-			void reset(byte expectedPrefix) {
+			void reset(AtomPrefix expectedPrefix) {
 				this.expectedPrefix = expectedPrefix;
 			}
 
@@ -164,7 +154,7 @@ public abstract class Parser<T> {
 			}
 
 			public boolean hasNext() {
-				return firstByte == expectedPrefix && currentBag != null;
+				return prefix == expectedPrefix && currentBag != null;
 			}
 
 			public ByteBuffer next() {

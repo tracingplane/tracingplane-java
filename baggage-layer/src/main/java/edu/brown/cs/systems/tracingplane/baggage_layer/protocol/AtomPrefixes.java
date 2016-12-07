@@ -1,133 +1,240 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomTypes.AtomType;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomTypes.HeaderType;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomTypes.Level;
 
-/** Logic for byte prefixes of serialized bags */
+/**
+ * Logic for byte prefixes of serialized bags
+ * 
+ * TODO: documentation
+ */
 public class AtomPrefixes {
-	
-	public static final int LEVELS = 32;
 
-	/**
-	 * NamedField and IndexedField use remaining five bits for field level.
-	 * Lowest level (eg root) is lexicographically highest
-	 */
-	public static class IndexedHeaderPrefix {
-		
-		private IndexedHeaderPrefix() {}
+	private static final AtomPrefix[] prefixes;
 
-		public static final AtomType bagType = AtomType.IndexedHeader;
-		
-		public static final byte[] prefixes = new byte[LEVELS];
+	static {
+		// Initialize all prefixes as unsupported
+		prefixes = new AtomPrefix[256];
+		for (int i = 0; i < prefixes.length; i++) {
+			prefixes[i] = new UnsupportedPrefixAtom((byte) i);
+		}
 
-		static {
-			for (int i = 0; i < LEVELS; i++) {
-				prefixes[i] = (byte) (bagType.byteValue | (LEVELS - 1 - i));
+		// Construct all valid prefixes
+		List<AtomPrefix> allowedAtoms = new ArrayList<>(256);
+		allowedAtoms.add(DataAtom.prefix());
+		for (IndexedHeaderAtom atom : IndexedHeaderAtom.prefixes) {
+			allowedAtoms.add(atom);
+		}
+		for (KeyedHeaderAtom atom : KeyedHeaderAtom.prefixes) {
+			allowedAtoms.add(atom);
+		}
+
+		// Insert into array
+		for (AtomPrefix atom : allowedAtoms) {
+			if (atom.prefix >= 0) {
+				prefixes[atom.prefix] = atom;
+			} else {
+				prefixes[256 + atom.prefix] = atom;
 			}
 		}
-		
-		public static boolean isIndexedFieldPrefix(byte b) {
-			return bagType.match(b);
+	}
+
+	public static AtomPrefix get(byte prefix) {
+		if (prefix >= 0) {
+			return prefixes[prefix];
+		} else {
+			return prefixes[256 + prefix];
+		}
+	}
+
+	public static abstract class AtomPrefix implements Comparable<AtomPrefix> {
+
+		protected final AtomType atomType;
+		public final byte prefix;
+
+		public AtomPrefix(AtomType atomType, byte prefix) {
+			this.atomType = atomType;
+			this.prefix = prefix;
+		}
+
+		boolean isValid() {
+			return true;
+		}
+
+		boolean isHeader() {
+			return false;
+		}
+
+		boolean isData() {
+			return false;
+		}
+
+		int level(int currentLevel) {
+			return currentLevel + 1;
+		}
+
+		@Override
+		public int compareTo(AtomPrefix o) {
+			return Lexicographic.compare(prefix, o.prefix);
+		}
+	}
+
+	public static abstract class HeaderAtom extends AtomPrefix {
+
+		public static final AtomType atomType = AtomType.Header;
+
+		protected final Level level;
+		protected final HeaderType headerType;
+
+		public HeaderAtom(Level level, HeaderType headerType) {
+			super(AtomType.Header, (byte) (AtomType.Header.byteValue | level.byteValue | headerType.byteValue));
+			this.level = level;
+			this.headerType = headerType;
+		}
+
+		@Override
+		boolean isHeader() {
+			return true;
 		}
 		
-		public static int level(byte b) {
-			return 31 - (b & 0x1F);
+		int level() {
+			return this.level.level;
 		}
-		
-		public static boolean isValidLevel(int level) {
-			return level >= 0 && level < LEVELS;
+
+		@Override
+		int level(int currentLevel) {
+			return this.level.level;
 		}
-		
-		public static byte prefixFor(int level) {
+
+		abstract BagKey parse(ByteBuffer buf) throws AtomLayerException;
+
+	}
+
+	public static class IndexedHeaderAtom extends HeaderAtom {
+
+		public static final HeaderType headerType = HeaderType.Indexed;
+
+		private static final IndexedHeaderAtom[] prefixes;
+
+		static {
+			prefixes = new IndexedHeaderAtom[Level.LEVELS];
+			for (int level = 0; level < Level.LEVELS; level++) {
+				prefixes[level] = new IndexedHeaderAtom(Level.get(level));
+			}
+		}
+
+		public static IndexedHeaderAtom prefixFor(int level) {
 			return prefixes[level];
 		}
 
+		private IndexedHeaderAtom(Level level) {
+			super(level, headerType);
+		}
+
+		@Override
+		public String toString() {
+			return String.format("[IndexedHeaderAtom prefix=%s level=%d]", TypeUtils.toBinaryString(prefix),
+					level.level);
+		}
+
+		@Override
+		BagKey parse(ByteBuffer buf) throws AtomLayerException {
+			return BagKeySerialization.parseIndexed(buf);
+		}
+
 	}
 
-	/**
-	 * NamedField and IndexedField use remaining five bits for field level.
-	 * Lowest level (eg root) is lexicographically highest
-	 */
-	public static class KeyedHeaderPrefix {
-		
-		private KeyedHeaderPrefix() {}
+	public static class KeyedHeaderAtom extends HeaderAtom {
 
-		public static final AtomType bagType = AtomType.KeyedHeader;
-		
-		public static final byte[] prefixes = new byte[LEVELS];
+		public static final HeaderType headerType = HeaderType.Keyed;
+
+		private static final KeyedHeaderAtom[] prefixes;
 
 		static {
-			for (int i = 0; i < LEVELS; i++) {
-				prefixes[i] = (byte) (bagType.byteValue | (LEVELS - 1 - i));
+			prefixes = new KeyedHeaderAtom[Level.LEVELS];
+			for (int level = 0; level < Level.LEVELS; level++) {
+				prefixes[level] = new KeyedHeaderAtom(Level.get(level));
 			}
 		}
-		
-		public static boolean isKeyedFieldPrefix(byte b) {
-			return bagType.match(b);
-		}
-		
-		public static int level(byte b) {
-			return 31 - (b & 0x1F);
-		}
-		
-		public static boolean isValidLevel(int level) {
-			return level >= 0 && level < LEVELS;
-		}
-		
-		public static byte prefixFor(int level) {
+
+		public static KeyedHeaderAtom prefixFor(int level) {
 			return prefixes[level];
 		}
 
-	}
-	
-	/** Overflow has no use for additional bits */
-	public static class OverflowPrefix {
-		
-		private OverflowPrefix() {}
-		
-		public static final AtomType bagType = AtomType.Overflow;
-		
-		public final static byte prefix = bagType.byteValue;
-		
-	}
-	
-	/** FieldData is data for the current bag and has the byte value of 0 */
-	public static class DataPrefix {
-		
-		public static final AtomType bagType = AtomType.Data;
-		
-		public static final byte prefix = bagType.byteValue;
-		
-	}
-	
-	/** InlineFieldData is also data, but inlined for a sub-bag with id in the range [0, 31) (EXCLUDING 31) */
-	public static class InlineFieldPrefix {
-		
-		public static final AtomType bagType = AtomType.Data;
+		private KeyedHeaderAtom(Level level) {
+			super(level, headerType);
+		}
 
-		public static final byte[] prefixes = new byte[31];
+		@Override
+		public String toString() {
+			return String.format("[KeyedHeaderAtom   prefix=%s level=%d]", TypeUtils.toBinaryString(prefix),
+					level.level);
+		}
 
-		static {
-			for (int i = 0; i < 31; i++) {
-				prefixes[i] = (byte) (bagType.byteValue | (i + 1));
-			}
+		@Override
+		BagKey parse(ByteBuffer buf) throws AtomLayerException {
+			return BagKeySerialization.parseKeyed(buf);
 		}
-		
-		public static boolean isInlineData(byte b) {
-			return bagType.match(b);
+
+	}
+
+	public static class DataAtom extends AtomPrefix {
+
+		public static final AtomType atomType = AtomType.Data;
+		public static final byte prefix = atomType.byteValue;
+		private static final DataAtom instance = new DataAtom();
+
+		private DataAtom() {
+			super(atomType, DataAtom.prefix);
 		}
-		
-		public static int fieldId(byte b) {
-			return (b & 0x1F) - 1;
+
+		public static DataAtom prefix() {
+			return instance;
 		}
-		
-		public static boolean idCanBeInlined(int id) {
-			return id >= 0 && id < 31;
+
+		@Override
+		public boolean isData() {
+			return true;
 		}
-		
-		public static byte prefixFor(int id) {
-			return prefixes[id];
+
+		@Override
+		public String toString() {
+			return String.format("[DataAtom prefix=%s]", TypeUtils.toBinaryString(super.prefix));
 		}
-		
+
+	}
+
+	public static class UnsupportedPrefixAtom extends AtomPrefix {
+
+		private UnsupportedPrefixAtom(byte prefix) {
+			super(null, prefix);
+		}
+
+		@Override
+		boolean isValid() {
+			return false;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("[UnsupportedAtom   prefix=%s]", TypeUtils.toBinaryString(prefix));
+		}
+
+	}
+
+	public static void main(String[] args) {
+		for (int i = 0; i < prefixes.length; i++) {
+			System.out.printf("%d: %s\n", i, prefixes[i]);
+		}
 	}
 
 }

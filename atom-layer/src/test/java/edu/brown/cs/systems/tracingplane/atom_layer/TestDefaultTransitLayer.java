@@ -25,7 +25,7 @@ public class TestDefaultTransitLayer extends TestCase {
 		Baggage baggage = Baggage.newInstance();
 		assertNull(baggage);
 		
-		assertEquals(transit.contextLayer, BaggageAtoms.contextLayer);
+		assertEquals(transit.contextLayer, BaggageAtoms.atomLayer);
 	}
 
 }

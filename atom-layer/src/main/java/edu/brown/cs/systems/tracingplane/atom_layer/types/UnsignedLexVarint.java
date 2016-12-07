@@ -102,13 +102,26 @@ public class UnsignedLexVarint {
 		}
 		return size;
 	}
-	
+
+	/**
+	 * Reads a lexvar uint32 from the specified buf, advancing the buf's
+	 * position
+	 */
 	public static int readLexVarUInt32(ByteBuffer buf) throws AtomLayerException {
 		return (int) readLexVarUInt64(buf);
 	}
 
 	/**
+	 * Reads a lexvar uint32 from the specified buf without advancing the buf's
+	 * position
+	 */
+	public static int readLexVarUInt32(ByteBuffer buf, int position) throws AtomLayerException {
+		return (int) readLexVarUInt64(buf, position);
+	}
+
+	/**
 	 * Reads a varint that is lexicographically comparable with other varints
+	 * and advance the buf's position
 	 */
 	public static long readLexVarUInt64(ByteBuffer buf) throws AtomLayerException {
 		byte b0 = buf.get();
@@ -117,8 +130,24 @@ public class UnsignedLexVarint {
 			return b0;
 		}
 		long result = b0 & (0xff >>> size);
-		result <<= (8 * (size-1));
-		result += readUInt64(buf, (size-1));
+		result <<= (8 * (size - 1));
+		result += readUInt64(buf, (size - 1));
+		return result;
+	}
+
+	/**
+	 * Reads a varint that is lexicographically comparable with other varints
+	 * without advancing the buf's position
+	 */
+	public static long readLexVarUInt64(ByteBuffer buf, int position) throws AtomLayerException {
+		byte b0 = buf.get(position++);
+		int size = interpretSize(b0);
+		if (size == 1) {
+			return b0;
+		}
+		long result = b0 & (0xff >>> size);
+		result <<= (8 * (size - 1));
+		result += readUInt64(buf, position, (size - 1));
 		return result;
 	}
 
@@ -128,7 +157,7 @@ public class UnsignedLexVarint {
 		}
 		for (int i = 0; i < 8; i++) {
 			if ((b & (0x80 >>> i)) == 0) {
-				return i+1;
+				return i + 1;
 			}
 		}
 		return 9;
@@ -141,6 +170,17 @@ public class UnsignedLexVarint {
 		long result = 0;
 		for (int i = 0; i < numBytes; i++) {
 			result = (result << 8) + (buf.get() & 0xff);
+		}
+		return result;
+	}
+
+	static long readUInt64(ByteBuffer buf, int position, int numBytes) throws AtomLayerException {
+		if (numBytes > 8 || numBytes <= 0) {
+			throw new AtomLayerException("Invalid UInt64 with " + numBytes + " bytes");
+		}
+		long result = 0;
+		for (int i = 0; i < numBytes; i++) {
+			result = (result << 8) + (buf.get(position++) & 0xff);
 		}
 		return result;
 	}

@@ -1,5 +1,6 @@
 package edu.brown.cs.systems.tracingplane.transit_layer;
 
+//TODO: description and method documentation
 public class ThreadLocalBaggage {
 	
 	private ThreadLocalBaggage() {}

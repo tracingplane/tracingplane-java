@@ -8,4 +8,10 @@ public class XTrace {
 	public List<Long> parentEventIds = null;
 	public boolean overflow = false;
 
+	public XTrace(Long taskId, List<Long> parentEventIds, boolean overflow) {
+		this.taskId = taskId;
+		this.parentEventIds = parentEventIds;
+		this.overflow = overflow;
+	}
+
 }

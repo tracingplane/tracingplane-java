@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+//TODO: description and method documentation
 public interface Baggage {
 
 	public static final TransitLayer<?> transit = TransitLayerFactory.createDefaultTransitLayer();
