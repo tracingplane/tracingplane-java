@@ -6,7 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import com.google.common.collect.Lists;
 
-/** <p>
+/**
+ * <p>
  * Merges multiple iterators and produces elements according to the provided comparator.
  * </p>
  * <p>
@@ -20,7 +21,8 @@ import com.google.common.collect.Lists;
  * </p>
  * 
  *
- * @param <T> */
+ * @param <T>
+ */
 public class MergeIterator<T> implements Iterator<T> {
 
     private class IteratorContainer {

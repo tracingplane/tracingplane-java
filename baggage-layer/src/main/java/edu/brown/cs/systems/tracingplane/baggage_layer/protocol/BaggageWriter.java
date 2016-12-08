@@ -86,8 +86,10 @@ public class BaggageWriter {
         }
     }
 
-    /** Creates a byte buffer with {@code expectedSize} bytes of free space. The atom can be written to as normal. Not
-     * all of the free space must be filled */
+    /**
+     * Creates a byte buffer with {@code expectedSize} bytes of free space. The atom can be written to as normal. Not
+     * all of the free space must be filled
+     */
     public ByteBuffer newDataAtom(int expectedSize) {
         ByteBuffer buf = backing.newAtom(expectedSize + 1);
         buf.put(DataPrefix.prefix);

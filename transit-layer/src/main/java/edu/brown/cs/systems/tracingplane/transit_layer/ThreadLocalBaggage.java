@@ -7,9 +7,11 @@ public class ThreadLocalBaggage {
 
     private static final ThreadLocal<Baggage> current = new ThreadLocal<Baggage>();
 
-    /** Get the Baggage instance, if any, stored for the current thread
+    /**
+     * Get the Baggage instance, if any, stored for the current thread
      * 
-     * @return a Baggage instance, possibly null */
+     * @return a Baggage instance, possibly null
+     */
     public static Baggage get() {
         return current.get();
     }
@@ -28,9 +30,11 @@ public class ThreadLocalBaggage {
         return currentBaggage;
     }
 
-    /** Set the Baggage instance for the current thread
+    /**
+     * Set the Baggage instance for the current thread
      * 
-     * @param baggage a Baggage instance, possibly null */
+     * @param baggage a Baggage instance, possibly null
+     */
     public static void set(Baggage baggage) {
         discard();
         current.set(baggage);

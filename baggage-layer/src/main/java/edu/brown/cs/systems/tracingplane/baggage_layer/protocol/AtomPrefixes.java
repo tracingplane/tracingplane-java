@@ -11,7 +11,8 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.HeaderType;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
 
-/** <p>
+/**
+ * <p>
  * This class has the logic for creating and checking bag prefixes. It does not directly create or deal with bit
  * representations; that is contained in {@link AtomPrefixTypes}.
  * </p>
@@ -20,7 +21,7 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.
  * The baggage protocol only uses the first byte of an atom as a prefix. Consequently, during parsing, instead of
  * interpreting the first byte, we just look it up in an array of 256 prefix objects.
  * </p>
-*/
+ */
 public class AtomPrefixes {
 
     private static final AtomPrefix[] prefixes;

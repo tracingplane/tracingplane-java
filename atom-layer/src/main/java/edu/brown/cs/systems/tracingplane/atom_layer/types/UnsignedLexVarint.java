@@ -2,7 +2,8 @@ package edu.brown.cs.systems.tracingplane.atom_layer.types;
 
 import java.nio.ByteBuffer;
 
-/** Unsigned varint (32 bit and 64 bit) that is encoded in such a way that the lexicographic comparison of the binary
+/**
+ * Unsigned varint (32 bit and 64 bit) that is encoded in such a way that the lexicographic comparison of the binary
  * encoding is consistent with the numeric comparison of the numeric values.
  * 
  * For example, consider the integers 130, 257, and 16385
@@ -25,21 +26,24 @@ import java.nio.ByteBuffer;
  * For unsigned 64-bit integers, values in the range [0, 2^7) use 1 byte; [2^7, 2^14) use 2 bytes, [2^14, 2^21) use 3
  * bytes, and so on. Negative 64-bit unsigned integers use 9 bytes. Negative 32-bit unsigned integeers use 5 bytes.
  * 
- * @author jon */
+ * @author jon
+ */
 public class UnsignedLexVarint {
-    
+
     public static void main(String[] args) {
         long v = 128;
         for (int i = 0; i < 9; i++) {
-            long mask = - v;
+            long mask = -v;
             System.out.println(v + " = 0x" + Long.toHexString(mask).toUpperCase() + "L");
             v *= 128;
         }
     }
 
-    /** @param value Any integer value
+    /**
+     * @param value Any integer value
      * @return the length of the encoded representation of this value. Values in the range [0, 2^7) use 1 byte; [2^7,
-     *         2^14) use 2 bytes, and so on. Negative values use 5 bytes. */
+     *         2^14) use 2 bytes, and so on. Negative values use 5 bytes.
+     */
     public static int encodedLength(int value) {
         if ((value & 0xFFFFFF80) == 0) {
             return 1;
@@ -54,9 +58,11 @@ public class UnsignedLexVarint {
         }
     }
 
-    /** @param value Any long value
+    /**
+     * @param value Any long value
      * @return the length of the encoded representation of this value. Values in the range [0, 2^7) use 1 byte; [2^7,
-     *         2^14) use 2 bytes, and so on. Negative values use 9 bytes. */
+     *         2^14) use 2 bytes, and so on. Negative values use 9 bytes.
+     */
     public static int encodedLength(long value) {
         if ((value & 0xFFFFFFFFFFFFFF80L) == 0) {
             return 1;

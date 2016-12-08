@@ -5,8 +5,10 @@ import java.util.List;
 import edu.brown.cs.systems.tracingplane.atom_layer.AtomLayer;
 import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
 
-/** The simple implementation of the context layer that can be used in lieu of a full baggage layer. Simply merges bags
- * lexicographically and removes duplicates */
+/**
+ * The simple implementation of the context layer that can be used in lieu of a full baggage layer. Simply merges bags
+ * lexicographically and removes duplicates
+ */
 public class RawAtomLayerImpl implements AtomLayer<RawBaggageAtoms> {
 
     @Override

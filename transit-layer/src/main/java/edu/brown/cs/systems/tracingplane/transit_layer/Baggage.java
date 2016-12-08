@@ -19,7 +19,8 @@ public interface Baggage {
         TransitLayerCompatibility.discard(transit, baggage);
     }
 
-    /** Uses the process's default configured transit layer.
+    /**
+     * Uses the process's default configured transit layer.
      * 
      * Creates a new baggage instance based off the provided instance. The provided instance is still valid and might be
      * modified by this operation. Might return the original baggage instance.
@@ -29,12 +30,14 @@ public interface Baggage {
      * should have its own baggage instance.
      * 
      * @param from a baggage instance
-     * @return a baggage instance */
+     * @return a baggage instance
+     */
     public static Baggage branch(Baggage from) {
         return TransitLayerCompatibility.branch(transit, from);
     }
 
-    /** Uses the process's default configured transit layer.
+    /**
+     * Uses the process's default configured transit layer.
      * 
      * Creates a new baggage instance based off two other instances.
      * 
@@ -44,14 +47,17 @@ public interface Baggage {
      * 
      * @param left a baggage instance
      * @param right a baggage instance
-     * @return a baggage instance */
+     * @return a baggage instance
+     */
     public static Baggage join(Baggage left, Baggage right) {
         return TransitLayerCompatibility.join(transit, left, right);
     }
 
-    /** Uses the process's default configured transit layer.
+    /**
+     * Uses the process's default configured transit layer.
      * 
-     * Deserialize a baggage instance from the provided bytes. */
+     * Deserialize a baggage instance from the provided bytes.
+     */
     public static Baggage deserialize(byte[] serialized, int offset, int length) {
         return TransitLayerCompatibility.deserialize(transit, serialized, offset, length);
     }
@@ -60,9 +66,11 @@ public interface Baggage {
         return TransitLayerCompatibility.readFrom(transit, in);
     }
 
-    /** Uses the process's default configured transit layer.
+    /**
+     * Uses the process's default configured transit layer.
      * 
-     * Serialize a baggage instance to its byte representation */
+     * Serialize a baggage instance to its byte representation
+     */
     public static byte[] serialize(Baggage baggage) {
         return TransitLayerCompatibility.serialize(transit, baggage);
     }
@@ -71,9 +79,11 @@ public interface Baggage {
         TransitLayerCompatibility.writeTo(transit, out, baggage);
     }
 
-    /** Gets the Baggage instance, if any, being stored for the current thread
+    /**
+     * Gets the Baggage instance, if any, being stored for the current thread
      * 
-     * @return a Baggage instance, possibly null */
+     * @return a Baggage instance, possibly null
+     */
     public static Baggage get() {
         return ThreadLocalBaggage.get();
     }
@@ -88,9 +98,11 @@ public interface Baggage {
         return ThreadLocalBaggage.take();
     }
 
-    /** Set the Baggage instance for the current thread
+    /**
+     * Set the Baggage instance for the current thread
      * 
-     * @param baggage a Baggage instance, possibly null */
+     * @param baggage a Baggage instance, possibly null
+     */
     public static void set(Baggage baggage) {
         ThreadLocalBaggage.set(baggage);
     }

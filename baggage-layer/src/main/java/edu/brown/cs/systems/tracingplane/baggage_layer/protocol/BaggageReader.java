@@ -41,9 +41,11 @@ public class BaggageReader {
         advanceNext();
     }
 
-    /** Advances to the next atom, also processing overflow markers.
+    /**
+     * Advances to the next atom, also processing overflow markers.
      * 
-     * @return true if there are more atoms; false if we have exhausted the input iterator */
+     * @return true if there are more atoms; false if we have exhausted the input iterator
+     */
     private boolean advanceNext() {
         while (it.hasNext()) {
             nextAtom = it.next();
@@ -68,8 +70,10 @@ public class BaggageReader {
         nextAtom.position(nextAtom.position() - 1);
     }
 
-    /** Assumes the current atom is a header and enters the child bag, incrementing the current level and adding the
-     * header to the current path */
+    /**
+     * Assumes the current atom is a header and enters the child bag, incrementing the current level and adding the
+     * header to the current path
+     */
     private void enterNextBag() {
         // Save the header
         rewindAtom();
@@ -81,17 +85,21 @@ public class BaggageReader {
         advanceNext();
     }
 
-    /** Skips and drops remaining data atoms in this bag.
+    /**
+     * Skips and drops remaining data atoms in this bag.
      * 
-     * Advances to either the a child bag, or the end of bag if there are no children. */
+     * Advances to either the a child bag, or the end of bag if there are no children.
+     */
     private void skipData() {
         while (hasData()) {
             advanceNext();
         }
     }
 
-    /** If the current atom is a child, iterates over atoms for the child. Atoms are treated as unprocessed and added to
-     * the list of unprocessed atoms. */
+    /**
+     * If the current atom is a child, iterates over atoms for the child. Atoms are treated as unprocessed and added to
+     * the list of unprocessed atoms.
+     */
     private void skipChild() {
         enterNextBag();
         while (hasData()) {
@@ -124,30 +132,38 @@ public class BaggageReader {
         }
     }
 
-    /** Checks to see whether there are more atoms at the current level.
+    /**
+     * Checks to see whether there are more atoms at the current level.
      * 
      * This is always true, unless the next atom is a prefix for a header at a level <= currentLevel, or we run out of
      * atoms.
      * 
-     * When this method returns false, {@link exitBag} should be called to return to the parent bag. */
+     * When this method returns false, {@link exitBag} should be called to return to the parent bag.
+     */
     public boolean hasNext() {
         return nextAtom != null && nextAtomPrefix.level(currentLevel) > currentLevel;
     }
 
-    /** @return true if the next atom is a data atom; false otherwise */
+    /**
+     * @return true if the next atom is a data atom; false otherwise
+     */
     public boolean hasData() {
         return nextAtom != null && nextAtomPrefix.isData();
     }
 
-    /** Check to see whether the current atom is the header for a child bag. This method can return false if the current
+    /**
+     * Check to see whether the current atom is the header for a child bag. This method can return false if the current
      * atom is a data atom, or if the current atom is a header for a bag belonging to a parent
      * 
-     * @return true if the current atom is the header for a child bag; false otherwise */
+     * @return true if the current atom is the header for a child bag; false otherwise
+     */
     public boolean hasChild() {
         return nextAtom != null && nextAtomPrefix.isHeader() && nextAtomPrefix.level(currentLevel) > currentLevel;
     }
 
-    /** @return the next atom if it is a data atom; null otherwise */
+    /**
+     * @return the next atom if it is a data atom; null otherwise
+     */
     public ByteBuffer nextData() {
         if (hasData()) {
             ByteBuffer currentAtom = nextAtom;
@@ -157,12 +173,14 @@ public class BaggageReader {
         return null;
     }
 
-    /** Advances through the atoms until either the specified bag is encountered, or we encounter a bag that is
+    /**
+     * Advances through the atoms until either the specified bag is encountered, or we encounter a bag that is
      * lexicographically greater than the specified bag.
      * 
      * That is, if we encounter the bag, we enter the bag and advance to the next atom and return true.
      * 
-     * If this method returns false, we are at the first bag after where the expected bag would be */
+     * If this method returns false, we are at the first bag after where the expected bag would be
+     */
     public boolean enter(BagKey expect) {
         // If the data atoms of the current bag aren't exhausted, drop them
         skipData();
@@ -195,9 +213,11 @@ public class BaggageReader {
         return false;
     }
 
-    /** If there are no more children in the current bag, returns null.
+    /**
+     * If there are no more children in the current bag, returns null.
      * 
-     * Otherwise, advances to the next child, enters it, and returns its key. */
+     * Otherwise, advances to the next child, enters it, and returns its key.
+     */
     public BagKey enter() {
         // If the data atoms of the current bag aren't exhausted, drop them
         skipData();
@@ -217,11 +237,13 @@ public class BaggageReader {
         return null;
     }
 
-    /** Indicate the current child has finished parsing. This method will drop any remaining data and/or child atoms
-     * that were not handled.
+    /**
+     * Indicate the current child has finished parsing. This method will drop any remaining data and/or child atoms that
+     * were not handled.
      * 
      * After this call finishes, the next atom is expected to be a bag header of either a sibling, or a sibling of some
-     * parent, grandparent, or other ancester. */
+     * parent, grandparent, or other ancester.
+     */
     public void exit() {
         // Skip any data atoms remaining in the bag
         skipData();
@@ -235,9 +257,11 @@ public class BaggageReader {
         exitCurrentBag();
     }
 
-    /** Indicate that atom parsing has completed.
+    /**
+     * Indicate that atom parsing has completed.
      * 
-     * Remaining data atoms will be discarded and remaining children will be treated as unprocessed */
+     * Remaining data atoms will be discarded and remaining children will be treated as unprocessed
+     */
     public void finish() {
         // Exit any bags that were left open
         while (currentLevel != -1) {
@@ -250,28 +274,34 @@ public class BaggageReader {
         }
     }
 
-    /** @return true if an overflow marker has been encountered parsing up to this point */
+    /**
+     * @return true if an overflow marker has been encountered parsing up to this point
+     */
     public boolean didOverflow() {
         return encounteredOverflow;
     }
 
-    /** If an overflow marker was encountered, we keep track of where the first occurrence of the overflow marker was
+    /**
+     * If an overflow marker was encountered, we keep track of where the first occurrence of the overflow marker was
      * encountered.
      * 
      * This consists of a path of atom headers followed by the overflow marker.
      * 
      * These atoms can be re-merged with baggage atoms to re-add the overflow marker in the correct position.
      * 
-     * @return a list of atoms if overflow was encountered, otherwise null */
+     * @return a list of atoms if overflow was encountered, otherwise null
+     */
     public List<ByteBuffer> overflowAtoms() {
         return overflowAtoms;
     }
 
-    /** If some bags went unprocessed, their atoms are saved.
+    /**
+     * If some bags went unprocessed, their atoms are saved.
      * 
      * These atoms comprise the unprocessed data elements plus the appropriate headers.
      * 
-     * @return a list of atoms if there were unprocessed atoms, otherwise null */
+     * @return a list of atoms if there were unprocessed atoms, otherwise null
+     */
     public List<ByteBuffer> unprocessedAtoms() {
         return unprocessedAtoms.isEmpty() ? null : unprocessedAtoms;
     }

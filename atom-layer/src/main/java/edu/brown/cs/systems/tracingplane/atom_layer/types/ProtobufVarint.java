@@ -6,8 +6,10 @@ import java.io.OutputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-/** Duplicates logic of Protocol Buffers variable length integer encoding, but with different logic for exceptions. This
- * enables us to handle end-of-stream differently to malformed length prefix exceptions or other IO exceptions */
+/**
+ * Duplicates logic of Protocol Buffers variable length integer encoding, but with different logic for exceptions. This
+ * enables us to handle end-of-stream differently to malformed length prefix exceptions or other IO exceptions
+ */
 public class ProtobufVarint {
 
     public static final class EndOfStreamException extends Exception {

@@ -2,7 +2,8 @@ package edu.brown.cs.systems.tracingplane.atom_layer.types;
 
 import java.nio.ByteBuffer;
 
-/** Signed varint (32 bit and 64 bit) that is encoded in such a way that the lexicographic comparison of the binary
+/**
+ * Signed varint (32 bit and 64 bit) that is encoded in such a way that the lexicographic comparison of the binary
  * encoding is consistent with the numeric comparison of the numeric values.
  * 
  * This is like unsigned varints, but with the following:
@@ -14,12 +15,15 @@ import java.nio.ByteBuffer;
  * 
  * Long.MIN_VALUE: 0000 0000 0000 0000 0000 0000 ... (9 bytes worth of zeros) -65: 0011 1111 1011 1111 -64: 0100 0000
  * -19: 0110 1101 -4: 0111 1100 -1: 0111 1111 0: 1000 0000 1: 1000 0001 19: 1001 0011 63: 1011 1111 64: 1100 0000 0100
- * 0000 LONG.MAX_VALUE: 1111 1111 1111 1111 1111 1111 ... (9 bytes worth of ones) */
+ * 0000 LONG.MAX_VALUE: 1111 1111 1111 1111 1111 1111 ... (9 bytes worth of ones)
+ */
 public class SignedLexVarint {
 
-    /** @param value Any integer value
+    /**
+     * @param value Any integer value
      * @return the length of the encoded representation of this value. Values in the range [-2^6, 2^6) use 1 byte;
-     *         [-2^12, -2^6) and [2^6, 2^12) use 2 bytes, and so on */
+     *         [-2^12, -2^6) and [2^6, 2^12) use 2 bytes, and so on
+     */
     public static int encodedLength(int value) {
         if (value < 0) {
             value = -(value + 1);
@@ -37,9 +41,11 @@ public class SignedLexVarint {
         }
     }
 
-    /** @param value Any long value
+    /**
+     * @param value Any long value
      * @return the length of the encoded representation of this value. Values in the range [-2^6, 2^6) use 1 byte;
-     *         [-2^12, -2^6) and [2^6, 2^12) use 2 bytes, and so on */
+     *         [-2^12, -2^6) and [2^6, 2^12) use 2 bytes, and so on
+     */
     public static int encodedLength(long value) {
         if (value < 0) {
             value = -(value + 1);
@@ -52,13 +58,13 @@ public class SignedLexVarint {
             return 3;
         } else if ((value & 0xFFFFFFFFF8000000L) == 0) {
             return 4;
-        }else if ((value & 0xFFFFFFFC00000000L) == 0) {
+        } else if ((value & 0xFFFFFFFC00000000L) == 0) {
             return 5;
-        }else if ((value & 0xFFFFFE0000000000L) == 0) {
+        } else if ((value & 0xFFFFFE0000000000L) == 0) {
             return 6;
-        }else if ((value & 0xFFFF000000000000L) == 0) {
+        } else if ((value & 0xFFFF000000000000L) == 0) {
             return 7;
-        }else if ((value & 0xFF80000000000000L) == 0) {
+        } else if ((value & 0xFF80000000000000L) == 0) {
             return 8;
         } else {
             return 9;

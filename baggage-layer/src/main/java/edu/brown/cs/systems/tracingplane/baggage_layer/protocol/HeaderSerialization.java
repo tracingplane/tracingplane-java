@@ -130,7 +130,7 @@ public class HeaderSerialization {
     public static void writeBagOptions(ByteBuffer buf, BagOptions options) {
         // TODO: implement options; for now do nothing
     }
-    
+
     /**
      * Serialize the full atom for the provided bag at the specified level
      */
@@ -141,7 +141,7 @@ public class HeaderSerialization {
         buf.flip();
         return buf;
     }
-    
+
     /**
      * Serialize the full atom for the provided bag at the specified level
      */

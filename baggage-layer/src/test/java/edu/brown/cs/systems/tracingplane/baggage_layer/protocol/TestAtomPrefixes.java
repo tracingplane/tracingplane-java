@@ -32,7 +32,7 @@ public class TestAtomPrefixes extends TestCase {
         assertEquals(DataPrefix.atomType, AtomType.Data);
         assertEquals(prefix, AtomPrefixes.get(prefix.prefix));
     }
-    
+
     @Test
     public void testIndexedHeaderPrefix() {
         for (int i = 0; i < Level.LEVELS; i++) {
@@ -46,15 +46,15 @@ public class TestAtomPrefixes extends TestCase {
             }
             assertEquals(prefix, AtomPrefixes.get(prefix.prefix));
         }
-        
+
         for (int i = -10; i < 0; i++) {
             assertNull(IndexedHeaderPrefix.prefixFor(i));
         }
-        for (int i = Level.LEVELS; i < Level.LEVELS+10; i++) {
+        for (int i = Level.LEVELS; i < Level.LEVELS + 10; i++) {
             assertNull(IndexedHeaderPrefix.prefixFor(i));
         }
     }
-    
+
     @Test
     public void testKeyedHeaderPrefix() {
         for (int i = 0; i < Level.LEVELS; i++) {
@@ -68,15 +68,15 @@ public class TestAtomPrefixes extends TestCase {
             }
             assertEquals(prefix, AtomPrefixes.get(prefix.prefix));
         }
-        
+
         for (int i = -10; i < 0; i++) {
             assertNull(KeyedHeaderPrefix.prefixFor(i));
         }
-        for (int i = Level.LEVELS; i < Level.LEVELS+10; i++) {
+        for (int i = Level.LEVELS; i < Level.LEVELS + 10; i++) {
             assertNull(KeyedHeaderPrefix.prefixFor(i));
         }
     }
-    
+
     @Test
     public void testCanGetAllPrefixes() {
         for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {

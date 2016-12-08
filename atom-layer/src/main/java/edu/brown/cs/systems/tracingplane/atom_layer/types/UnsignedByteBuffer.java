@@ -19,7 +19,8 @@ public final class UnsignedByteBuffer {
         return lexicographicalComparator().compare(a, b);
     }
 
-    /** Returns a comparator that compares two {@code java.nio.ByteBuffer}s
+    /**
+     * Returns a comparator that compares two {@code java.nio.ByteBuffer}s
      * <a href="http://en.wikipedia.org/wiki/Lexicographical_order">lexicographically</a>. That is, it compares, using
      * {@link #compare(byte, byte)}), the first pair of values that follow any common prefix, or when one array is a
      * prefix of the other, treats the shorter array as the lesser. For example,
@@ -29,7 +30,8 @@ public final class UnsignedByteBuffer {
      * The returned comparator is inconsistent with {@link Object#equals(Object)} (since arrays support only identity
      * equality), but it is consistent with {@link java.util.Arrays#equals(byte[], byte[])}.
      *
-     * @since 2.0 */
+     * @since 2.0
+     */
     public static Comparator<ByteBuffer> lexicographicalComparator() {
         return LexicographicalComparatorHolder.BEST_COMPARATOR;
     }
@@ -39,11 +41,13 @@ public final class UnsignedByteBuffer {
         return LexicographicalComparatorHolder.PureJavaComparator.INSTANCE;
     }
 
-    /** Provides a lexicographical comparator implementation; either a Java implementation or a faster implementation
+    /**
+     * Provides a lexicographical comparator implementation; either a Java implementation or a faster implementation
      * based on {@link Unsafe}.
      *
      * <p>
-     * Uses reflection to gracefully fall back to the Java implementation if {@code Unsafe} isn't available. */
+     * Uses reflection to gracefully fall back to the Java implementation if {@code Unsafe} isn't available.
+     */
     @VisibleForTesting
     static class LexicographicalComparatorHolder {
         static final String UNSAFE_COMPARATOR_NAME =
@@ -82,10 +86,12 @@ public final class UnsignedByteBuffer {
                 }
             }
 
-            /** Returns a sun.misc.Unsafe. Suitable for use in a 3rd party package. Replace with a simple call to
+            /**
+             * Returns a sun.misc.Unsafe. Suitable for use in a 3rd party package. Replace with a simple call to
              * Unsafe.getUnsafe when integrating into a jdk.
              *
-             * @return a sun.misc.Unsafe */
+             * @return a sun.misc.Unsafe
+             */
             private static sun.misc.Unsafe getUnsafe() {
                 try {
                     return sun.misc.Unsafe.getUnsafe();

@@ -9,7 +9,7 @@ public class BaggageLayerException extends Exception {
     public BaggageLayerException(String message) {
         super(message);
     }
-    
+
     public BaggageLayerException(String message, AtomLayerException e) {
         super(message, e);
     }

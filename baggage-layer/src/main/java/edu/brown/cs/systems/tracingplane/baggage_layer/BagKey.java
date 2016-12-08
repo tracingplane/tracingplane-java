@@ -8,7 +8,8 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.Ind
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.HeaderSerialization;
 
-/** <p>
+/**
+ * <p>
  * A {@link BagKey} is used to look up data items and child bags within a baggage instance. A {@link BagPath} is a list
  * of zero or more bag keys that acts much like a path in a file system.
  * </p>
@@ -19,11 +20,12 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.HeaderSerializat
  * fields are statically assigned for efficiency in more established protocols. It is recommended to use named keys for
  * ad-hoc data.
  * </p>
-*/
+ */
 public abstract class BagKey implements Comparable<BagKey> {
 
-    /** Zero or more BagKeys represent a path to data in baggage. Paths can be used to access data from
-     * BaggageContents. */
+    /**
+     * Zero or more BagKeys represent a path to data in baggage. Paths can be used to access data from BaggageContents.
+     */
     public static class BagPath implements Comparable<BagPath> {
 
         public final BagKey[] keys;
@@ -50,38 +52,50 @@ public abstract class BagKey implements Comparable<BagKey> {
             return new BagPath(newKeys);
         }
 
-        /** Creates and appends a new indexed key to the end of this bag path. Returns a new BagPath that is equal to
-         * this path plus the created key appended to the end. */
+        /**
+         * Creates and appends a new indexed key to the end of this bag path. Returns a new BagPath that is equal to
+         * this path plus the created key appended to the end.
+         */
         public BagPath append(int index) {
             return append(indexed(index));
         }
 
-        /** Creates and appends a new indexed key to the end of this bag path. Returns a new BagPath that is equal to
-         * this path plus the created key appended to the end. */
+        /**
+         * Creates and appends a new indexed key to the end of this bag path. Returns a new BagPath that is equal to
+         * this path plus the created key appended to the end.
+         */
         public BagPath append(int index, BagOptions options) {
             return append(indexed(index, options));
         }
 
-        /** Creates and appends a new named key to the end of this bag path. Returns a new BagPath that is equal to this
-         * path plus the created key appended to the end. */
+        /**
+         * Creates and appends a new named key to the end of this bag path. Returns a new BagPath that is equal to this
+         * path plus the created key appended to the end.
+         */
         public BagPath append(ByteBuffer key) {
             return append(named(key));
         }
 
-        /** Creates and appends a new named key to the end of this bag path. Returns a new BagPath that is equal to this
-         * path plus the created key appended to the end. */
+        /**
+         * Creates and appends a new named key to the end of this bag path. Returns a new BagPath that is equal to this
+         * path plus the created key appended to the end.
+         */
         public BagPath append(String key) {
             return append(named(key));
         }
 
-        /** Creates and appends a new named key to the end of this bag path. Returns a new BagPath that is equal to this
-         * path plus the created key appended to the end. */
+        /**
+         * Creates and appends a new named key to the end of this bag path. Returns a new BagPath that is equal to this
+         * path plus the created key appended to the end.
+         */
         public BagPath append(ByteBuffer key, BagOptions options) {
             return append(named(key, options));
         }
 
-        /** Creates and appends a new named key to the end of this bag path. Returns a new BagPath that is equal to this
-         * path plus the created key appended to the end. */
+        /**
+         * Creates and appends a new named key to the end of this bag path. Returns a new BagPath that is equal to this
+         * path plus the created key appended to the end.
+         */
         public BagPath append(String key, BagOptions options) {
             return append(named(key, options));
         }

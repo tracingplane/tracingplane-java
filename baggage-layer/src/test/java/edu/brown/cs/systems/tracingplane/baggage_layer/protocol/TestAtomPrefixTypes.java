@@ -32,7 +32,7 @@ public class TestAtomPrefixTypes extends TestCase {
             assertEquals(0, type.byteValue & 0xFC); // remove final two bits, check rest are zero
         }
     }
-    
+
     @Test
     public void testValidLevels() {
         for (int i = -10; i < 0; i++) {
@@ -48,7 +48,7 @@ public class TestAtomPrefixTypes extends TestCase {
             assertNull(Level.get(i));
         }
     }
-    
+
     @Test
     public void testLevelIdentity() {
         for (int i = 0; i < Level.LEVELS; i++) {
@@ -64,7 +64,7 @@ public class TestAtomPrefixTypes extends TestCase {
             }
         }
     }
-    
+
     @Test
     public void testHeaderTypeIdentity() {
         for (HeaderType a : HeaderType.values()) {
@@ -79,7 +79,7 @@ public class TestAtomPrefixTypes extends TestCase {
             }
         }
     }
-    
+
     @Test
     public void testValidAtomTypes() {
         assertNull(AtomType.fromByte((byte) 0));
@@ -87,7 +87,7 @@ public class TestAtomPrefixTypes extends TestCase {
         assertNotNull(AtomType.fromByte((byte) 128));
         assertNull(AtomType.fromByte((byte) 192));
     }
-    
+
     @Test
     public void testValidHeaderTypes() {
         assertNull(HeaderType.fromByte((byte) 0));
@@ -95,7 +95,7 @@ public class TestAtomPrefixTypes extends TestCase {
         assertNotNull(HeaderType.fromByte((byte) 2));
         assertNull(HeaderType.fromByte((byte) 3));
     }
-    
+
     @Test
     public void testAllBytes() {
         for (int i = 0; i < 256; i++) {

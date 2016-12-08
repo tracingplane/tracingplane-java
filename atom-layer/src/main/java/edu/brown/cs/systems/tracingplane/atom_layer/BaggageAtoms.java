@@ -21,8 +21,10 @@ public interface BaggageAtoms extends Baggage {
         return AtomLayerCompatibility.atoms(atomLayer, atoms);
     }
 
-    /** Gets the serialized byte array atoms for the thread's current context, if there is one Serialize the provided
-     * BaggageAtoms object into the byte-array representation. */
+    /**
+     * Gets the serialized byte array atoms for the thread's current context, if there is one Serialize the provided
+     * BaggageAtoms object into the byte-array representation.
+     */
     public static List<ByteBuffer> atoms() {
         return AtomLayerCompatibility.atoms(atomLayer, ThreadLocalBaggage.get());
     }

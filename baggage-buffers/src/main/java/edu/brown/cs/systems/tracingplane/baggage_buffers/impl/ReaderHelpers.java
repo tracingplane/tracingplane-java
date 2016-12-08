@@ -30,8 +30,10 @@ public class ReaderHelpers {
         return null;
     }
 
-    /** Get the next data item and transform bytebuffer to type using the provided function. If the cast function
-     * returns null, it will move on to the next data item. */
+    /**
+     * Get the next data item and transform bytebuffer to type using the provided function. If the cast function returns
+     * null, it will move on to the next data item.
+     */
     public static <T> T castNext(BaggageReader reader, Function<ByteBuffer, T> cast) {
         ByteBuffer buf = null;
         T out = null;
