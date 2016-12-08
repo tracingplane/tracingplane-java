@@ -5,7 +5,29 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-// TODO: tests
+import com.google.common.collect.Lists;
+
+/**
+ * <p>
+ * Merges multiple iterators and produces elements according to the provided
+ * comparator.
+ * </p>
+ * <p>
+ * The input iterators do not need to be sorted. However, if two iterators
+ * produce the same element at the same time, the element will only be output
+ * once.
+ * </p>
+ * 
+ * <p>
+ * eg, for inputs [1, 2, 3] and [0, 1, 2], the output will be [0, 1, 2, 3]
+ * <br />
+ * however, for inputs [1, 2, 1] and [1, 3, 2], the output will be [1, 2, 1, 3,
+ * 2]
+ * </p>
+ * 
+ *
+ * @param <T>
+ */
 public class MergeIterator<T> implements Iterator<T> {
 
 	private class IteratorContainer {
@@ -28,6 +50,10 @@ public class MergeIterator<T> implements Iterator<T> {
 	private final List<IteratorContainer> iterators;
 	private final List<IteratorContainer> iteratorsWithNextValue;
 	private T nextValue = null;
+	
+	public MergeIterator(Comparator<? super T> comparator, Iterator<T>... iterators) {
+		this(Lists.newArrayList(iterators), comparator);
+	}
 
 	public MergeIterator(List<Iterator<T>> iterators, Comparator<? super T> comparator) {
 		int size = iterators.size();
@@ -38,11 +64,11 @@ public class MergeIterator<T> implements Iterator<T> {
 		this.nextValue = null;
 
 		for (Iterator<? extends T> it : iterators) {
-			if (it.hasNext()) {
+			if (it != null && it.hasNext()) {
 				this.iterators.add(new IteratorContainer(it));
 			}
 		}
-		
+
 		advance();
 	}
 
@@ -54,7 +80,7 @@ public class MergeIterator<T> implements Iterator<T> {
 				iterators.remove(it);
 			}
 		}
-		
+
 		// Get the next min value
 		T next = null;
 		for (IteratorContainer it : iterators) {
