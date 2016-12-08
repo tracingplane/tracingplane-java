@@ -5,8 +5,8 @@ import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayerFactory;
 
 public class NullTransitLayerFactory implements TransitLayerFactory {
 
-	public TransitLayer<?> newTransitLayer() {
-		return new NullTransitLayer();
-	}
+    public TransitLayer<?> newTransitLayer() {
+        return new NullTransitLayer();
+    }
 
 }

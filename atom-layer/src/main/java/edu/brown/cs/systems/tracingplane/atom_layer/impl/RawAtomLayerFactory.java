@@ -5,9 +5,9 @@ import edu.brown.cs.systems.tracingplane.atom_layer.AtomLayerFactory;
 
 public class RawAtomLayerFactory implements AtomLayerFactory {
 
-	@Override
-	public AtomLayer<?> newAtomLayer() {
-		return new RawAtomLayerImpl();
-	}
+    @Override
+    public AtomLayer<?> newAtomLayer() {
+        return new RawAtomLayerImpl();
+    }
 
 }
