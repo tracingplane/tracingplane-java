@@ -63,14 +63,14 @@ public class BaggageWriter {
         currentLevel--;
     }
 
-    private void writeHeader(int level, BagKey.Indexed field) {
-        ByteBuffer buf = backing.newAtom(10 + BagOptionsSerialization.serializedSize(field.options));
-        BagKeySerialization.write(level, field, buf);
+    private void writeHeader(int level, BagKey.Indexed bagKey) {
+        ByteBuffer buf = backing.newAtom(HeaderSerialization.serializedSize(bagKey));
+        HeaderSerialization.writeAtom(buf, bagKey, level);
     }
 
-    private void writeHeader(int level, BagKey.Keyed field) {
-        ByteBuffer buf = backing.newAtom(field.key.remaining() + BagOptionsSerialization.serializedSize(field.options));
-        BagKeySerialization.write(level, field, buf);
+    private void writeHeader(int level, BagKey.Keyed bagKey) {
+        ByteBuffer buf = backing.newAtom(HeaderSerialization.serializedSize(bagKey));
+        HeaderSerialization.writeAtom(buf, bagKey, level);
 
     }
 

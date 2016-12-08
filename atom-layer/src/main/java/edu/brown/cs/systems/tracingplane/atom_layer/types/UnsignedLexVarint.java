@@ -27,41 +27,56 @@ import java.nio.ByteBuffer;
  * 
  * @author jon */
 public class UnsignedLexVarint {
+    
+    public static void main(String[] args) {
+        long v = 128;
+        for (int i = 0; i < 9; i++) {
+            long mask = - v;
+            System.out.println(v + " = 0x" + Long.toHexString(mask).toUpperCase() + "L");
+            v *= 128;
+        }
+    }
 
     /** @param value Any integer value
      * @return the length of the encoded representation of this value. Values in the range [0, 2^7) use 1 byte; [2^7,
      *         2^14) use 2 bytes, and so on. Negative values use 5 bytes. */
     public static int encodedLength(int value) {
-        if (value < 0) {
+        if ((value & 0xFFFFFF80) == 0) {
+            return 1;
+        } else if ((value & 0xFFFFC000) == 0) {
+            return 2;
+        } else if ((value & 0xFFE00000) == 0) {
+            return 3;
+        } else if ((value & 0xF0000000) == 0) {
+            return 4;
+        } else {
             return 5;
         }
-        long cutoff = 128;
-        for (int i = 1; i < 5; i++) {
-            if (value < cutoff) {
-                return i;
-            } else {
-                cutoff *= 128;
-            }
-        }
-        return 5;
     }
 
     /** @param value Any long value
      * @return the length of the encoded representation of this value. Values in the range [0, 2^7) use 1 byte; [2^7,
      *         2^14) use 2 bytes, and so on. Negative values use 9 bytes. */
     public static int encodedLength(long value) {
-        if (value < 0) {
+        if ((value & 0xFFFFFFFFFFFFFF80L) == 0) {
+            return 1;
+        } else if ((value & 0xFFFFFFFFFFFFC000L) == 0) {
+            return 2;
+        } else if ((value & 0xFFFFFFFFFFE00000L) == 0) {
+            return 3;
+        } else if ((value & 0xFFFFFFFFF0000000L) == 0) {
+            return 4;
+        } else if ((value & 0xFFFFFFF800000000L) == 0) {
+            return 5;
+        } else if ((value & 0xFFFFFC0000000000L) == 0) {
+            return 6;
+        } else if ((value & 0xFFFE000000000000L) == 0) {
+            return 7;
+        } else if ((value & 0xFF00000000000000L) == 0) {
+            return 8;
+        } else {
             return 9;
         }
-        long cutoff = 128;
-        for (int i = 1; i < 9; i++) {
-            if (value < cutoff) {
-                return i;
-            } else {
-                cutoff *= 128;
-            }
-        }
-        return 9;
     }
 
     public static int writeLexVarUInt32(ByteBuffer buf, int value) {

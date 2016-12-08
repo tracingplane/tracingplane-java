@@ -24,15 +24,17 @@ public class SignedLexVarint {
         if (value < 0) {
             value = -(value + 1);
         }
-        long cutoff = 64;
-        for (int i = 1; i < 5; i++) {
-            if (value < cutoff) {
-                return i;
-            } else {
-                cutoff *= 128;
-            }
+        if ((value & 0xFFFFFFC0) == 0) {
+            return 1;
+        } else if ((value & 0xFFFFE000) == 0) {
+            return 2;
+        } else if ((value & 0xFFF00000) == 0) {
+            return 3;
+        } else if ((value & 0xF8000000) == 0) {
+            return 4;
+        } else {
+            return 5;
         }
-        return 5;
     }
 
     /** @param value Any long value
@@ -42,15 +44,25 @@ public class SignedLexVarint {
         if (value < 0) {
             value = -(value + 1);
         }
-        long cutoff = 64;
-        for (int i = 1; i < 9; i++) {
-            if (value < cutoff) {
-                return i;
-            } else {
-                cutoff *= 128;
-            }
+        if ((value & 0xFFFFFFFFFFFFFFC0L) == 0) {
+            return 1;
+        } else if ((value & 0xFFFFFFFFFFFFE000L) == 0) {
+            return 2;
+        } else if ((value & 0xFFFFFFFFFFF00000L) == 0) {
+            return 3;
+        } else if ((value & 0xFFFFFFFFF8000000L) == 0) {
+            return 4;
+        }else if ((value & 0xFFFFFFFC00000000L) == 0) {
+            return 5;
+        }else if ((value & 0xFFFFFE0000000000L) == 0) {
+            return 6;
+        }else if ((value & 0xFFFF000000000000L) == 0) {
+            return 7;
+        }else if ((value & 0xFF80000000000000L) == 0) {
+            return 8;
+        } else {
+            return 9;
         }
-        return 9;
     }
 
     public static int writeLexVarInt32(ByteBuffer buf, int value) {

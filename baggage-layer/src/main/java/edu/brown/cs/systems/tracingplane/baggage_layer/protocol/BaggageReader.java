@@ -9,12 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.Queues;
 import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayerException;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.AtomPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.HeaderPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
 
 /** TODO: documentation, tests, test exceptions and so forth */
 public class BaggageReader {
@@ -204,10 +204,10 @@ public class BaggageReader {
 
         while (hasChild()) {
             try {
-                BagKey key = BagKeySerialization.parse((HeaderPrefix) nextAtomPrefix, nextAtom);
+                BagKey key = HeaderSerialization.parse((HeaderPrefix) nextAtomPrefix, nextAtom);
                 enterNextBag();
                 return key;
-            } catch (AtomLayerException e) {
+            } catch (BaggageLayerException e) {
                 log.error(String.format("Unable to parse bag key for header %s %s", nextAtomPrefix, nextAtom), e);
                 skipChild();
                 continue;

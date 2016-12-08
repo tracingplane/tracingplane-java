@@ -9,8 +9,10 @@ public class ByteBuffers {
     public static final Comparator<ByteBuffer> LEXICOGRAPHIC_COMPARATOR =
             UnsignedByteBuffer.lexicographicalComparator();
 
-    /** Copies all remaining bytes from src to dest. This is done without modifying the src's position. However, the
-     * dest's position is updated. */
+    /**
+     * Copies all remaining bytes from src to dest. This is done without modifying the src's position. However, the
+     * dest's position is updated.
+     */
     public static void copyTo(ByteBuffer src, ByteBuffer dest) {
         if (src == null || dest == null) {
             return;
@@ -35,8 +37,10 @@ public class ByteBuffers {
         return buf;
     }
 
-    /** Copies the remaining bytes form src to a new byte buffer. This is done without modifying the src position. The
-     * dest position will be 0. */
+    /**
+     * Copies the remaining bytes form src to a new byte buffer. This is done without modifying the src position. The
+     * dest position will be 0.
+     */
     public static ByteBuffer copyRemaining(ByteBuffer src) {
         ByteBuffer buf = ByteBuffer.allocate(src.remaining());
         copyTo(src, buf);
@@ -47,6 +51,18 @@ public class ByteBuffers {
     /** Copies the remaining bytes form src to a byte array. This is done without modifying the src position. */
     public static byte[] copyRemainingBytes(ByteBuffer src) {
         return copyRemaining(src).array();
+    }
+
+    /**
+     * Create a ByteBuffer with the same backing array as src, looking at the next length bytes of src. The position of
+     * src is modified.
+     */
+    public static ByteBuffer slice(ByteBuffer src, int length) {
+        ByteBuffer buf = src.duplicate();
+        int srcPosition = src.position() + length;
+        src.position(srcPosition);
+        buf.limit(srcPosition);
+        return buf;
     }
 
 }

@@ -6,7 +6,7 @@ import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.AtomPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BagKeySerialization;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.HeaderSerialization;
 
 /** <p>
  * A {@link BagKey} is used to look up data items and child bags within a baggage instance. A {@link BagPath} is a list
@@ -214,7 +214,7 @@ public abstract class BagKey implements Comparable<BagKey> {
         @Override
         public ByteBuffer atomPayload() {
             if (byteRepr == null) {
-                byteRepr = BagKeySerialization.serialize(index, options);
+                byteRepr = HeaderSerialization.serializePayload(this);
             }
             return byteRepr;
         }
@@ -273,7 +273,7 @@ public abstract class BagKey implements Comparable<BagKey> {
         @Override
         public ByteBuffer atomPayload() {
             if (byteRepr == null) {
-                byteRepr = BagKeySerialization.serialize(key, options);
+                byteRepr = HeaderSerialization.serializePayload(this);
             }
             return byteRepr;
         }

@@ -3,10 +3,10 @@ package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayerException;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.AtomType;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.HeaderType;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
@@ -123,7 +123,7 @@ public class AtomPrefixes {
             return this.level.level;
         }
 
-        abstract BagKey parse(ByteBuffer buf) throws AtomLayerException;
+        abstract BagKey parse(ByteBuffer buf) throws BaggageLayerException;
 
     }
 
@@ -159,8 +159,8 @@ public class AtomPrefixes {
         }
 
         @Override
-        BagKey parse(ByteBuffer buf) throws AtomLayerException {
-            return BagKeySerialization.parseIndexed(buf);
+        BagKey parse(ByteBuffer buf) throws BaggageLayerException {
+            return HeaderSerialization.parseIndexedHeaderPayload(buf);
         }
 
     }
@@ -197,8 +197,8 @@ public class AtomPrefixes {
         }
 
         @Override
-        BagKey parse(ByteBuffer buf) throws AtomLayerException {
-            return BagKeySerialization.parseKeyed(buf);
+        BagKey parse(ByteBuffer buf) throws BaggageLayerException {
+            return HeaderSerialization.parseKeyedHeaderPayload(buf);
         }
 
     }
