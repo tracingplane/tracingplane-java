@@ -5,8 +5,6 @@ import java.util.Comparator;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.UnsignedByteBuffer;
 import junit.framework.TestCase;
 
 public class TestUnsignedByteBuffer extends TestCase {

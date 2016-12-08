@@ -6,7 +6,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.tracingplane.atom_layer.types.ProtobufVarint;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.ProtobufVarint.MalformedVarintException;
 import junit.framework.TestCase;
 

@@ -5,10 +5,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.SignedLexVarint;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
 import junit.framework.TestCase;
 
 public class TestXSignedVarint32 extends TestCase {

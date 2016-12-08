@@ -51,7 +51,7 @@ public class MergeIterator<T> implements Iterator<T> {
 	private final List<IteratorContainer> iteratorsWithNextValue;
 	private T nextValue = null;
 	
-	public MergeIterator(Comparator<? super T> comparator, Iterator<T>... iterators) {
+	public MergeIterator(Comparator<? super T> comparator, @SuppressWarnings("unchecked") Iterator<T>... iterators) {
 		this(Lists.newArrayList(iterators), comparator);
 	}
 

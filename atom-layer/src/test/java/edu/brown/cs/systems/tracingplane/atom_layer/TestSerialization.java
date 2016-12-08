@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.tracingplane.atom_layer.AtomLayerSerialization;
 import junit.framework.TestCase;
 
 public class TestSerialization extends TestCase {

@@ -3,8 +3,8 @@ package edu.brown.cs.systems.tracingplane.atom_layer.impl;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.atom_layer.AtomLayer;
+import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
 
 /**
  * The simple implementation of the context layer that can be used in lieu of a

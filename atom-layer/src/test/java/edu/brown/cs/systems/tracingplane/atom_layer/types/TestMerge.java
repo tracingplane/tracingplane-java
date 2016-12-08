@@ -7,8 +7,6 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
 import junit.framework.TestCase;
 
 public class TestMerge extends TestCase {

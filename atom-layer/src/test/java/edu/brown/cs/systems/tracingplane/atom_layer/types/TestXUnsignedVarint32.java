@@ -6,10 +6,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.UnsignedLexVarint;
 import junit.framework.TestCase;
 
 public class TestXUnsignedVarint32 extends TestCase {

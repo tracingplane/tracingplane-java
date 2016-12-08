@@ -7,8 +7,6 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
-import edu.brown.cs.systems.tracingplane.atom_layer.AtomLayerSerialization;
 import junit.framework.TestCase;
 
 public class TestOverflowMarker extends TestCase {
