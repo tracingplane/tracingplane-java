@@ -171,17 +171,17 @@ public class BaggageWriter {
         ByteBuffer newAtom(int expectedSize) {
             finish();
             ensureCapacity(expectedSize);
-            current = backingBuffer.duplicate();
+            current = backingBuffer.slice();
+            current.limit(expectedSize);
+            backingBuffer.position(backingBuffer.position() + expectedSize);
             return current;
         }
 
         void finish() {
             if (current != null) {
-                int currentStart = backingBuffer.position();
-                int currentEnd = current.position();
-                current.position(currentStart);
-                current.limit(currentEnd);
-                backingBuffer.position(currentEnd);
+                int unused = current.remaining();
+                current.flip();
+                backingBuffer.position(backingBuffer.position() - unused);
                 addAtom(current);
                 current = null;
             }

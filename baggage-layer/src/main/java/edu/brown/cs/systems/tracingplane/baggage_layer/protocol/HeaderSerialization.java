@@ -48,7 +48,11 @@ public class HeaderSerialization {
      * serialization
      */
     public static int serializedSize(BagOptions options) {
-        return 0;
+        if (options.isDefault()) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
 
     /**
@@ -105,7 +109,9 @@ public class HeaderSerialization {
      */
     public static void writeAtomPayload(ByteBuffer buf, BagKey.Indexed bagKey) {
         UnsignedLexVarint.writeLexVarUInt32(buf, bagKey.index);
-        writeBagOptions(buf, bagKey.options);
+        if (bagKey.options != BagOptions.defaultOptions) {
+            writeBagOptions(buf, bagKey.options);
+        }
     }
 
     /**
@@ -115,7 +121,6 @@ public class HeaderSerialization {
      * @param bagKey the bagKey to write
      */
     public static void writeAtomPayload(ByteBuffer buf, BagKey.Keyed bagKey) {
-        UnsignedLexVarint.writeLexVarUInt32(buf, bagKey.key.remaining());
         ByteBuffers.copyTo(bagKey.key, buf);
         writeBagOptions(buf, bagKey.options);
     }
@@ -128,7 +133,10 @@ public class HeaderSerialization {
      * @param options the bag options
      */
     public static void writeBagOptions(ByteBuffer buf, BagOptions options) {
-        // TODO: implement options; for now do nothing
+        if (options == null) {
+            options = BagOptions.defaultOptions;
+        }
+        buf.put(options.byteValue);
     }
 
     /**
@@ -159,10 +167,7 @@ public class HeaderSerialization {
      * payload.
      */
     public static ByteBuffer serializePayload(BagKey.Indexed bagKey) {
-        ByteBuffer buf = ByteBuffer.allocate(serializedSize(bagKey));
-        buf.position(1);
-        writeAtomPayload(buf, bagKey);
-        buf.flip();
+        ByteBuffer buf = serialize(bagKey, 0);
         buf.position(1);
         return buf;
     }
@@ -173,10 +178,7 @@ public class HeaderSerialization {
      * payload.
      */
     public static ByteBuffer serializePayload(BagKey.Keyed bagKey) {
-        ByteBuffer buf = ByteBuffer.allocate(serializedSize(bagKey));
-        buf.position(1);
-        writeAtomPayload(buf, bagKey);
-        buf.flip();
+        ByteBuffer buf = serialize(bagKey, 0);
         buf.position(1);
         return buf;
     }
@@ -236,8 +238,11 @@ public class HeaderSerialization {
     public static BagKey parseIndexedHeaderPayload(ByteBuffer buf) throws BaggageLayerException {
         try {
             int index = UnsignedLexVarint.readLexVarUInt32(buf);
-            BagOptions options = parseBagOptions(buf);
-            return BagKey.indexed(index, options);
+            if (buf.hasRemaining()) {
+                return BagKey.indexed(index, parseBagOptions(buf));
+            } else {
+                return BagKey.indexed(index);
+            }
         } catch (AtomLayerException e) {
             throw new BaggageLayerException("Unable to parse IndexedHeader payload", e);
         }
@@ -251,52 +256,24 @@ public class HeaderSerialization {
      * @throws BaggageLayerException if the atom payload could not be parsed
      */
     public static BagKey parseKeyedHeaderPayload(ByteBuffer buf) throws BaggageLayerException {
-        try {
-            int keyLength = UnsignedLexVarint.readLexVarUInt32(buf);
-            ByteBuffer key = ByteBuffers.slice(buf, keyLength);
-            BagOptions options = parseBagOptions(buf);
-            return BagKey.named(key, options);
-        } catch (AtomLayerException e) {
-            throw new BaggageLayerException("Unable to parse KeyedHeader payload", e);
-        }
+        int keySize = buf.remaining() - 1;
+        ByteBuffer key = buf.slice();
+        key.limit(keySize);
+        buf.position(buf.position() + keySize);
+        BagOptions options = parseBagOptions(buf);
+        return BagKey.named(key, options);
     }
 
     /**
-     * Parse bag options
-     * 
-     * @param buf the payload of the atom
-     * @return parsed bag options
+     * Parse bag options. If the options are invalid, throws a BaggageLayerException
      */
-    public static BagOptions parseBagOptions(ByteBuffer buf) {
-        // TODO: implement bagoptions
-        return BagOptions.DEFAULT_OPTIONS;
+    public static BagOptions parseBagOptions(ByteBuffer buf) throws BaggageLayerException {
+        byte optionsValue = buf.get();
+        BagOptions options = BagOptions.valueOf(optionsValue);
+        if (options == null) {
+            throw new BaggageLayerException(String.format("Got invalid bag options %d", optionsValue));
+        }
+        return options;
     }
-
-    //
-    // public static int compare(BagKey.Indexed bagKey, ByteBuffer buf) throws AtomLayerException {
-    // int bufIndex = UnsignedLexVarint.readLexVarUInt32(buf);
-    // if (bufIndex < bagKey.index) {
-    // return 1;
-    // } else if (bufIndex == bagKey.index) {
-    // return BagOptionsSerialization.compare(bagKey.options, buf);
-    // } else {
-    // return -1;
-    // }
-    // }
-    //
-    // public static int compare(BagKey.Keyed bagKey, ByteBuffer buf) throws AtomLayerException {
-    // int keyLength = UnsignedLexVarint.readLexVarUInt32(buf);
-    // int limit = buf.limit();
-    // buf.limit(buf.position() + keyLength);
-    //
-    // int keyComparison = Lexicographic.compare(bagKey.key, buf);
-    // if (keyComparison != 0) {
-    // return keyComparison;
-    // } else {
-    // buf.position(buf.limit());
-    // buf.limit(limit);
-    // return BagOptionsSerialization.compare(bagKey.options, buf);
-    // }
-    // }
 
 }

@@ -2,7 +2,10 @@ package edu.brown.cs.systems.tracingplane.baggage_layer;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import com.google.common.collect.Lists;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.AtomPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
@@ -149,7 +152,7 @@ public abstract class BagKey implements Comparable<BagKey> {
 
     public static BagKey indexed(int index, BagOptions options) {
         if (options == null) {
-            options = BagOptions.DEFAULT_OPTIONS;
+            options = BagOptions.defaultOptions;
         }
         return new Indexed(index, options);
     }
@@ -168,7 +171,7 @@ public abstract class BagKey implements Comparable<BagKey> {
 
     public static BagKey named(ByteBuffer name, BagOptions options) {
         if (options == null) {
-            options = BagOptions.DEFAULT_OPTIONS;
+            options = BagOptions.defaultOptions;
         }
         if (name == null) {
             name = ByteBuffer.allocate(0);
@@ -290,6 +293,15 @@ public abstract class BagKey implements Comparable<BagKey> {
                 byteRepr = HeaderSerialization.serializePayload(this);
             }
             return byteRepr;
+        }
+        
+        @Override
+        public String toString() {
+            List<String> bytes = Lists.newArrayList();
+            for (int i = 0; i < key.remaining(); i++) {
+                bytes.add(TypeUtils.toHexString(key.get(key.position() + i)));
+            }
+            return String.format("Keyed %s %s", StringUtils.join(bytes, " "), options);
         }
 
     }

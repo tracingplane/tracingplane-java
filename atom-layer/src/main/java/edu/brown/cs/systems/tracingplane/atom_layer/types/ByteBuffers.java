@@ -53,16 +53,4 @@ public class ByteBuffers {
         return copyRemaining(src).array();
     }
 
-    /**
-     * Create a ByteBuffer with the same backing array as src, looking at the next length bytes of src. The position of
-     * src is modified.
-     */
-    public static ByteBuffer slice(ByteBuffer src, int length) {
-        ByteBuffer buf = src.duplicate();
-        int srcPosition = src.position() + length;
-        src.position(srcPosition);
-        buf.limit(srcPosition);
-        return buf;
-    }
-
 }
