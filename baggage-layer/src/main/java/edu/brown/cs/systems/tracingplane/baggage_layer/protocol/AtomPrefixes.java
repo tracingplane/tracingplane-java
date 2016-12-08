@@ -194,7 +194,7 @@ public class AtomPrefixes {
 
 		public static final AtomType atomType = AtomType.Data;
 		public static final byte prefix = atomType.byteValue;
-		private static final DataPrefix instance = new DataPrefix();
+		static final DataPrefix instance = new DataPrefix();
 
 		private DataPrefix() {
 			super(atomType, DataPrefix.prefix);
