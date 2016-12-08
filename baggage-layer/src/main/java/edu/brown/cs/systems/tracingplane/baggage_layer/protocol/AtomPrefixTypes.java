@@ -8,8 +8,8 @@ public class AtomPrefixTypes {
 
     private AtomPrefixTypes() {}
 
-    private static final AtomType[] bagTypes = new AtomType[4];
-    private static final HeaderType[] headerTypes = new HeaderType[4];
+    private static final AtomType[] bagTypes = new AtomType[AtomType.VALUES];
+    private static final HeaderType[] headerTypes = new HeaderType[HeaderType.VALUES];
 
     /** The first two bits of a prefix is the atom type:
      * 
@@ -22,6 +22,9 @@ public class AtomPrefixTypes {
      * has no prefix) and therefore lexicographically less than all other atoms */
     public enum AtomType {
         Data(1), Header(2);
+        
+        public static final int BITS = 2;
+        public static final int VALUES = 4;
 
         public final int id;
         public final byte byteValue;
@@ -85,9 +88,17 @@ public class AtomPrefixTypes {
             this.level = level;
             this.byteValue = (byte) (((15 - level) << 2) & 0x3C);
         }
+        
+        public static boolean isValidLevel(int level) {
+            return (level & 0xF0) == 0;
+        }
 
         public static Level get(int level) {
-            return levels[level];
+            if (isValidLevel(level)) {
+                return levels[level];
+            } else {
+                return null;
+            }
         }
 
         public static int valueOf(byte b) {
@@ -113,6 +124,9 @@ public class AtomPrefixTypes {
      * 11 is not currently used */
     public enum HeaderType {
         Indexed(1), Keyed(2);
+        
+        public static final int BITS = 2;
+        public static final int VALUES = 4;
 
         public final int id;
         public final byte byteValue;
@@ -120,6 +134,7 @@ public class AtomPrefixTypes {
         private HeaderType(int id) {
             this.id = id;
             this.byteValue = (byte) (id & 0x03);
+            headerTypes[id] = this;
         }
 
         /** Inspect the final two bits of the provided byte and return the corresponding {@link HeaderType} */

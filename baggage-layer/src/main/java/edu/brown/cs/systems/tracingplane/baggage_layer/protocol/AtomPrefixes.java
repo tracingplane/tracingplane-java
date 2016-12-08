@@ -11,9 +11,16 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.HeaderType;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
 
-/** Logic for byte prefixes of serialized bags
+/** <p>
+ * This class has the logic for creating and checking bag prefixes. It does not directly create or deal with bit
+ * representations; that is contained in {@link AtomPrefixTypes}.
+ * </p>
  * 
- * TODO: documentation */
+ * <p>
+ * The baggage protocol only uses the first byte of an atom as a prefix. Consequently, during parsing, instead of
+ * interpreting the first byte, we just look it up in an array of 256 prefix objects.
+ * </p>
+*/
 public class AtomPrefixes {
 
     private static final AtomPrefix[] prefixes;
@@ -47,6 +54,7 @@ public class AtomPrefixes {
 
     private AtomPrefixes() {}
 
+    /** Get the {@link AtomPrefix} object for the specified byte */
     public static AtomPrefix get(byte prefix) {
         if (prefix >= 0) {
             return prefixes[prefix];
@@ -55,6 +63,7 @@ public class AtomPrefixes {
         }
     }
 
+    /** AtomPrefix has some convenience methods for checking what kind of prefix a byte is and what it supports */
     public static abstract class AtomPrefix implements Comparable<AtomPrefix> {
 
         protected final AtomType atomType;
@@ -132,7 +141,11 @@ public class AtomPrefixes {
         }
 
         public static IndexedHeaderPrefix prefixFor(int level) {
-            return prefixes[level];
+            if (Level.isValidLevel(level)) {
+                return prefixes[level];
+            } else {
+                return null;
+            }
         }
 
         private IndexedHeaderPrefix(Level level) {
@@ -166,7 +179,11 @@ public class AtomPrefixes {
         }
 
         public static KeyedHeaderPrefix prefixFor(int level) {
-            return prefixes[level];
+            if (Level.isValidLevel(level)) {
+                return prefixes[level];
+            } else {
+                return null;
+            }
         }
 
         private KeyedHeaderPrefix(Level level) {
