@@ -149,7 +149,7 @@ public class TestMergeIterator extends TestCase {
             list.add(r.nextInt());
         }
 
-        List<Iterator<Integer>> iterators = Lists.newArrayList(list.iterator());
+        List<Iterator<Integer>> iterators = Lists.<Iterator<Integer>>newArrayList(list.iterator());
         MergeIterator<Integer> merged = new MergeIterator<Integer>(iterators, integerComparator);
 
         for (Integer i = 0; i < 100; i++) {
@@ -163,7 +163,7 @@ public class TestMergeIterator extends TestCase {
     @Test
     public void testEmptyIterator() {
         List<Integer> empty = Lists.newArrayList();
-        List<Iterator<Integer>> iterators = Lists.newArrayList(empty.iterator());
+        List<Iterator<Integer>> iterators = Lists.<Iterator<Integer>>newArrayList(empty.iterator());
         MergeIterator<Integer> merged = new MergeIterator<Integer>(iterators, integerComparator);
         assertFalse(merged.hasNext());
     }
@@ -171,7 +171,7 @@ public class TestMergeIterator extends TestCase {
     @Test
     public void testMultipleEmptyIterators() {
         List<Integer> empty = Lists.newArrayList();
-        List<Iterator<Integer>> iterators = Lists.newArrayList(empty.iterator(), empty.iterator(), empty.iterator());
+        List<Iterator<Integer>> iterators = Lists.<Iterator<Integer>>newArrayList(empty.iterator(), empty.iterator(), empty.iterator());
         MergeIterator<Integer> merged = new MergeIterator<Integer>(iterators, integerComparator);
         assertFalse(merged.hasNext());
     }
@@ -186,7 +186,7 @@ public class TestMergeIterator extends TestCase {
 
         List<Integer> empty = Lists.newArrayList();
         List<Iterator<Integer>> iterators =
-                Lists.newArrayList(empty.iterator(), empty.iterator(), list.iterator(), empty.iterator());
+                Lists.<Iterator<Integer>>newArrayList(empty.iterator(), empty.iterator(), list.iterator(), empty.iterator());
         MergeIterator<Integer> merged = new MergeIterator<Integer>(iterators, integerComparator);
 
         for (Integer i = 0; i < 100; i++) {

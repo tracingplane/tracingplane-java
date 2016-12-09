@@ -7,6 +7,7 @@ import edu.brown.cs.systems.tracingplane.atom_layer.types.UnsignedLexVarint;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagOptions;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayerException;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayerException.BaggageLayerRuntimeException;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.AtomPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.HeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
@@ -137,6 +138,19 @@ public class HeaderSerialization {
             options = BagOptions.defaultOptions;
         }
         buf.put(options.byteValue);
+    }
+
+    /**
+     * Serialize the full atom for the provided bag at the specified level
+     */
+    public static ByteBuffer serialize(BagKey bagKey, int level) {
+        if (bagKey instanceof BagKey.Indexed) {
+            return serialize((BagKey.Indexed) bagKey, level);
+        } else if (bagKey instanceof BagKey.Keyed) {
+            return serialize((BagKey.Keyed) bagKey, level);
+        } else {
+            throw new BaggageLayerRuntimeException("Cannot serialize unsupported bagKey " + bagKey);
+        }
     }
 
     /**

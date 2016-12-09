@@ -2,6 +2,7 @@ package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +13,7 @@ import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayerException;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayerException.BaggageLayerRuntimeException;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.AtomPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.HeaderPrefix;
@@ -25,6 +27,7 @@ public class BaggageReader {
     private List<ByteBuffer> overflowAtoms = null;
     private final List<ByteBuffer> unprocessedAtoms = new ArrayList<>(Level.LEVELS);
 
+    private boolean didReadData = false;
     private boolean encounteredOverflow = false;
     private int currentLevel = -1;
     private final Deque<ByteBuffer> currentPath = Queues.newArrayDeque();
@@ -36,16 +39,25 @@ public class BaggageReader {
         this.it = it;
         advanceNext();
     }
-    
+
     public static BaggageReader create(Iterable<ByteBuffer> itbl) {
-        return new BaggageReader(itbl.iterator());
-    }
-    
-    public static BaggageReader create(Iterator<ByteBuffer> it) {
-        return new BaggageReader(it);
+        if (itbl == null) {
+            return create(Collections.emptyIterator());
+        } else {
+            return create(itbl.iterator());
+        }
     }
 
-    public static BaggageReader create(Iterator<ByteBuffer> first, Iterator<ByteBuffer> second, Iterator<ByteBuffer> more) {
+    public static BaggageReader create(Iterator<ByteBuffer> it) {
+        if (it == null) {
+            return new BaggageReader(Collections.emptyIterator());
+        } else {
+            return new BaggageReader(it);
+        }
+    }
+
+    public static BaggageReader create(Iterator<ByteBuffer> first, Iterator<ByteBuffer> second,
+                                       Iterator<ByteBuffer> more) {
         return new BaggageReader(Lexicographic.merge(first, second, more));
     }
 
@@ -78,6 +90,14 @@ public class BaggageReader {
         nextAtom.position(nextAtom.position() - 1);
     }
 
+    private void advanceToNextBag() {
+        if (didReadData) {
+            dropData();
+        } else {
+            keepData();
+        }
+    }
+
     /**
      * Assumes the current atom is a header and enters the child bag, incrementing the current level and adding the
      * header to the current path
@@ -91,39 +111,15 @@ public class BaggageReader {
 
         // Move to next atom
         advanceNext();
-    }
-
-    /**
-     * Skips and drops remaining data atoms in this bag.
-     * 
-     * Advances to either the a child bag, or the end of bag if there are no children.
-     */
-    private void skipData() {
-        while (hasData()) {
-            advanceNext();
-        }
-    }
-
-    /**
-     * If the current atom is a child, iterates over atoms for the child. Atoms are treated as unprocessed and added to
-     * the list of unprocessed atoms.
-     */
-    private void skipChild() {
-        enterNextBag();
-        while (hasData()) {
-            rewindAtom();
-            unprocessedAtoms.add(nextAtom);
-            advanceNext();
-        }
-        while (hasChild()) {
-            skipChild();
-        }
-        exitCurrentBag();
+        didReadData = false;
     }
 
     private void exitCurrentBag() {
         // Pop down a level
         ByteBuffer previousHeaderAtom = currentPath.pollLast();
+        if (previousHeaderAtom == null) {
+            throw new BaggageLayerRuntimeException("Called exit without a corresponding call to enter");
+        }
 
         // If the child processed all of its atoms then trim unprocessed
         int endIndex = unprocessedAtoms.size() - 1;
@@ -176,9 +172,93 @@ public class BaggageReader {
         if (hasData()) {
             ByteBuffer currentAtom = nextAtom;
             advanceNext();
+            didReadData = true;
             return currentAtom;
         }
         return null;
+    }
+
+    /**
+     * <p>
+     * Drop remaining data atoms between here and the next child bag / end of bag. This means they will not be added to
+     * the list of unprocessed elements. The method {@link keepData()} lets you keep remaining data atoms as unprocessed
+     * elements instead if desired.
+     * </p>
+     * 
+     * <p>
+     * The default behavior for data atoms is as follows:
+     * <ul>
+     * <li>If you do not attempt to read any data from a bag (eg, by jumping straight to a child bag), then all data is
+     * automatically added to the list of unprocessed elements.</li>
+     * <li>If you read some data from a bag, but not all of it, then the remaining data in the bag is discarded and not
+     * added as unprocessed</li>
+     * </p>
+     * 
+     * The methods {@link dropData()} and {@link keepData()} let the user control this behavior
+     */
+    public void dropData() {
+        while (hasData()) {
+            advanceNext();
+        }
+    }
+
+    /**
+     * <p>
+     * Drop all remaining data atoms and child atoms in this bag, advancing to the next sibling / parent bag. None of
+     * the atoms will be added to the list of unprocessed elements.
+     * 
+     * In general this method should not be used, as it is likely to violate the 'ignore and propagate' principle.
+     * </p>
+     */
+    public void dropDataAndChildren() {
+        dropData();
+        while (hasChild()) {
+            enterNextBag();
+            dropDataAndChildren();
+            exitCurrentBag();
+        }
+    }
+
+    /**
+     * <p>
+     * Add all remaining data atoms between here and the next child bag / end of bag to the list of unprocessed
+     * elements. The method {@link dropData()} lets you instead drop the data items if desired.
+     * </p>
+     * 
+     * <p>
+     * The default behavior for data atoms is as follows:
+     * <ul>
+     * <li>If you do not attempt to read any data from a bag (eg, by jumping straight to a child bag), then all data is
+     * automatically added to the list of unprocessed elements.</li>
+     * <li>If you read some data from a bag, but not all of it, then the remaining data in the bag is discarded and not
+     * added as unprocessed</li>
+     * </p>
+     * 
+     * The methods {@link dropData()} and {@link keepData()} let the user control this behavior
+     */
+    public void keepData() {
+        while (hasData()) {
+            rewindAtom();
+            unprocessedAtoms.add(nextAtom);
+            advanceNext();
+        }
+    }
+
+    /**
+     * <p>
+     * Add all remaining data atoms and children of this bag to the list of unprocessed elements. The method (@link
+     * dropBag()} lets you instead drop the bag if desired.
+     * </p>
+     * 
+     * The default behavior is to keep all child bags that are not processed, so a call to {@link keepDataAndChildren()} is not necessary
+     */
+    public void keepDataAndChildren() {
+        keepData();
+        while (hasChild()) {
+            enterNextBag();
+            keepDataAndChildren();
+            exitCurrentBag();
+        }
     }
 
     /**
@@ -190,8 +270,7 @@ public class BaggageReader {
      * If this method returns false, we are at the first bag after where the expected bag would be
      */
     public boolean enter(BagKey expect) {
-        // If the data atoms of the current bag aren't exhausted, drop them
-        skipData();
+        advanceToNextBag();
 
         // Get the prefix we are looking for
         AtomPrefix expectedPrefix = expect.atomPrefix(currentLevel + 1);
@@ -212,7 +291,9 @@ public class BaggageReader {
                 return false;
             } else {
                 // Skip the bag then continue to check the next one
-                skipChild();
+                enterNextBag();
+                keepDataAndChildren();
+                exitCurrentBag();
                 continue;
             }
         }
@@ -228,7 +309,7 @@ public class BaggageReader {
      */
     public BagKey enter() {
         // If the data atoms of the current bag aren't exhausted, drop them
-        skipData();
+        advanceToNextBag();
 
         while (hasChild()) {
             try {
@@ -237,7 +318,9 @@ public class BaggageReader {
                 return key;
             } catch (BaggageLayerException e) {
                 log.error(String.format("Unable to parse bag key for header %s %s", nextAtomPrefix, nextAtom), e);
-                skipChild();
+                enterNextBag();
+                keepDataAndChildren();
+                exitCurrentBag();
                 continue;
             }
         }
@@ -253,15 +336,8 @@ public class BaggageReader {
      * parent, grandparent, or other ancester.
      */
     public void exit() {
-        // Skip any data atoms remaining in the bag
-        skipData();
-
-        // Treat remaining child bags as unprocessed
-        while (hasChild()) {
-            skipChild();
-        }
-
-        // Exit the bag
+        advanceToNextBag();
+        keepDataAndChildren();
         exitCurrentBag();
     }
 
@@ -277,15 +353,14 @@ public class BaggageReader {
         }
 
         // Finish child bags at the root level
-        while (hasChild()) {
-            skipChild();
-        }
+        keepDataAndChildren();
     }
 
     /**
      * @return true if an overflow marker has been encountered parsing up to this point
      */
     public boolean didOverflow() {
+        finish();
         return encounteredOverflow;
     }
 
@@ -297,9 +372,13 @@ public class BaggageReader {
      * 
      * These atoms can be re-merged with baggage atoms to re-add the overflow marker in the correct position.
      * 
+     * This method should only be called at the end of parsing. Upon calling this method, all remaining atoms will be
+     * traversed in an attempt to find trailing overflow markers. All remaining atoms are treated as unprocessed.
+     * 
      * @return a list of atoms if overflow was encountered, otherwise null
      */
     public List<ByteBuffer> overflowAtoms() {
+        finish();
         return overflowAtoms;
     }
 
@@ -307,6 +386,9 @@ public class BaggageReader {
      * If some bags went unprocessed, their atoms are saved.
      * 
      * These atoms comprise the unprocessed data elements plus the appropriate headers.
+     * 
+     * This method should only be called at the end of parsing. Upon calling this method, all remaining atoms will be
+     * traversed in an attempt to find trailing overflow markers. All remaining atoms are treated as unprocessed.
      * 
      * @return a list of atoms if there were unprocessed atoms, otherwise null
      */
