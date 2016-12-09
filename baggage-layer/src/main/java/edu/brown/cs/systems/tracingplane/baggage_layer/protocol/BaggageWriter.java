@@ -76,16 +76,20 @@ public class BaggageWriter {
 
     }
 
-    public void didOverflowHere(boolean didOverflow) {
+    public BaggageWriter didOverflowHere(boolean didOverflow) {
         if (didOverflow && !wroteOverflow) {
+            flush();
             addAtom(BaggageAtoms.OVERFLOW_MARKER);
         }
+        return this;
     }
 
-    public void didTrimHere(boolean didTrim) {
+    public BaggageWriter didTrimHere(boolean didTrim) {
         if (didTrim) {
+            flush();
             addAtom(BaggageContents.TRIMMARKER_ATOM);
         }
+        return this;
     }
 
     /**

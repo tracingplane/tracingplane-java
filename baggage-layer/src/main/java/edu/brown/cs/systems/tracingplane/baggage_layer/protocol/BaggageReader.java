@@ -250,7 +250,8 @@ public class BaggageReader {
      * dropBag()} lets you instead drop the bag if desired.
      * </p>
      * 
-     * The default behavior is to keep all child bags that are not processed, so a call to {@link keepDataAndChildren()} is not necessary
+     * The default behavior is to keep all child bags that are not processed, so a call to {@link keepDataAndChildren()}
+     * is not necessary
      */
     public void keepDataAndChildren() {
         keepData();
