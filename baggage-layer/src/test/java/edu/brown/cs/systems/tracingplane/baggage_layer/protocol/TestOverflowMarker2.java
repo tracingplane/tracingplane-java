@@ -11,7 +11,7 @@ import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.ByteBuffers;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 
-public class TestWriterWithMerge extends BaggageTestCase {
+public class TestOverflowMarker2 extends BaggageTestCase {
 
     private final BagKey.Indexed first = indexed(4);
     private final BagKey.Indexed second = indexed(10);
