@@ -353,6 +353,7 @@ public class BaggageReader {
         }
 
         // Finish child bags at the root level
+        advanceToNextBag();
         keepDataAndChildren();
     }
 
@@ -360,7 +361,6 @@ public class BaggageReader {
      * @return true if an overflow marker has been encountered parsing up to this point
      */
     public boolean didOverflow() {
-        finish();
         return encounteredOverflow;
     }
 
@@ -393,6 +393,7 @@ public class BaggageReader {
      * @return a list of atoms if there were unprocessed atoms, otherwise null
      */
     public List<ByteBuffer> unprocessedAtoms() {
+        finish();
         return unprocessedAtoms.isEmpty() ? null : unprocessedAtoms;
     }
 

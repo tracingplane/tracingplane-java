@@ -1,5 +1,10 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.AtomType;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
@@ -7,9 +12,8 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.Ato
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
-import junit.framework.TestCase;
 
-public class TestAtomPrefixes extends TestCase {
+public class TestAtomPrefixes {
 
     @Test
     public void testValidPrefixes() {

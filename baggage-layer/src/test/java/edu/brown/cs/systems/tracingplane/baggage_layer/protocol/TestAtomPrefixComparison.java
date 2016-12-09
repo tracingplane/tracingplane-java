@@ -1,5 +1,7 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.nio.ByteBuffer;
 import org.junit.Test;
 import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
@@ -9,12 +11,11 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.Ato
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
-import junit.framework.TestCase;
 
 /**
  * Tests that the protocol-specified comparisons between prefixes are valid
  */
-public class TestAtomPrefixComparison extends TestCase {
+public class TestAtomPrefixComparison {
 
     private static ByteBuffer wrap(byte b) {
         return ByteBuffer.wrap(new byte[] { b });

@@ -1,5 +1,6 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
+import static org.junit.Assert.assertEquals;
 import java.nio.ByteBuffer;
 import org.junit.Test;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
@@ -9,9 +10,8 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayerException;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.IndexedHeaderPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.KeyedHeaderPrefix;
-import junit.framework.TestCase;
 
-public class TestHeaderSerialization extends TestCase {
+public class TestHeaderSerialization {
     
     private static int[] indices() {
         int v = 128;

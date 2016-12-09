@@ -1,12 +1,16 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.AtomType;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.HeaderType;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
-import junit.framework.TestCase;
 
-public class TestAtomPrefixTypes extends TestCase {
+public class TestAtomPrefixTypes {
 
     /** Test that the first two bits only are used for atom type */
     @Test

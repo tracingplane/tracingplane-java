@@ -1,11 +1,11 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer;
 
+import static org.junit.Assert.assertEquals;
 import java.nio.ByteBuffer;
 import org.junit.Test;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
-import junit.framework.TestCase;
 
-public class TestBagKey extends TestCase {
+public class TestBagKey {
 
     @Test
     public void testBagKeyComparison() {

@@ -8,6 +8,7 @@ import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.ByteBuffers;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataPrefix;
 
 public abstract class BaggageTestCase {
     
@@ -24,6 +25,18 @@ public abstract class BaggageTestCase {
     
     BagKey.Indexed indexed(int index) {
         return (BagKey.Indexed) BagKey.indexed(index);
+    }
+    
+    ByteBuffer dataAtom(ByteBuffer payload) {
+        ByteBuffer atom = ByteBuffer.allocate(payload.remaining()+1);
+        atom.put(DataPrefix.prefix);
+        ByteBuffers.copyTo(payload, atom);
+        atom.flip();
+        return atom;
+    }
+    
+    ByteBuffer headerAtom(BagKey bagKey, int level) {
+        return HeaderSerialization.serialize(bagKey, level);
     }
     
     List<ByteBuffer> writeBag(BagKey key, ByteBuffer... contents) {

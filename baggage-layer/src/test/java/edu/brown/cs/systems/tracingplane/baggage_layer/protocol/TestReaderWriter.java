@@ -1,15 +1,19 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import org.junit.Before;
 import org.junit.Test;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.ByteBuffers;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
-import junit.framework.TestCase;
 
-public class TestReaderWriter extends TestCase {
+public class TestReaderWriter {
     
     private static final Random r = new Random(0);
     
@@ -45,8 +49,8 @@ public class TestReaderWriter extends TestCase {
         return writer.atoms();
     }
     
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         r.setSeed(0);
     };
     

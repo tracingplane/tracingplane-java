@@ -1,8 +1,15 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Random;
+import org.junit.Before;
 import org.junit.Test;
 import com.google.common.collect.Lists;
 import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
@@ -10,9 +17,8 @@ import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.ByteBuffers;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayerException;
-import junit.framework.TestCase;
 
-public class TestOverflowMarker extends TestCase {
+public class TestOverflowMarker {
 
     private static final Random r = new Random(0);
 
@@ -77,8 +83,8 @@ public class TestOverflowMarker extends TestCase {
         assertEquals(BaggageAtoms.OVERFLOW_MARKER, overflowAtoms.get(keys.size()));
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         r.setSeed(0);
     };
 
