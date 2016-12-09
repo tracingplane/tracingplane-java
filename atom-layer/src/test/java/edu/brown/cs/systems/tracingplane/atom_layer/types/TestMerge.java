@@ -1,12 +1,12 @@
 package edu.brown.cs.systems.tracingplane.atom_layer.types;
 
+import static org.junit.Assert.assertTrue;
 import java.nio.ByteBuffer;
 import java.util.List;
 import org.junit.Test;
 import com.google.common.collect.Lists;
-import junit.framework.TestCase;
 
-public class TestMerge extends TestCase {
+public class TestMerge {
 
     private static ByteBuffer make(String... ss) {
         ByteBuffer buf = ByteBuffer.allocate(ss.length);

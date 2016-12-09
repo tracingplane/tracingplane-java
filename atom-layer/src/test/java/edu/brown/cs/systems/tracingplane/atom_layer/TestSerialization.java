@@ -1,11 +1,11 @@
 package edu.brown.cs.systems.tracingplane.atom_layer;
 
+import static org.junit.Assert.assertNull;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import org.junit.Test;
-import junit.framework.TestCase;
 
-public class TestSerialization extends TestCase {
+public class TestSerialization {
 
     @Test
     public void testSerializeNulls() {

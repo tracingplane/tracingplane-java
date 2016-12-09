@@ -1,10 +1,10 @@
 package edu.brown.cs.systems.tracingplane.atom_layer.types;
 
+import static org.junit.Assert.assertEquals;
 import java.nio.ByteBuffer;
 import org.junit.Test;
-import junit.framework.TestCase;
 
-public class TestSerializedSize extends TestCase {
+public class TestSerializedSize {
 
     @Test
     public void testSerializedSizeUnsigned32() {

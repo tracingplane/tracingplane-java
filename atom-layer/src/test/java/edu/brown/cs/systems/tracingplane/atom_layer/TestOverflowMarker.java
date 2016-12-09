@@ -1,12 +1,14 @@
 package edu.brown.cs.systems.tracingplane.atom_layer;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.nio.ByteBuffer;
 import java.util.List;
 import org.junit.Test;
 import com.google.common.collect.Lists;
-import junit.framework.TestCase;
 
-public class TestOverflowMarker extends TestCase {
+public class TestOverflowMarker {
 
     @Test
     public void testSerializedOverflowMarker() {

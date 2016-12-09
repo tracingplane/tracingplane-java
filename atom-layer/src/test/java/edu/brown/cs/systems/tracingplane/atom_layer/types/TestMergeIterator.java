@@ -1,5 +1,8 @@
 package edu.brown.cs.systems.tracingplane.atom_layer.types;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -7,9 +10,8 @@ import java.util.List;
 import java.util.Random;
 import org.junit.Test;
 import com.google.common.collect.Lists;
-import junit.framework.TestCase;
 
-public class TestMergeIterator extends TestCase {
+public class TestMergeIterator {
 
     private static final Comparator<Integer> integerComparator = new Comparator<Integer>() {
         public int compare(Integer o1, Integer o2) {

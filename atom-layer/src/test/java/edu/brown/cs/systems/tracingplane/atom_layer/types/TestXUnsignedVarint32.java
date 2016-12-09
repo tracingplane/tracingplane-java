@@ -1,12 +1,14 @@
 package edu.brown.cs.systems.tracingplane.atom_layer.types;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 import org.junit.Test;
-import junit.framework.TestCase;
 
-public class TestXUnsignedVarint32 extends TestCase {
+public class TestXUnsignedVarint32 {
 
     @Test
     public void testLexVarInt32() throws AtomLayerException {

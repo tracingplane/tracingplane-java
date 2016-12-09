@@ -1,13 +1,13 @@
 package edu.brown.cs.systems.tracingplane.atom_layer.types;
 
+import static org.junit.Assert.assertEquals;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 import org.junit.Test;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.ProtobufVarint.MalformedVarintException;
-import junit.framework.TestCase;
 
-public class TestProtobufVarint extends TestCase {
+public class TestProtobufVarint {
 
     @Test
     public void testVarintSize() {

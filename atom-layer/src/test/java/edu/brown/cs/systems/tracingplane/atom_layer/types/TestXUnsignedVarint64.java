@@ -1,11 +1,12 @@
 package edu.brown.cs.systems.tracingplane.atom_layer.types;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.nio.ByteBuffer;
 import java.util.Random;
 import org.junit.Test;
-import junit.framework.TestCase;
 
-public class TestXUnsignedVarint64 extends TestCase {
+public class TestXUnsignedVarint64 {
 
     @Test
     public void testReadUint64() throws AtomLayerException {

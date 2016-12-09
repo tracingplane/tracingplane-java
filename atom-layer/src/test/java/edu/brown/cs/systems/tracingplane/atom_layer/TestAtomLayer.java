@@ -1,10 +1,10 @@
 package edu.brown.cs.systems.tracingplane.atom_layer;
 
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
-import junit.framework.TestCase;
 
-public class TestAtomLayer extends TestCase {
+public class TestAtomLayer {
 
     @Test
     public void testNewInstance() {
