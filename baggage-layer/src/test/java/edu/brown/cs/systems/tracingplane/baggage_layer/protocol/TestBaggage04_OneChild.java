@@ -18,8 +18,6 @@ public class TestBaggage04_OneChild extends BaggageTestCase {
 
     private final BagKey.Indexed bagKey = indexed(4);
     private final ByteBuffer[] payloads = { randomBytes(3), randomBytes(1), randomBytes(0) };
-    private final ByteBuffer[] payloadAtoms =
-            { headerAtom(bagKey, 0), dataAtom(payloads[0]), dataAtom(payloads[1]), dataAtom(payloads[2]) };
     private final ByteBuffer[] allAtoms =
             { headerAtom(bagKey, 0), dataAtom(payloads[0]), dataAtom(payloads[1]), dataAtom(payloads[2]) };
 

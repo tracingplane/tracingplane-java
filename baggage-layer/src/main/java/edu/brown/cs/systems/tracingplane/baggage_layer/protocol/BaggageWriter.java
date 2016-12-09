@@ -50,17 +50,19 @@ public class BaggageWriter {
         return new BaggageWriter(Lexicographic.merge(a0, a1));
     }
 
-    public void enter(BagKey field) {
+    public BaggageWriter enter(BagKey field) {
         currentLevel++;
         if (field instanceof BagKey.Indexed) {
             writeHeader(currentLevel, (BagKey.Indexed) field);
         } else if (field instanceof BagKey.Keyed) {
             writeHeader(currentLevel, (BagKey.Keyed) field);
         }
+        return this;
     }
 
-    public void exit() {
+    public BaggageWriter exit() {
         currentLevel--;
+        return this;
     }
 
     private void writeHeader(int level, BagKey.Indexed bagKey) {
@@ -97,7 +99,7 @@ public class BaggageWriter {
     }
 
     /** Write a data atom with the provided buf content */
-    public void writeBytes(ByteBuffer buf) {
+    public BaggageWriter writeBytes(ByteBuffer buf) {
         // See if this is already prefixed
         if (buf.position() > 0 && buf.get(buf.position() - 1) == DataPrefix.prefix) {
             buf.position(buf.position() - 1);
@@ -105,16 +107,19 @@ public class BaggageWriter {
         } else {
             addAtom(ByteBuffers.copyWithPrefix(DataPrefix.prefix, buf));
         }
+        return this;
     }
 
     /** Write a data atom with an integer value */
-    public void writeInt(int value) {
+    public BaggageWriter writeInt(int value) {
         newDataAtom(Integer.BYTES).putInt(value);
+        return this;
     }
 
     /** Write a data atom with a long value */
-    public void writeLong(long value) {
+    public BaggageWriter writeLong(long value) {
         newDataAtom(Long.BYTES).putLong(value);
+        return this;
     }
 
     /** Ensure that any buffers created with newDataAtom are finished. */
