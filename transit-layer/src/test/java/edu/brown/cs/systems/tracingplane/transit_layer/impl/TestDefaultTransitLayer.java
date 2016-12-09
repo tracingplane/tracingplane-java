@@ -1,10 +1,12 @@
 package edu.brown.cs.systems.tracingplane.transit_layer.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
-import junit.framework.TestCase;
 
-public class TestDefaultTransitLayer extends TestCase {
+public class TestDefaultTransitLayer {
 
     @Test
     public void testNullTransitLayerImpl() {
