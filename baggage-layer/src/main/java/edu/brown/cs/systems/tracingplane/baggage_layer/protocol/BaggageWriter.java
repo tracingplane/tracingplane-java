@@ -127,7 +127,7 @@ public class BaggageWriter {
         return atoms;
     }
 
-    void addAtom(ByteBuffer atom) {
+    private void addAtom(ByteBuffer atom) {
         while (nextAtomToMerge != null) {
             int comparison = Lexicographic.compare(nextAtomToMerge, atom);
             if (comparison > 0) {
@@ -145,7 +145,7 @@ public class BaggageWriter {
         doAddAtom(atom);
     }
 
-    void doAddAtom(ByteBuffer atom) {
+    private void doAddAtom(ByteBuffer atom) {
         if (wroteOverflow && BaggageAtoms.OVERFLOW_MARKER.equals(atom)) {
             return;
         }

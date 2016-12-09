@@ -32,13 +32,21 @@ public class BaggageReader {
     private AtomPrefix nextAtomPrefix;
     private ByteBuffer nextAtom;
 
-    public BaggageReader(Iterable<ByteBuffer> itbl) {
-        this(itbl.iterator());
-    }
-
-    public BaggageReader(Iterator<ByteBuffer> it) {
+    private BaggageReader(Iterator<ByteBuffer> it) {
         this.it = it;
         advanceNext();
+    }
+    
+    public static BaggageReader create(Iterable<ByteBuffer> itbl) {
+        return new BaggageReader(itbl.iterator());
+    }
+    
+    public static BaggageReader create(Iterator<ByteBuffer> it) {
+        return new BaggageReader(it);
+    }
+
+    public static BaggageReader create(Iterator<ByteBuffer> first, Iterator<ByteBuffer> second, Iterator<ByteBuffer> more) {
+        return new BaggageReader(Lexicographic.merge(first, second, more));
     }
 
     /**
@@ -199,7 +207,7 @@ public class BaggageReader {
                 // Found the bag!
                 enterNextBag();
                 return true;
-            } else if (comparison > 0) {
+            } else if (comparison < 0) {
                 // Didn't find the bag, reached a bag past it
                 return false;
             } else {
