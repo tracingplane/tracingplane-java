@@ -80,6 +80,7 @@ public class TestOverflowMarkerMerge extends BaggageTestCase {
 
         List<ByteBuffer> expectedMergedAtoms = addOverflowMarker(atoms, expectedIndexInMerged);
         assertEquals(expectedMergedAtoms, Lexicographic.merge(atoms, reader.overflowAtoms()));
+        assertEquals(expectedMergedAtoms, Lexicographic.merge(reader.unprocessedAtoms(), reader.overflowAtoms()));
     }
 
     @Test

@@ -46,7 +46,7 @@ public class BaggageWriter {
         return createAndMergeWith(a0 == null ? null : a0.iterator(), a1 == null ? null : a1.iterator());
     }
 
-    private static BaggageWriter createAndMergeWith(Iterator<ByteBuffer> a0, Iterator<ByteBuffer> a1) {
+    public static BaggageWriter createAndMergeWith(Iterator<ByteBuffer> a0, Iterator<ByteBuffer> a1) {
         return new BaggageWriter(Lexicographic.merge(a0, a1));
     }
 
@@ -130,9 +130,19 @@ public class BaggageWriter {
     public void flush() {
         backing.finish();
     }
-
-    public List<ByteBuffer> atoms() {
+    
+    /** Indicate that writing to this writer has finished, and if the writer was also merging with other atoms, they should be finished */
+    public void finish() {
         flush();
+        while (nextAtomToMerge != null) {
+            doAddAtom(nextAtomToMerge);
+            nextAtomToMerge = atomsToMerge.hasNext() ? atomsToMerge.next() : null;
+        }
+    }
+
+    /** Should only be called once writing has completed */
+    public List<ByteBuffer> atoms() {
+        finish();
         return atoms;
     }
 
