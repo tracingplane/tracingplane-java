@@ -142,7 +142,7 @@ public abstract class BagKey implements Comparable<BagKey> {
         this.options = options;
     }
 
-    public abstract AtomPrefix atomPrefix(int level);
+    public abstract AtomPrefix atomPrefix(int level, BagOptions options);
 
     public abstract ByteBuffer atomPayload();
 
@@ -224,8 +224,8 @@ public abstract class BagKey implements Comparable<BagKey> {
         }
 
         @Override
-        public AtomPrefix atomPrefix(int level) {
-            return IndexedHeaderPrefix.prefixFor(level);
+        public AtomPrefix atomPrefix(int level, BagOptions options) {
+            return IndexedHeaderPrefix.prefixFor(level, options);
         }
 
         @Override
@@ -283,8 +283,8 @@ public abstract class BagKey implements Comparable<BagKey> {
         }
 
         @Override
-        public AtomPrefix atomPrefix(int level) {
-            return KeyedHeaderPrefix.prefixFor(level);
+        public AtomPrefix atomPrefix(int level, BagOptions options) {
+            return KeyedHeaderPrefix.prefixFor(level, options);
         }
 
         @Override

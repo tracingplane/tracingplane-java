@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.AtomType;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.BagOptionsInPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.HeaderType;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
 
@@ -25,7 +26,7 @@ public class TestAtomPrefixTypes {
     @Test
     public void testLevelBits() {
         for (Level level : Level.levels) {
-            assertEquals(0, level.byteValue & 0xC3); // remove middle four bits, check rest are 0
+            assertEquals(0, level.byteValue & ~0x78); // remove middle four bits, check rest are 0
         }
     }
 
@@ -33,7 +34,7 @@ public class TestAtomPrefixTypes {
     @Test
     public void testHeaderTypeBits() {
         for (HeaderType type : HeaderType.values()) {
-            assertEquals(0, type.byteValue & 0xFC); // remove final two bits, check rest are zero
+            assertEquals(0, type.byteValue & 128); // remove final two bits, check rest are zero
         }
     }
 
@@ -86,18 +87,14 @@ public class TestAtomPrefixTypes {
 
     @Test
     public void testValidAtomTypes() {
-        assertNull(AtomType.fromByte((byte) 0));
-        assertNotNull(AtomType.fromByte((byte) 64));
+        assertNotNull(AtomType.fromByte((byte) 0));
         assertNotNull(AtomType.fromByte((byte) 128));
-        assertNull(AtomType.fromByte((byte) 192));
     }
 
     @Test
     public void testValidHeaderTypes() {
-        assertNull(HeaderType.fromByte((byte) 0));
-        assertNotNull(HeaderType.fromByte((byte) 1));
-        assertNotNull(HeaderType.fromByte((byte) 2));
-        assertNull(HeaderType.fromByte((byte) 3));
+        assertNotNull(HeaderType.fromByte((byte) 0));
+        assertNotNull(HeaderType.fromByte((byte) 4));
     }
 
     @Test
@@ -107,6 +104,7 @@ public class TestAtomPrefixTypes {
             AtomType.fromByte(b);
             Level.fromByte(b);
             HeaderType.fromByte(b);
+            BagOptionsInPrefix.fromByte(b);
         }
     }
 

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BagOptions;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.AtomType;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.AtomPrefix;
@@ -18,8 +19,10 @@ public class TestAtomPrefixes {
     @Test
     public void testValidPrefixes() {
         assertTrue(DataPrefix.prefix().isValid());
-        for (int level = 0; level < Level.LEVELS; level++) {
-            assertTrue(IndexedHeaderPrefix.prefixFor(level).isValid());
+        for (BagOptions options : BagOptions.values()) {
+            for (int level = 0; level < Level.LEVELS; level++) {
+                assertTrue(IndexedHeaderPrefix.prefixFor(level, options).isValid());
+            }
         }
     }
 
@@ -39,45 +42,53 @@ public class TestAtomPrefixes {
 
     @Test
     public void testIndexedHeaderPrefix() {
-        for (int i = 0; i < Level.LEVELS; i++) {
-            AtomPrefix prefix = IndexedHeaderPrefix.prefixFor(i);
-            assertNotNull(prefix);
-            assertTrue(prefix.isHeader());
-            assertTrue(prefix.isValid());
-            assertFalse(prefix.isData());
-            for (int j = 0; j < Level.LEVELS; j++) {
-                assertEquals(i, prefix.level(j));
+        for (BagOptions options : BagOptions.values()) {
+            for (int i = 0; i < Level.LEVELS; i++) {
+                AtomPrefix prefix = IndexedHeaderPrefix.prefixFor(i, options);
+                assertNotNull(prefix);
+                assertTrue(prefix.isHeader());
+                assertTrue(prefix.isValid());
+                assertFalse(prefix.isData());
+                for (int j = 0; j < Level.LEVELS; j++) {
+                    assertEquals(i, prefix.level(j));
+                }
+                assertEquals(prefix, AtomPrefixes.get(prefix.prefix));
             }
-            assertEquals(prefix, AtomPrefixes.get(prefix.prefix));
         }
 
-        for (int i = -10; i < 0; i++) {
-            assertNull(IndexedHeaderPrefix.prefixFor(i));
-        }
-        for (int i = Level.LEVELS; i < Level.LEVELS + 10; i++) {
-            assertNull(IndexedHeaderPrefix.prefixFor(i));
+        for (BagOptions options : BagOptions.values()) {
+            for (int i = -10; i < 0; i++) {
+                assertNull(IndexedHeaderPrefix.prefixFor(i, options));
+            }
+            for (int i = Level.LEVELS; i < Level.LEVELS + 10; i++) {
+                assertNull(IndexedHeaderPrefix.prefixFor(i, options));
+            }
         }
     }
 
     @Test
     public void testKeyedHeaderPrefix() {
-        for (int i = 0; i < Level.LEVELS; i++) {
-            AtomPrefix prefix = KeyedHeaderPrefix.prefixFor(i);
-            assertNotNull(prefix);
-            assertTrue(prefix.isHeader());
-            assertTrue(prefix.isValid());
-            assertFalse(prefix.isData());
-            for (int j = 0; j < Level.LEVELS; j++) {
-                assertEquals(i, prefix.level(j));
+        for (BagOptions options : BagOptions.values()) {
+            for (int i = 0; i < Level.LEVELS; i++) {
+                AtomPrefix prefix = KeyedHeaderPrefix.prefixFor(i, options);
+                assertNotNull(prefix);
+                assertTrue(prefix.isHeader());
+                assertTrue(prefix.isValid());
+                assertFalse(prefix.isData());
+                for (int j = 0; j < Level.LEVELS; j++) {
+                    assertEquals(i, prefix.level(j));
+                }
+                assertEquals(prefix, AtomPrefixes.get(prefix.prefix));
             }
-            assertEquals(prefix, AtomPrefixes.get(prefix.prefix));
         }
 
-        for (int i = -10; i < 0; i++) {
-            assertNull(KeyedHeaderPrefix.prefixFor(i));
-        }
-        for (int i = Level.LEVELS; i < Level.LEVELS + 10; i++) {
-            assertNull(KeyedHeaderPrefix.prefixFor(i));
+        for (BagOptions options : BagOptions.values()) {
+            for (int i = -10; i < 0; i++) {
+                assertNull(KeyedHeaderPrefix.prefixFor(i, options));
+            }
+            for (int i = Level.LEVELS; i < Level.LEVELS + 10; i++) {
+                assertNull(KeyedHeaderPrefix.prefixFor(i, options));
+            }
         }
     }
 

@@ -1,169 +1,51 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer;
 
-import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
-
 /**
- * First bit specifies merge behavior. Next three bits specify branch behavior. Next bit specifies serialize behavior.
- * Final three bits unused. *
+ * <p>
+ * The only additional option that we propagate is the merge behavior. We do not propagate serialize or branch
+ * behaviors, as follows:
+ * </p>
+ * 
+ * <ul>
+ * <li>The main use case for specifying branch and serialize behaviors is to handle 'brittle' fields. The default
+ * propagation behavior is `ignore and propagate`; however, you might want to override this to drop data in some
+ * scenarios. For example, you might have a vector clock style component id in the baggage and could want to ensure that
+ * only one side of the branch retains the ID.</li>
+ * <li>Because of this it could be argued that the baggage layer could have some options for specifying logic for when
+ * baggage operations (branch, join, serialize) occur.</li>
+ * <li>The reason for implementing logic in the baggage layer is for when data traverses other processes that are
+ * baggage compliant, but lack knowledge of the semantics of specific fields of the baggage</li>
+ * <li>However, when the baggage leaves the current process, it might traverse atom-compliant-only processes (ie,
+ * non-baggage-compliant) that naively copy the data (because they adhere to `ignore and propagate`. This is
+ * unavoidable. So we cannot provide guarantees for brittle fields outside of a process.</li>
+ * <li>Within a process, if the process knows how to add one of these brittle fields to the baggage, then it is implied
+ * that the process knows the semantics of that field. Thus, the process also has control of when the baggage will
+ * branch, join, and serialize within this process. This means it can interpose on the baggage via callbacks</li>
+ * <li>As a result, we argue that branch and serialize options are unnecessary and can be handled by callbacks</li>
+ * </ul>
  */
 public class BagOptions implements Comparable<BagOptions> {
 
-    /**
-     * Specifies what the baggage layer should do with the data of a bag when merging multiple baggages. Uses the first
-     * bit of bag options.
-     */
+    private static final BagOptions[] values =
+            { new BagOptions(MergeBehavior.TakeAll), new BagOptions(MergeBehavior.TakeFirst) };
+    public static final BagOptions defaultOptions = values[0];
+
     public static enum MergeBehavior {
-        /** Keep all data from both sides of the branch. Default behavior. */
-        KeepAll(0),
-
-        /** Keep only the first item from the merged baggages. */
-        KeepFirst(1);
-
-        private static final byte mask = TypeUtils.makeByte("10000000");
-        private static final int offset = 7;
-
-        public static final MergeBehavior defaultBehavior = KeepAll;
-
-        public final int id;
-        public final byte byteValue;
-
-        MergeBehavior(int id) {
-            this.id = id;
-            this.byteValue = (byte) (id << offset);
-        }
-
-        public static MergeBehavior fromByte(byte b) {
-            return MergeBehavior.values()[(b & mask) >> offset];
-        }
-
-    }
-
-    /**
-     * Specifies what the baggage layer should do with the data of a bag when branching. Uses three bits, offset by one
-     * bit.
-     */
-    public static enum BranchBehavior {
-        /** Copy the bag to both baggages when branching. This is the default behavior */
-        Copy(0),
-
-        /** Drop the bag data when branching */
-        Drop(1),
-
-        /** Keep the bag data in the original baggage, don't copy it to the new baggage */
-        Keep(2),
-
-        /** Give the bag to the new baggage, don't keep it in the original baggage */
-        Give(3),
-
-        /**
-         * Divide the bag data between the original and copied baggage. Each data item will exist either in the original
-         * baggage, or in the new baggage, but not in both
-         */
-        Share(4);
-
-        private static final byte mask = TypeUtils.makeByte("01110000");
-        private static final int offset = 4;
-
-        public static final BranchBehavior defaultBehavior = Copy;
-
-        public final int id;
-        public final byte byteValue;
-
-        BranchBehavior(int id) {
-            this.id = id;
-            this.byteValue = (byte) (id << offset);
-        }
-
-        public static BranchBehavior fromByte(byte b) {
-            return BranchBehavior.values()[(b & mask) >> offset];
-        }
-
-    }
-
-    /**
-     * Specifies what the baggage layer should do with the data of a bag when serializing. Uses one bit, offset by four
-     * bits.
-     */
-    public static enum SerializeBehavior {
-        /** Include the bag when serializing baggage */
-        Keep(0),
-
-        /** Drop the bag when serializing baggage */
-        Drop(1);
-
-        private static final byte mask = TypeUtils.makeByte("00001000");
-        private static final int offset = 3;
-
-        public static final SerializeBehavior defaultBehavior = Keep;
-
-        public final int id;
-        public final byte byteValue;
-
-        SerializeBehavior(int id) {
-            this.id = id;
-            this.byteValue = (byte) (id << offset);
-        }
-
-        public static SerializeBehavior fromByte(byte b) {
-            return SerializeBehavior.values()[(b & mask) >> offset];
-        }
-    }
-
-    public static final BagOptions defaultOptions;
-    private static final BagOptions[] options;
-    private static final BagOptions[] values;
-
-    static {
-        options = new BagOptions[256];
-        values = new BagOptions[MergeBehavior.values().length * BranchBehavior.values().length *
-                                SerializeBehavior.values().length];
-
-        int valueIndex = 0;
-        for (MergeBehavior merge : MergeBehavior.values()) {
-            for (BranchBehavior branch : BranchBehavior.values()) {
-                for (SerializeBehavior serialize : SerializeBehavior.values()) {
-                    BagOptions bagOptions = new BagOptions(merge, branch, serialize);
-                    if (bagOptions.byteValue < 0) {
-                        options[256 + bagOptions.byteValue] = bagOptions;
-                    } else {
-                        options[bagOptions.byteValue] = bagOptions;
-                    }
-                    values[valueIndex++] = bagOptions;
-                }
-            }
-        }
-        defaultOptions = create(MergeBehavior.defaultBehavior, BranchBehavior.defaultBehavior,
-                                SerializeBehavior.defaultBehavior);
+        TakeAll, TakeFirst;
     }
 
     public final MergeBehavior merge;
-    public final BranchBehavior branch;
-    public final SerializeBehavior serialize;
-    public final byte byteValue;
 
-    private BagOptions(MergeBehavior merge, BranchBehavior branch, SerializeBehavior serialize) {
+    private BagOptions(MergeBehavior merge) {
         this.merge = merge;
-        this.branch = branch;
-        this.serialize = serialize;
-        this.byteValue = (byte) (merge.byteValue | branch.byteValue | serialize.byteValue);
     }
 
-    public static BagOptions create(MergeBehavior merge, BranchBehavior branch, SerializeBehavior serialize) {
-        return valueOf((byte) (merge.byteValue | branch.byteValue | serialize.byteValue));
+    public static BagOptions defaultOptions() {
+        return defaultOptions;
     }
 
-    /** Returns null if the byte is not valid */
-    public static BagOptions valueOf(byte b) {
-        if (b < 0) {
-            return options[256 + b];
-        } else {
-            return options[b];
-        }
-    }
-
-    public static BagOptions[] values() {
-        return values;
+    public static BagOptions create(MergeBehavior mergeBehavior) {
+        return values[mergeBehavior.ordinal()];
     }
 
     public boolean isDefault() {
@@ -172,13 +54,16 @@ public class BagOptions implements Comparable<BagOptions> {
 
     @Override
     public String toString() {
-        return String.format("[BagOptions Merge=%s Branch=%s Serialize=%s]", merge.name(), branch.name(),
-                             serialize.name());
+        return String.format("[BagOptions Merge=%s]", merge.name());
     }
 
     @Override
     public int compareTo(BagOptions o) {
-        return Lexicographic.compare(byteValue, byteValue);
+        return merge.compareTo(o.merge);
+    }
+    
+    public static BagOptions[] values() {
+        return values;
     }
 
 }

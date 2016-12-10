@@ -26,4 +26,13 @@ public class TypeUtils {
         }
         return result;
     }
+    
+    public static int offset(byte mask) {
+        for (int i = 1; i <= 8; i++) {
+            if (((mask >> i) << i) != mask) {
+                return i-1;
+            }
+        }
+        return 8;
+    }
 }

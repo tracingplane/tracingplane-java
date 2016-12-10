@@ -274,7 +274,7 @@ public class BaggageReader {
         advanceToNextBag();
 
         // Get the prefix we are looking for
-        AtomPrefix expectedPrefix = expect.atomPrefix(currentLevel + 1);
+        AtomPrefix expectedPrefix = expect.atomPrefix(currentLevel + 1, expect.options);
 
         while (hasChild()) {
             // Compare the prefix then the payload

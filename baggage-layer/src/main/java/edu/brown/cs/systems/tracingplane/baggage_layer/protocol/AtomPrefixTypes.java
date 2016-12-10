@@ -1,5 +1,9 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
+import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BagOptions;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BagOptions.MergeBehavior;
+
 /**
  * This class has the bitwise logic for different bags prefixes.
  * 
@@ -13,44 +17,45 @@ public class AtomPrefixTypes {
     private static final HeaderType[] headerTypes = new HeaderType[HeaderType.VALUES];
 
     /**
-     * The first two bits of a prefix is the atom type:
+     * The first bit of a prefix is the atom type:
      * 
-     * 00 is not currently used <br />
-     * 01 is a data atom <br />
-     * 10 is a header atom <br />
-     * 11 is not currently used <br />
+     * 0 is a data atom <br />
+     * 1 is a header atom <br />
      * 
      * There is also an overflow marker {@link BaggageAtoms.OVERFLOW_MARKER} that is just the empty byte array (ie, it
      * has no prefix) and therefore lexicographically less than all other atoms
      */
     public enum AtomType {
-        Data(1), Header(2);
+        Data(0), Header(1);
 
-        public static final int BITS = 2;
-        public static final int VALUES = 4;
+        public static final int BITS = 1;
+        public static final int VALUES = 2;
+
+        private static final int mask = 0x80;
+        private static final int offset = 7;
 
         public final int id;
         public final byte byteValue;
 
         private AtomType(int id) {
             this.id = id;
-            this.byteValue = (byte) ((id << 6) & 0xC0);
+            this.byteValue = (byte) ((id << offset) & mask);
             bagTypes[id] = this;
         }
 
         public static AtomType fromByte(byte b) {
-            int id = (b & 0xC0) >>> 6;
+            int id = (b & mask) >>> offset;
             return bagTypes[id];
         }
 
         public boolean match(byte b) {
-            return (b & 0xC0) == byteValue;
+            return (b & mask) == byteValue;
         }
     }
 
     /**
      * <p>
-     * Levels are used by headers. Within a header prefix, the middle four bits specify the {@link Level} of the header,
+     * Levels are used by headers. Within a header prefix, bytes 2 through 5 specify the {@link Level} of the header,
      * while the final two bits specify the {@link HeaderType}.
      * </p>
      * 
@@ -77,6 +82,11 @@ public class AtomPrefixTypes {
     public static class Level {
 
         public static final int LEVELS = 16;
+
+        private static final int MAXLEVEL = 15;
+        private static final int mask = 0x78;
+        private static final int offset = 3;
+
         static final Level[] levels = new Level[LEVELS];
 
         static {
@@ -90,7 +100,7 @@ public class AtomPrefixTypes {
 
         private Level(int level) {
             this.level = level;
-            this.byteValue = (byte) (((15 - level) << 2) & 0x3C);
+            this.byteValue = (byte) (((MAXLEVEL - level) << offset) & mask);
         }
 
         public static boolean isValidLevel(int level) {
@@ -106,7 +116,7 @@ public class AtomPrefixTypes {
         }
 
         public static int valueOf(byte b) {
-            return 15 - ((b & 0x3C) >> 2);
+            return MAXLEVEL - ((b & mask) >> offset);
         }
 
         public static Level fromByte(byte b) {
@@ -114,7 +124,7 @@ public class AtomPrefixTypes {
         }
 
         public boolean match(byte b) {
-            return (b & 0x3C) == byteValue;
+            return (b & mask) == byteValue;
         }
 
     }
@@ -129,29 +139,68 @@ public class AtomPrefixTypes {
      * 11 is not currently used
      */
     public enum HeaderType {
-        Indexed(1), Keyed(2);
+        Indexed(0), Keyed(1);
 
-        public static final int BITS = 2;
-        public static final int VALUES = 4;
+        public static final int BITS = 1;
+        public static final int VALUES = 2;
+        
+        private static final int mask = 0x04;
+        private static final int offset = 2;
 
         public final int id;
         public final byte byteValue;
 
         private HeaderType(int id) {
             this.id = id;
-            this.byteValue = (byte) (id & 0x03);
+            this.byteValue = (byte) ((id << offset) & mask);
             headerTypes[id] = this;
         }
 
         /** Inspect the final two bits of the provided byte and return the corresponding {@link HeaderType} */
         public static HeaderType fromByte(byte b) {
-            int id = b & 0x03;
+            int id = (b & mask) >> offset;
             return headerTypes[id];
         }
 
         public boolean match(byte b) {
-            return (b & 0x03) == byteValue;
+            return (b & mask) == byteValue;
         }
 
+    }
+    
+    public static class BagOptionsInPrefix {
+        
+        public static final int mask = 0x01;
+        public static final int offset = 0;
+        
+        public final int id;
+        public final MergeBehavior merge;
+        public final byte byteValue;
+        
+        static final BagOptionsInPrefix[] values = new BagOptionsInPrefix[2];
+        static {
+            values[0] = new BagOptionsInPrefix(0, MergeBehavior.TakeAll);
+            values[1] = new BagOptionsInPrefix(1, MergeBehavior.TakeFirst);
+        }
+        
+        public BagOptionsInPrefix(int id, MergeBehavior merge) {
+            this.id = id;
+            this.merge = merge;
+            this.byteValue = (byte) ((merge.ordinal() << offset) & mask);
+        }
+        
+        public static BagOptionsInPrefix fromByte(byte b) {
+            int merge = (b & mask) >> offset;
+            return values[merge];
+        }
+
+        public static BagOptionsInPrefix get(BagOptions options) {
+            return values[options.merge.ordinal()];
+        }
+
+        public boolean match(byte b) {
+            return (b & mask) == byteValue;
+        }
+        
     }
 }

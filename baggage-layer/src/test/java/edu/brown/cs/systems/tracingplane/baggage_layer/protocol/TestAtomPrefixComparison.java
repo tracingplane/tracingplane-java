@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BagOptions;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.AtomPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataPrefix;
@@ -58,33 +60,37 @@ public class TestAtomPrefixComparison {
 
     @Test
     public void testIndexedHeadersBeatKeyedHeaders() {
-        for (int i = 0; i < Level.LEVELS; i++) {
-            IndexedHeaderPrefix prefixA = IndexedHeaderPrefix.prefixFor(i);
-            KeyedHeaderPrefix prefixB = KeyedHeaderPrefix.prefixFor(i);
+        for (BagOptions options : BagOptions.values()) {
+            for (int i = 0; i < Level.LEVELS; i++) {
+                IndexedHeaderPrefix prefixA = IndexedHeaderPrefix.prefixFor(i, options);
+                KeyedHeaderPrefix prefixB = KeyedHeaderPrefix.prefixFor(i, options);
 
-            ByteBuffer bufA = wrap(prefixA.prefix);
-            ByteBuffer bufB = wrap(prefixB.prefix);
+                ByteBuffer bufA = wrap(prefixA.prefix);
+                ByteBuffer bufB = wrap(prefixB.prefix);
 
-            assertEquals(0, Lexicographic.compare(bufA, bufA));
-            assertEquals(0, Lexicographic.compare(bufB, bufB));
-            assertTrue(0 > Lexicographic.compare(bufA, bufB));
-            assertTrue(0 < Lexicographic.compare(bufB, bufA));
+                assertEquals(0, Lexicographic.compare(bufA, bufA));
+                assertEquals(0, Lexicographic.compare(bufB, bufB));
+                assertTrue(0 > Lexicographic.compare(bufA, bufB));
+                assertTrue(0 < Lexicographic.compare(bufB, bufA));
+            }
         }
     }
 
     @Test
     public void testHigherLevelsBeatLowerLevels() {
-        for (int i = 0; i < Level.LEVELS; i++) {
-            ByteBuffer a1 = wrap(IndexedHeaderPrefix.prefixFor(i).prefix);
-            ByteBuffer b1 = wrap(KeyedHeaderPrefix.prefixFor(i).prefix);
-            for (int j = 0; j < i; j++) {
-                ByteBuffer a2 = wrap(IndexedHeaderPrefix.prefixFor(j).prefix);
-                ByteBuffer b2 = wrap(KeyedHeaderPrefix.prefixFor(j).prefix);
-
-                assertTrue(0 > Lexicographic.compare(a1, a2));
-                assertTrue(0 > Lexicographic.compare(a1, b2));
-                assertTrue(0 > Lexicographic.compare(b1, a2));
-                assertTrue(0 > Lexicographic.compare(b1, b2));
+        for (BagOptions options : BagOptions.values()) {
+            for (int i = 0; i < Level.LEVELS; i++) {
+                ByteBuffer a1 = wrap(IndexedHeaderPrefix.prefixFor(i, options).prefix);
+                ByteBuffer b1 = wrap(KeyedHeaderPrefix.prefixFor(i, options).prefix);
+                for (int j = 0; j < i; j++) {
+                    ByteBuffer a2 = wrap(IndexedHeaderPrefix.prefixFor(j, options).prefix);
+                    ByteBuffer b2 = wrap(KeyedHeaderPrefix.prefixFor(j, options).prefix);
+                    
+                    assertTrue(0 > Lexicographic.compare(a1, a2));
+                    assertTrue(0 > Lexicographic.compare(a1, b2));
+                    assertTrue(0 > Lexicographic.compare(b1, a2));
+                    assertTrue(0 > Lexicographic.compare(b1, b2));
+                }
             }
         }
     }

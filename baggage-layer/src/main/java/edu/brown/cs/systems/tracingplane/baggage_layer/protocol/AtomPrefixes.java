@@ -6,8 +6,10 @@ import java.util.List;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BagOptions;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayerException;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.AtomType;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.BagOptionsInPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.HeaderType;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.Level;
 
@@ -101,13 +103,28 @@ public class AtomPrefixes {
 
         public static final AtomType atomType = AtomType.Header;
 
+        protected static final int distinctLevels = Level.LEVELS;
+        protected static final int distinctBagOptions = BagOptionsInPrefix.values.length;
+        protected static final int distinctPrefixes = distinctLevels * distinctBagOptions;
+
         protected final Level level;
         protected final HeaderType headerType;
+        protected final BagOptionsInPrefix options;
 
-        public HeaderPrefix(Level level, HeaderType headerType) {
-            super(AtomType.Header, (byte) (AtomType.Header.byteValue | level.byteValue | headerType.byteValue));
+        public HeaderPrefix(Level level, HeaderType headerType, BagOptionsInPrefix options) {
+            super(AtomType.Header,
+                  (byte) (AtomType.Header.byteValue | level.byteValue | headerType.byteValue | options.byteValue));
             this.level = level;
             this.headerType = headerType;
+            this.options = options;
+        }
+
+        protected static int indexOf(int level, BagOptions options) {
+            return indexOf(level, BagOptionsInPrefix.get(options));
+        }
+
+        protected static int indexOf(int level, BagOptionsInPrefix options) {
+            return level * distinctBagOptions + options.id;
         }
 
         @Override
@@ -123,6 +140,10 @@ public class AtomPrefixes {
         int level(int currentLevel) {
             return this.level.level;
         }
+        
+        BagOptions options() {
+            return BagOptions.create(options.merge);
+        }
 
         abstract BagKey parse(ByteBuffer buf) throws BaggageLayerException;
 
@@ -135,33 +156,35 @@ public class AtomPrefixes {
         private static final IndexedHeaderPrefix[] prefixes;
 
         static {
-            prefixes = new IndexedHeaderPrefix[Level.LEVELS];
-            for (int level = 0; level < Level.LEVELS; level++) {
-                prefixes[level] = new IndexedHeaderPrefix(Level.get(level));
+            prefixes = new IndexedHeaderPrefix[distinctPrefixes];
+            for (BagOptionsInPrefix options : BagOptionsInPrefix.values) {
+                for (Level level : Level.levels) {
+                    prefixes[indexOf(level.level, options)] = new IndexedHeaderPrefix(level, options);
+                }
             }
         }
 
-        public static IndexedHeaderPrefix prefixFor(int level) {
+        public static IndexedHeaderPrefix prefixFor(int level, BagOptions options) {
             if (Level.isValidLevel(level)) {
-                return prefixes[level];
+                return prefixes[indexOf(level, options)];
             } else {
                 return null;
             }
         }
 
-        private IndexedHeaderPrefix(Level level) {
-            super(level, headerType);
+        private IndexedHeaderPrefix(Level level, BagOptionsInPrefix options) {
+            super(level, headerType, options);
         }
 
         @Override
         public String toString() {
-            return String.format("[IndexedHeaderPrefix prefix=%s level=%d]", TypeUtils.toBinaryString(prefix),
-                                 level.level);
+            return String.format("[IndexedHeaderPrefix prefix=%s level=%d options=%s]",
+                                 TypeUtils.toBinaryString(prefix), level.level, options);
         }
 
         @Override
         BagKey parse(ByteBuffer buf) throws BaggageLayerException {
-            return HeaderSerialization.parseIndexedHeaderPayload(buf);
+            return HeaderSerialization.parseIndexedHeaderPayload(this, buf);
         }
 
     }
@@ -173,33 +196,35 @@ public class AtomPrefixes {
         private static final KeyedHeaderPrefix[] prefixes;
 
         static {
-            prefixes = new KeyedHeaderPrefix[Level.LEVELS];
-            for (int level = 0; level < Level.LEVELS; level++) {
-                prefixes[level] = new KeyedHeaderPrefix(Level.get(level));
+            prefixes = new KeyedHeaderPrefix[distinctPrefixes];
+            for (BagOptionsInPrefix options : BagOptionsInPrefix.values) {
+                for (Level level : Level.levels) {
+                    prefixes[indexOf(level.level, options)] = new KeyedHeaderPrefix(level, options);
+                }
             }
         }
 
-        public static KeyedHeaderPrefix prefixFor(int level) {
+        public static KeyedHeaderPrefix prefixFor(int level, BagOptions options) {
             if (Level.isValidLevel(level)) {
-                return prefixes[level];
+                return prefixes[indexOf(level, options)];
             } else {
                 return null;
             }
         }
 
-        private KeyedHeaderPrefix(Level level) {
-            super(level, headerType);
+        private KeyedHeaderPrefix(Level level, BagOptionsInPrefix options) {
+            super(level, headerType, options);
         }
 
         @Override
         public String toString() {
-            return String.format("[KeyedHeaderPrefix   prefix=%s level=%d]", TypeUtils.toBinaryString(prefix),
-                                 level.level);
+            return String.format("[KeyedHeaderPrefix   prefix=%s level=%d, options=%s]",
+                                 TypeUtils.toBinaryString(prefix), level.level, options);
         }
 
         @Override
         BagKey parse(ByteBuffer buf) throws BaggageLayerException {
-            return HeaderSerialization.parseKeyedHeaderPayload(buf);
+            return HeaderSerialization.parseKeyedHeaderPayload(this, buf);
         }
 
     }
