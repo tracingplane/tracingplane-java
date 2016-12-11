@@ -5,6 +5,10 @@ import java.io.OutputStream;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
 
+/**
+ * The default {@link TransitLayer} implementation if no other is configured. This transit layer implementation attempts
+ * no interpretation of bytes and simply returns an empty baggage instance from all methods.
+ */
 public class NullTransitLayer implements TransitLayer<Baggage> {
 
     public boolean isInstance(Baggage baggage) {
