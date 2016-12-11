@@ -6,6 +6,11 @@ import java.io.OutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class just does type checking on {@link Baggage} instances to ensure they are compatible with the
+ * {@link TransitLayer} installed in the current process. In general, Baggage instances should never be created by any
+ * transit layer other than the one installed in the current process.
+ */
 class TransitLayerCompatibility {
 
     static final Logger log = LoggerFactory.getLogger(TransitLayerCompatibility.class);

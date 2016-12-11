@@ -1,7 +1,10 @@
 package edu.brown.cs.systems.tracingplane.transit_layer;
 
-//TODO: description and method documentation
-public class ThreadLocalBaggage {
+/**
+ * Implements storage of {@link Baggage} instances in a thread-local variable. Users should use the static methods in
+ * {@link Baggage} to access the contents of the thread-local baggage.
+ */
+class ThreadLocalBaggage {
 
     private ThreadLocalBaggage() {}
 
