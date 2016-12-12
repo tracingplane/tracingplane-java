@@ -83,6 +83,17 @@ public interface TransitLayer<B extends Baggage> {
     public byte[] serialize(B baggage);
 
     /**
+     * Serialize the provided baggage instance to its byte representation and trim the baggage so that its serialized
+     * size is {@code <= maximumSerializedSize}. This method should behave as though {@link branch()} is also being
+     * called prior to serialization.
+     * 
+     * @param baggage a baggage instance to serialize, possibly null
+     * @param maximumSerializedSize the maximum size in bytes of the serialized baggage.
+     * @return the serialized representation of <code>baggage</code>, which might be null or an empty byte array
+     */
+    public byte[] serialize(B baggage, int maximumSerializedSize);
+
+    /**
      * Serializes <code>baggage</code> and writes it length-prefixed to <code>out</code>.
      * 
      * @param out the output stream to write to
@@ -90,5 +101,16 @@ public interface TransitLayer<B extends Baggage> {
      * @throws IOException propagated if any occurs while writing to <code>out</code>
      */
     public void writeTo(OutputStream out, B baggage) throws IOException;
+
+    /**
+     * Serializes <code>baggage</code> and writes it length-prefixed to <code>out</code>. Also trims the baggage so that
+     * its serialized size is {@code <= maximumSerializedSize}
+     * 
+     * @param out the output stream to write to
+     * @param baggage a baggage instance to serialize, possibly null
+     * @param maximumSerializedSize the maximum size in bytes of the serialized baggage.
+     * @throws IOException propagated if any occurs while writing to <code>out</code>
+     */
+    public void writeTo(OutputStream out, B baggage, int maximumSerializedSize) throws IOException;
 
 }

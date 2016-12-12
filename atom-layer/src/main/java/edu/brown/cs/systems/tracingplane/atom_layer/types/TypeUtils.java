@@ -1,6 +1,11 @@
 package edu.brown.cs.systems.tracingplane.atom_layer.types;
 
+/**
+ * Some useful utility methods related to bits and bytes
+ */
 public class TypeUtils {
+    
+    private TypeUtils() {}
 
     public static String toBinaryString(byte b) {
         return String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');

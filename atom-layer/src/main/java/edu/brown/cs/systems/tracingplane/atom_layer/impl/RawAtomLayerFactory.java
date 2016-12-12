@@ -7,7 +7,7 @@ public class RawAtomLayerFactory implements AtomLayerFactory {
 
     @Override
     public AtomLayer<?> newAtomLayer() {
-        return new RawAtomLayerImpl();
+        return new RawAtomLayer();
     }
 
 }

@@ -57,7 +57,7 @@ public final class UnsignedByteBuffer {
 
         @VisibleForTesting
         enum UnsafeComparator implements Comparator<ByteBuffer> {
-            INSTANCE;
+                                                                 INSTANCE;
 
             static final boolean BIG_ENDIAN = ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN);
 
@@ -178,7 +178,7 @@ public final class UnsignedByteBuffer {
         }
 
         enum PureJavaComparator implements Comparator<ByteBuffer> {
-            INSTANCE;
+                                                                   INSTANCE;
 
             @Override
             public int compare(ByteBuffer left, ByteBuffer right) {

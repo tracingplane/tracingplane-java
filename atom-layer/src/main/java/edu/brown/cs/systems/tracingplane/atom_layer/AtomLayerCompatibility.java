@@ -6,6 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 
+/**
+ * This class just does type checking on {@link BaggageAtoms} instances to ensure they are compatible with the
+ * {@link AtomLayer} installed in the current process. In general, BaggageAtoms instances should never be created by any
+ * atom layer other than the one installed in the current process.
+ */
 public class AtomLayerCompatibility {
 
     static final Logger log = LoggerFactory.getLogger(AtomLayerCompatibility.class);

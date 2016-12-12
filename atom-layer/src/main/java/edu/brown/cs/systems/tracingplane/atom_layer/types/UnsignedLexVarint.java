@@ -174,4 +174,24 @@ public class UnsignedLexVarint {
         }
         return result;
     }
+
+    /**
+     * Returns the byte representation of the provided 32 bit unsigned integer encoded as a lexicographically comparable
+     * varint
+     */
+    public static byte[] writeVarUInt32(int value) {
+        ByteBuffer buf = ByteBuffer.allocate(UnsignedLexVarint.encodedLength(value));
+        UnsignedLexVarint.writeLexVarUInt32(buf, value);
+        return buf.array();
+    }
+
+    /**
+     * Returns the byte representation of the provided 64 bit unsigned integer encoded as a lexicographically comparable
+     * varint
+     */
+    public static byte[] writeVarUInt64(long value) {
+        ByteBuffer buf = ByteBuffer.allocate(UnsignedLexVarint.encodedLength(value));
+        UnsignedLexVarint.writeLexVarUInt64(buf, value);
+        return buf.array();
+    }
 }

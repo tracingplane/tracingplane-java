@@ -3,7 +3,9 @@ package edu.brown.cs.systems.tracingplane.atom_layer.types;
 import java.nio.ByteBuffer;
 import java.util.Comparator;
 
-// TODO: tests of some of these, such as isprefixedby, and copies
+/**
+ * Some functions I found useful for dealing with byte buffers
+ */
 public class ByteBuffers {
 
     public static final Comparator<ByteBuffer> LEXICOGRAPHIC_COMPARATOR =

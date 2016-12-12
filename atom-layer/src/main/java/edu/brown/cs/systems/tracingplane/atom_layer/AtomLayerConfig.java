@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import edu.brown.cs.systems.tracingplane.atom_layer.impl.RawAtomLayerFactory;
 
 public class AtomLayerConfig {
 
@@ -22,6 +23,27 @@ public class AtomLayerConfig {
         } catch (ClassNotFoundException e) {
             log.error("The configured atom layer class {}=\"{}\" was not found; defaulting to raw atom layer");
         }
+    }
+
+    public AtomLayer<?> createAtomLayer() throws InstantiationException, IllegalAccessException,
+                                          ClassNotFoundException {
+        return ((AtomLayerFactory) Class.forName(atomLayerFactory).newInstance()).newAtomLayer();
+    }
+    
+    private static AtomLayer<?> defaultAtomLayer = null;
+
+    public static synchronized AtomLayer<?> defaultAtomLayer() {
+        if (defaultAtomLayer == null) {
+            AtomLayerConfig config = new AtomLayerConfig();
+            try {
+                defaultAtomLayer =  config.createAtomLayer();
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                log.error(String.format("Unable to instantiate default atom layer factory %s, defaulting to %s",
+                                        config.atomLayerFactory, RawAtomLayerFactory.class.getName()));
+                defaultAtomLayer = new RawAtomLayerFactory().newAtomLayer();
+            }
+        }
+        return defaultAtomLayer;
     }
 
 }

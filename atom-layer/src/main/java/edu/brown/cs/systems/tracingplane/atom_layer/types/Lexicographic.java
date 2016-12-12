@@ -9,28 +9,75 @@ import java.util.Iterator;
 import java.util.List;
 import com.google.common.primitives.UnsignedBytes;
 
+/**
+ * <p>
+ * This class has static methods for lexicographically comparing bytes. Lexicographic comparison compares the
+ * <b>unsigned</b> byte representations starting from the left-most bit. It is like alphabetical comparison but for
+ * bytes. For example, consider the following:
+ * <ul>
+ * <li>a = 0000 0001</li>
+ * <li>b = 1000 0010 0010 0000</li>
+ * <li>c = 0000 0000 0000 1111</li>
+ * </ul>
+ * The lexicographic ordering for this example is c < a < b.
+ * </p>
+ */
 public class Lexicographic {
 
+    private Lexicographic() {}
+
+    /**
+     * A {@link Comparator<byte[]>} for performing lexicographical comparison on {@link byte[]} arrays.
+     */
     public static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = UnsignedBytes.lexicographicalComparator();
+
+    /**
+     * A {@link Comparator<byte[]>} for performing lexicographical comparison on {@link ByteBuffer} instances.
+     */
     public static final Comparator<ByteBuffer> BYTE_BUFFER_COMPARATOR = UnsignedByteBuffer.lexicographicalComparator();
 
+    /**
+     * Perform lexicographical (ie, unsigned) comparison on two bytes
+     * 
+     * @param a a byte. this function uses the unsigned value of a, so if {@code a < 0}, the function compares a + 256.
+     * @param b a byte. this function uses the unsigned value of b, so if {@code b < 0}, the function compares b + 256.
+     * @return compares the unsigned values of <code>a</code> and <code>b</code>, returning a negative integer if
+     *         {@code a < b}, 0 if {@code a == b}, or a positive integer if {@code a > b}.
+     */
     public static int compare(byte a, byte b) {
         return UnsignedBytes.compare(a, b);
     }
 
-    /** Compares the two byte arrays lexicographically */
+    /**
+     * Performs lexicographical comparison on two byte arrays, starting with index 0.
+     * 
+     * @param a an array of bytes
+     * @param b an array of bytes
+     * @return the lexicographical comparison of a and b: a negative integer if {@code a < b}, 0 if {@code a == b}, or a
+     *         positive integer if {@code a > b}.
+     */
     public static int compare(byte[] a, byte[] b) {
         return BYTE_ARRAY_COMPARATOR.compare(a, b);
     }
 
-    /** Compares the two byte buffers lexicographically */
+    /**
+     * Performs lexicographical comparison on two {@link ByteBuffer}s, starting with index 0. This method uses absolute
+     * indexes to compare a and b, and does not change their position or limit.
+     * 
+     * @param a an array of bytes
+     * @param b an array of bytes
+     * @return the lexicographical comparison of a and b: a negative integer if {@code a < b}, 0 if {@code a == b}, or a
+     *         positive integer if {@code a > b}.
+     */
     public static int compare(ByteBuffer a, ByteBuffer b) {
         return BYTE_BUFFER_COMPARATOR.compare(a, b);
     }
 
     /**
-     * Sort the provided array of bytebuffers lexicographically. The original array is modified. Returns the original
-     * array.
+     * Performs an in-place sort of {@code bufs} lexicographically
+     * 
+     * @param bufs an array of bytebuffers
+     * @return {@code bufs}, sorted lexicographically
      */
     public static ByteBuffer[] sort(ByteBuffer[] bufs) {
         Arrays.sort(bufs, BYTE_BUFFER_COMPARATOR);
@@ -38,8 +85,10 @@ public class Lexicographic {
     }
 
     /**
-     * Sort the provided list of bytebuffers lexicographically. The original list is modified. Returns the original
-     * list.
+     * Performs an in-place sort of {@code bufs} lexicographically
+     * 
+     * @param bufs a list of bytebuffers
+     * @return {@code bufs}, sorted lexicographically
      */
     public static List<ByteBuffer> sort(List<ByteBuffer> bufs) {
         Collections.sort(bufs, BYTE_BUFFER_COMPARATOR);
@@ -47,12 +96,31 @@ public class Lexicographic {
     }
 
     /**
-     * Merges the provided bytebuffers using lexicographical comparison to determine the merge order. Duplicate entries
-     * are discarded
+     * <p>
+     * Lexicographically merges the two provided lists of ByteBuffers. This method does <b>not</b> sort a, or b, or the
+     * returned list.
+     * </p>
+     * 
+     * <p>
+     * If the merge encounters identical values (e.g., the next value of a == the next value of b), then both a and b
+     * are advanced, and the value is only include once. For example:
+     * 
+     * <pre>
+     * a = [ 00000100, 00001000, 00000001 ];                               // [4, 8, 1]
+     * b = [ 00000010, 00001000, 00000011 ];                               // [2, 8, 3]
+     * merge(a, b) = [ 00000010, 00000100, 00001000, 00000001, 00000011 ]; // [2, 4, 8, 1, 3]
+     * </pre>
+     * </p>
+     * 
+     * @param a a list of bytebuffers, possibly null
+     * @param b a list of bytebuffers, possibly null
+     * @return a and b, lexicographically merged
      */
     public static List<ByteBuffer> merge(List<ByteBuffer> a, List<ByteBuffer> b) {
-        if (a == b) {
+        if (a == b || b == null) {
             return a;
+        } else if (a == null) {
+            return b;
         }
         int ia = 0, ib = 0, size_a = a.size(), size_b = b.size();
         final List<ByteBuffer> merged = new ArrayList<>(size_a + size_b);
@@ -89,6 +157,28 @@ public class Lexicographic {
         }
     }
 
+    /**
+     * <p>
+     * Takes two or more iterators as input and creates a {@link MergeIterator} that produces values in lexicographic
+     * order as would be produced by {@link #merge(List, List)}
+     * </p>
+     * 
+     * <p>
+     * If the merge encounters identical values (e.g., the next value of a == the next value of b), then both a and b
+     * are advanced, and the value is only include once. For example:
+     * 
+     * <pre>
+     * a = [ 00000100, 00001000, 00000001 ];                               // [4, 8, 1]
+     * b = [ 00000010, 00001000, 00000011 ];                               // [2, 8, 3]
+     * merge(a, b) = [ 00000010, 00000100, 00001000, 00000001, 00000011 ]; // [2, 4, 8, 1, 3]
+     * </pre>
+     * </p>
+     * 
+     * @param a an iterator of bytebuffers, possibly null, possibly exhausted
+     * @param b an iterator of bytebuffers, possibly null, possibly exhausted
+     * @param moreIterators zero or more iterators of bytebuffers, possibly null, possibly exhausted
+     * @return an iterator that produces elements from the input iterators, merged lexicographically
+     */
     @SafeVarargs
     public static Iterator<ByteBuffer> merge(Iterator<ByteBuffer> a, Iterator<ByteBuffer> b,
                                              Iterator<ByteBuffer>... moreIterators) {
@@ -98,121 +188,15 @@ public class Lexicographic {
         for (Iterator<ByteBuffer> it : moreIterators) {
             if (it != null && it.hasNext()) iterators.add(it);
         }
-        if (iterators.size() > 1) {
+        if (iterators.size() > 2) {
             return new MergeIterator<ByteBuffer>(iterators, BYTE_BUFFER_COMPARATOR);
+        } else if (iterators.size() == 2) {
+            return new MergeTwoIterator<>(a, b, BYTE_BUFFER_COMPARATOR);
         } else if (iterators.size() == 1) {
             return iterators.get(0);
         } else {
             return null;
         }
-    }
-
-    /**
-     * Write a 32 bit signed integer value into the provided buffer, encoded as a lexicographically comparable varint
-     */
-    public static int writeVarInt32(ByteBuffer buf, int value) {
-        return SignedLexVarint.writeLexVarInt32(buf, value);
-    }
-
-    /**
-     * Write a 64 bit signed integer value into the provided buffer, encoded as a lexicographically comparable varint
-     */
-    public static int writeVarInt64(ByteBuffer buf, long value) {
-        return SignedLexVarint.writeLexVarInt64(buf, value);
-    }
-
-    /**
-     * Write a 32 bit unsigned integer value into the provided buffer, encoded as a lexicographically comparable varint
-     */
-    public static int writeVarUInt32(ByteBuffer buf, int value) {
-        return UnsignedLexVarint.writeLexVarUInt32(buf, value);
-    }
-
-    /**
-     * Write a 64 bit unsigned integer value into the provided buffer, encoded as a lexicographically comparable varint
-     */
-    public static int writeVarUInt64(ByteBuffer buf, int value) {
-        return UnsignedLexVarint.writeLexVarUInt64(buf, value);
-    }
-
-    /**
-     * Returns the byte representation of the provided 32 bit signed integer encoded as a lexicographically comparable
-     * varint
-     */
-    public static byte[] writeVarInt32(int value) {
-        ByteBuffer buf = ByteBuffer.allocate(SignedLexVarint.encodedLength(value));
-        SignedLexVarint.writeLexVarInt32(buf, value);
-        return buf.array();
-    }
-
-    /**
-     * Returns the byte representation of the provided 64 bit signed integer encoded as a lexicographically comparable
-     * varint
-     */
-    public static byte[] writeVarInt64(long value) {
-        ByteBuffer buf = ByteBuffer.allocate(SignedLexVarint.encodedLength(value));
-        SignedLexVarint.writeLexVarInt64(buf, value);
-        return buf.array();
-    }
-
-    /**
-     * Returns the byte representation of the provided 32 bit unsigned integer encoded as a lexicographically comparable
-     * varint
-     */
-    public static byte[] writeVarUInt32(int value) {
-        ByteBuffer buf = ByteBuffer.allocate(UnsignedLexVarint.encodedLength(value));
-        UnsignedLexVarint.writeLexVarUInt32(buf, value);
-        return buf.array();
-    }
-
-    /**
-     * Returns the byte representation of the provided 64 bit unsigned integer encoded as a lexicographically comparable
-     * varint
-     */
-    public static byte[] writeVarUInt64(long value) {
-        ByteBuffer buf = ByteBuffer.allocate(UnsignedLexVarint.encodedLength(value));
-        UnsignedLexVarint.writeLexVarUInt64(buf, value);
-        return buf.array();
-    }
-
-    /** Reads a 32 bit signed varint from the provided buffer */
-    public static int readVarInt32(ByteBuffer buf) throws AtomLayerException {
-        return SignedLexVarint.readLexVarInt32(buf);
-    }
-
-    /** Reads a 64 bit signed varint from the provided buffer */
-    public static long readVarInt64(ByteBuffer buf) throws AtomLayerException {
-        return SignedLexVarint.readLexVarInt64(buf);
-    }
-
-    /** Reads a 32 bit unsigned varint from the provided buffer */
-    public static int readVarUInt32(ByteBuffer buf) throws AtomLayerException {
-        return UnsignedLexVarint.readLexVarUInt32(buf);
-    }
-
-    /** Reads a 64 bit unsigned varint from the provided buffer */
-    public static long readVarUInt64(ByteBuffer buf) throws AtomLayerException {
-        return UnsignedLexVarint.readLexVarUInt64(buf);
-    }
-
-    /** Reads a 32 bit signed varint from the provided buffer */
-    public static int readVarInt32(byte[] bytes) throws AtomLayerException {
-        return SignedLexVarint.readLexVarInt32(ByteBuffer.wrap(bytes));
-    }
-
-    /** Reads a 64 bit signed varint from the provided buffer */
-    public static long readVarInt64(byte[] bytes) throws AtomLayerException {
-        return SignedLexVarint.readLexVarInt64(ByteBuffer.wrap(bytes));
-    }
-
-    /** Reads a 32 bit unsigned varint from the provided buffer */
-    public static int readVarUInt32(byte[] bytes) throws AtomLayerException {
-        return UnsignedLexVarint.readLexVarUInt32(ByteBuffer.wrap(bytes));
-    }
-
-    /** Reads a 64 bit unsigned varint from the provided buffer */
-    public static long readVarUInt64(byte[] bytes) throws AtomLayerException {
-        return UnsignedLexVarint.readLexVarUInt64(ByteBuffer.wrap(bytes));
     }
 
 }

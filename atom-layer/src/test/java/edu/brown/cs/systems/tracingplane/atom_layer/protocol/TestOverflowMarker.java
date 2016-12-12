@@ -1,4 +1,4 @@
-package edu.brown.cs.systems.tracingplane.atom_layer;
+package edu.brown.cs.systems.tracingplane.atom_layer.protocol;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -7,6 +7,8 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import org.junit.Test;
 import com.google.common.collect.Lists;
+import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
+import edu.brown.cs.systems.tracingplane.atom_layer.protocol.AtomLayerSerialization;
 
 public class TestOverflowMarker {
 
@@ -47,7 +49,7 @@ public class TestOverflowMarker {
         assertEquals(10, AtomLayerSerialization.serializedSize(bufs));
 
         for (int i = 1; i < 6; i++) {
-            List<ByteBuffer> trimmed = AtomLayerSerialization.trimToSize(bufs, i);
+            List<ByteBuffer> trimmed = AtomLayerOverflow.trimToSize(bufs, i);
             assertNotNull(trimmed);
             assertEquals(1, trimmed.size());
             assertFalse(b1.equals(trimmed.get(0)));
@@ -55,7 +57,7 @@ public class TestOverflowMarker {
         }
 
         for (int i = 6; i < 10; i++) {
-            List<ByteBuffer> trimmed = AtomLayerSerialization.trimToSize(bufs, i);
+            List<ByteBuffer> trimmed = AtomLayerOverflow.trimToSize(bufs, i);
             assertNotNull(trimmed);
             assertEquals(2, trimmed.size());
             assertEquals(b1, trimmed.get(0));
@@ -64,7 +66,7 @@ public class TestOverflowMarker {
         }
 
         for (int i = 10; i < 20; i++) {
-            List<ByteBuffer> trimmed = AtomLayerSerialization.trimToSize(bufs, i);
+            List<ByteBuffer> trimmed = AtomLayerOverflow.trimToSize(bufs, i);
             assertNotNull(trimmed);
             assertEquals(2, trimmed.size());
             assertEquals(b1, trimmed.get(0));

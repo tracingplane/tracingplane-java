@@ -185,4 +185,24 @@ public class SignedLexVarint {
         }
         return result;
     }
+
+    /**
+     * Returns the byte representation of the provided 32 bit signed integer encoded as a lexicographically comparable
+     * varint
+     */
+    public static byte[] writeVarInt32(int value) {
+        ByteBuffer buf = ByteBuffer.allocate(SignedLexVarint.encodedLength(value));
+        SignedLexVarint.writeLexVarInt32(buf, value);
+        return buf.array();
+    }
+
+    /**
+     * Returns the byte representation of the provided 64 bit signed integer encoded as a lexicographically comparable
+     * varint
+     */
+    public static byte[] writeVarInt64(long value) {
+        ByteBuffer buf = ByteBuffer.allocate(SignedLexVarint.encodedLength(value));
+        SignedLexVarint.writeLexVarInt64(buf, value);
+        return buf.array();
+    }
 }

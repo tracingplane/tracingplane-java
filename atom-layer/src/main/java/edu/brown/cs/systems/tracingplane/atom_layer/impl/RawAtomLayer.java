@@ -1,18 +1,21 @@
 package edu.brown.cs.systems.tracingplane.atom_layer.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 import edu.brown.cs.systems.tracingplane.atom_layer.AtomLayer;
-import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
+import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 
 /**
  * The simple implementation of the context layer that can be used in lieu of a full baggage layer. Simply merges bags
- * lexicographically and removes duplicates
+ * lexicographically, removes duplicates, and supports overflow.
  */
-public class RawAtomLayerImpl implements AtomLayer<RawBaggageAtoms> {
+public class RawAtomLayer implements AtomLayer<RawBaggageAtoms> {
 
     @Override
-    public boolean isInstance(BaggageAtoms baggage) {
+    public boolean isInstance(Baggage baggage) {
         return baggage == null || baggage instanceof RawBaggageAtoms;
     }
 
@@ -64,6 +67,30 @@ public class RawAtomLayerImpl implements AtomLayer<RawBaggageAtoms> {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public RawBaggageAtoms deserialize(byte[] serialized, int offset, int length) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public RawBaggageAtoms readFrom(InputStream in) throws IOException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public byte[] serialize(RawBaggageAtoms baggage) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void writeTo(OutputStream out, RawBaggageAtoms baggage) throws IOException {
+        // TODO Auto-generated method stub
+        
     }
 
 }

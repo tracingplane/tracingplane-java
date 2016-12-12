@@ -48,7 +48,7 @@ public interface Baggage {
     /**
      * The {@link TransitLayer} implementation installed in the process.
      */
-    public static final TransitLayer<?> transit = TransitLayerFactory.createDefaultTransitLayer();
+    public static final TransitLayer<?> transit = TransitLayerConfig.defaultTransitLayer();
 
     /**
      * <p>

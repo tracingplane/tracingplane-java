@@ -243,8 +243,8 @@ public class TestXUnsignedVarint32 {
 
     @Test
     public void testUnsignedVarint32Comparison() {
-        byte[] imax = Lexicographic.writeVarUInt32(Integer.MAX_VALUE);
-        byte[] imax2 = Lexicographic.writeVarUInt32(-1);
+        byte[] imax = UnsignedLexVarint.writeVarUInt32(Integer.MAX_VALUE);
+        byte[] imax2 = UnsignedLexVarint.writeVarUInt32(-1);
 
         assertTrue(Lexicographic.compare(imax, imax2) < 0);
 

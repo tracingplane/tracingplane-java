@@ -2,16 +2,16 @@ package edu.brown.cs.systems.tracingplane.baggage_layer.impl;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey.BagPath;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayer;
+import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 
 /** TODO: documentation and description */
 public class GenericBaggageLayer implements BaggageLayer<GenericBaggageContents> {
 
     @Override
-    public boolean isInstance(BaggageAtoms baggage) {
+    public boolean isInstance(Baggage baggage) {
         return baggage == null || baggage instanceof GenericBaggageContents;
     }
 

@@ -6,7 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import edu.brown.cs.systems.tracingplane.atom_layer.impl.RawAtomLayerImpl;
+import edu.brown.cs.systems.tracingplane.atom_layer.impl.RawAtomLayer;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 import edu.brown.cs.systems.tracingplane.transit_layer.impl.NullTransitLayer;
 
@@ -19,16 +19,15 @@ public class TestDefaultTransitLayer {
 
         assertNotNull(Baggage.transit);
         assertFalse(Baggage.transit instanceof NullTransitLayer);
-        assertTrue(Baggage.transit instanceof AtomTransitLayerImpl);
+        assertTrue(Baggage.transit instanceof RawAtomLayer);
 
-        AtomTransitLayerImpl<?> transit = (AtomTransitLayerImpl<?>) Baggage.transit;
-        assertNotNull(transit.contextLayer);
-        assertTrue(transit.contextLayer instanceof RawAtomLayerImpl);
+        assertNotNull(BaggageAtoms.atomLayer);
+        assertTrue(BaggageAtoms.atomLayer instanceof RawAtomLayer);
 
         Baggage baggage = Baggage.newInstance();
         assertNull(baggage);
 
-        assertEquals(transit.contextLayer, BaggageAtoms.atomLayer);
+        assertEquals(Baggage.transit, BaggageAtoms.atomLayer);
     }
 
 }

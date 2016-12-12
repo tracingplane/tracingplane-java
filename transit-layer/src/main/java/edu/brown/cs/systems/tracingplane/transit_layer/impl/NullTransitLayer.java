@@ -1,5 +1,6 @@
 package edu.brown.cs.systems.tracingplane.transit_layer.impl;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
@@ -41,9 +42,17 @@ public class NullTransitLayer implements TransitLayer<Baggage> {
 
     @Override
     public byte[] serialize(Baggage instance) {
-        return new byte[0];
+        return NullBaggage.SERIALIZED;
+    }
+
+    @Override
+    public byte[] serialize(Baggage baggage, int maximumSerializedSize) {
+        return NullBaggage.SERIALIZED;
     }
 
     @Override
     public void writeTo(OutputStream out, Baggage instance) {}
+
+    @Override
+    public void writeTo(OutputStream out, Baggage baggage, int maximumSerializedSize) throws IOException {}
 }
