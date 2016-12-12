@@ -14,12 +14,15 @@ import com.google.common.primitives.UnsignedBytes;
  * This class has static methods for lexicographically comparing bytes. Lexicographic comparison compares the
  * <b>unsigned</b> byte representations starting from the left-most bit. It is like alphabetical comparison but for
  * bytes. For example, consider the following:
+ * </p>
  * <ul>
  * <li>a = 0000 0001</li>
  * <li>b = 1000 0010 0010 0000</li>
  * <li>c = 0000 0000 0000 1111</li>
  * </ul>
- * The lexicographic ordering for this example is c < a < b.
+ * 
+ * <p>
+ * The lexicographic ordering for this example is {@code c < a < b}.
  * </p>
  */
 public class Lexicographic {
@@ -27,12 +30,12 @@ public class Lexicographic {
     private Lexicographic() {}
 
     /**
-     * A {@link Comparator<byte[]>} for performing lexicographical comparison on {@link byte[]} arrays.
+     * A Comparator for performing lexicographical comparison on {@link byte[]} arrays.
      */
     public static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = UnsignedBytes.lexicographicalComparator();
 
     /**
-     * A {@link Comparator<byte[]>} for performing lexicographical comparison on {@link ByteBuffer} instances.
+     * A Comparator for performing lexicographical comparison on {@link ByteBuffer} instances.
      */
     public static final Comparator<ByteBuffer> BYTE_BUFFER_COMPARATOR = UnsignedByteBuffer.lexicographicalComparator();
 
@@ -104,13 +107,13 @@ public class Lexicographic {
      * <p>
      * If the merge encounters identical values (e.g., the next value of a == the next value of b), then both a and b
      * are advanced, and the value is only include once. For example:
+     * </p>
      * 
      * <pre>
      * a = [ 00000100, 00001000, 00000001 ];                               // [4, 8, 1]
      * b = [ 00000010, 00001000, 00000011 ];                               // [2, 8, 3]
      * merge(a, b) = [ 00000010, 00000100, 00001000, 00000001, 00000011 ]; // [2, 4, 8, 1, 3]
      * </pre>
-     * </p>
      * 
      * @param a a list of bytebuffers, possibly null
      * @param b a list of bytebuffers, possibly null
@@ -166,13 +169,13 @@ public class Lexicographic {
      * <p>
      * If the merge encounters identical values (e.g., the next value of a == the next value of b), then both a and b
      * are advanced, and the value is only include once. For example:
+     * </p>
      * 
      * <pre>
      * a = [ 00000100, 00001000, 00000001 ];                               // [4, 8, 1]
      * b = [ 00000010, 00001000, 00000011 ];                               // [2, 8, 3]
      * merge(a, b) = [ 00000010, 00000100, 00001000, 00000001, 00000011 ]; // [2, 4, 8, 1, 3]
      * </pre>
-     * </p>
      * 
      * @param a an iterator of bytebuffers, possibly null, possibly exhausted
      * @param b an iterator of bytebuffers, possibly null, possibly exhausted

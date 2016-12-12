@@ -17,7 +17,7 @@ import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
  * 
  * <p>
  * BaggageAtoms are a simple default representation of data that enables consistent propagation of data while traversing
- * different thread, process, machine, and application boundaries. The AtomLayer specifies the following:
+ * different thread, process, machine, and application boundaries. The AtomLayer specifies the following:</p>
  * <ul>
  * <li>The underlying serialization format of atoms, which is to prefix the bytes of each atom with their length
  * (encoded as a protobuf-style varint). For example, with {@code byte[] a = new byte[10];} and
@@ -35,7 +35,6 @@ import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
  * marker is the empty atom (e.g., zero-length atom) which is lexicographically smaller than all other atoms and
  * therefore tracks the position in the baggage where data was dropped.</li>
  * </ul>
- * </p>
  * 
  * <p>
  * Propagation of BaggageAtoms should still be done via the static methods in {@link Baggage}. However, there are
@@ -58,19 +57,46 @@ public interface BaggageAtoms extends Baggage {
      */
     public static final AtomLayer<?> atomLayer = AtomLayerConfig.defaultAtomLayer();
 
-    /** Create a BaggageAtoms object by wrapping the raw bytes provided */
+    /**
+     * <p>
+     * Turn a list of atoms into a {@link BaggageAtoms} instance.
+     * </p>
+     * 
+     * <p>
+     * This method does <b>not</b> affect the current thread's baggage. To set the current thread's baggage, call
+     * {@link Baggage#set(Baggage)}, passing the wrapped {@link BaggageAtoms}, e.g.
+     * {@code Baggage.set(BaggageAtoms.wrap(atoms));}
+     * </p>
+     * 
+     * @param atoms The atom representation of a BaggageAtoms instance, possibly null
+     * @return a parsed BaggageAtoms instance, possibly null
+     */
     public static BaggageAtoms wrap(List<ByteBuffer> atoms) {
         return AtomLayerCompatibility.wrap(atomLayer, atoms);
     }
 
-    /** Serialize the provided BaggageAtoms object into the byte-array representation. */
-    public static List<ByteBuffer> atoms(BaggageAtoms atoms) {
-        return AtomLayerCompatibility.atoms(atomLayer, atoms);
+    /**
+     * <p>
+     * Get the atoms that comprise the provided baggage instance.
+     * </p>
+     * 
+     * <p>
+     * To get the atoms of the current thread's baggage, use {@link #atoms()}.
+     * </p>
+     * 
+     * @param baggage a BaggageAtoms instance, possibly null
+     * @return The atom representation of the BaggageAtoms instance, possibly null
+     */
+    public static List<ByteBuffer> atoms(BaggageAtoms baggage) {
+        return AtomLayerCompatibility.atoms(atomLayer, baggage);
     }
 
     /**
-     * Gets the serialized byte array atoms for the thread's current context, if there is one Serialize the provided
-     * BaggageAtoms object into the byte-array representation.
+     * <p>
+     * Get the atoms that comprise the current thread's baggage.
+     * </p>
+     * 
+     * @return The atom representation of the BaggageAtoms instance, possibly null
      */
     public static List<ByteBuffer> atoms() {
         return AtomLayerCompatibility.atoms(atomLayer, Baggage.get());

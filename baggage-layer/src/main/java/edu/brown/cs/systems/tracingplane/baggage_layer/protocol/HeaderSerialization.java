@@ -5,7 +5,6 @@ import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.ByteBuffers;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.UnsignedLexVarint;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
-import edu.brown.cs.systems.tracingplane.baggage_layer.BagOptions;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayerException;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayerException.BaggageLayerRuntimeException;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.AtomPrefix;
@@ -21,6 +20,7 @@ public class HeaderSerialization {
 
     private HeaderSerialization() {}
 
+    /** Atom prefixes are 1 byte long */
     public static final int PREFIX_SIZE = 1;
 
     /**
@@ -30,7 +30,7 @@ public class HeaderSerialization {
      * @return the serialized size of the atom for this bagkey
      */
     public static int serializedSize(BagKey.Indexed bagKey) {
-        return PREFIX_SIZE + UnsignedLexVarint.encodedLength(bagKey.index) + serializedSize(bagKey.options);
+        return PREFIX_SIZE + UnsignedLexVarint.encodedLength(bagKey.index);
     }
 
     /**
@@ -40,20 +40,7 @@ public class HeaderSerialization {
      * @return the serialized size of the atom for this bagKey
      */
     public static int serializedSize(BagKey.Keyed bagKey) {
-        return PREFIX_SIZE + UnsignedLexVarint.encodedLength(bagKey.key.remaining()) + bagKey.key.remaining() +
-               serializedSize(bagKey.options);
-    }
-
-    /**
-     * Calculates the serialized size of bag options. If the bag options are the default options, they are omitted from
-     * serialization
-     */
-    public static int serializedSize(BagOptions options) {
-        if (options.isDefault()) {
-            return 0;
-        } else {
-            return 1;
-        }
+        return PREFIX_SIZE + bagKey.key.remaining();
     }
 
     /**
@@ -86,6 +73,7 @@ public class HeaderSerialization {
      * Write the prefix byte of an Indexed header atom to the provided buf
      * 
      * @param buf the buffer to write to
+     * @param bagKey the key of this header
      * @param level the header level
      */
     public static void writeAtomPrefix(ByteBuffer buf, BagKey.Indexed bagKey, int level) {
@@ -96,6 +84,7 @@ public class HeaderSerialization {
      * Write the prefix byte of a Keyed header atom to the provided buf
      * 
      * @param buf the buffer to write to
+     * @param bagKey the key of this header
      * @param level the header level
      */
     public static void writeAtomPrefix(ByteBuffer buf, BagKey.Keyed bagKey, int level) {
@@ -106,6 +95,7 @@ public class HeaderSerialization {
      * Write the payload of an Indexed header atom to the provided buf
      * 
      * @param buf the buffer to write to
+     * @param bagKey the key of this header
      * @param bagKey the bagKey to write
      */
     public static void writeAtomPayload(ByteBuffer buf, BagKey.Indexed bagKey) {
@@ -122,22 +112,12 @@ public class HeaderSerialization {
         ByteBuffers.copyTo(bagKey.key, buf);
     }
 
-    // /**
-    // * Write the bag options to the provided buf. If the options are just the default options, this will not write
-    // * anything.
-    // *
-    // * @param buf the buffer to write to
-    // * @param options the bag options
-    // */
-    // public static void writeBagOptions(ByteBuffer buf, BagOptions options) {
-    // if (options == null) {
-    // options = BagOptions.defaultOptions;
-    // }
-    // buf.put(options.byteValue);
-    // }
-
     /**
-     * Serialize the full atom for the provided bag at the specified level
+     * Serialize the header atom, including prefix byte, for the provided bagKey and level
+     * 
+     * @param bagKey the key to write a header for
+     * @param level the level of this key
+     * @return the header atom representing the provided key and level
      */
     public static ByteBuffer serialize(BagKey bagKey, int level) {
         if (bagKey instanceof BagKey.Indexed) {
@@ -150,7 +130,11 @@ public class HeaderSerialization {
     }
 
     /**
-     * Serialize the full atom for the provided bag at the specified level
+     * Serialize the header atom, including prefix byte, for the provided bagKey and level
+     * 
+     * @param bagKey the key to write a header for
+     * @param level the level of this key
+     * @return the header atom representing the provided key and level
      */
     public static ByteBuffer serialize(BagKey.Indexed bagKey, int level) {
         ByteBuffer buf = ByteBuffer.allocate(serializedSize(bagKey));
@@ -161,7 +145,11 @@ public class HeaderSerialization {
     }
 
     /**
-     * Serialize the full atom for the provided bag at the specified level
+     * Serialize the header atom, including prefix byte, for the provided bagKey and level
+     * 
+     * @param bagKey the key to write a header for
+     * @param level the level of this key
+     * @return the header atom representing the provided key and level
      */
     public static ByteBuffer serialize(BagKey.Keyed bagKey, int level) {
         ByteBuffer buf = ByteBuffer.allocate(serializedSize(bagKey));
@@ -175,6 +163,9 @@ public class HeaderSerialization {
      * Serialize the atom payload for the provided bagkey, excluding atom prefix. The returned buffer will have
      * allocated room for a prefix byte, but not filled it. The position of the returned buffer will be the start of the
      * payload.
+     * 
+     * @param bagKey the key to write a header for
+     * @return a buffer containing the payload of the header atom
      */
     public static ByteBuffer serializePayload(BagKey.Indexed bagKey) {
         ByteBuffer buf = serialize(bagKey, 0);
@@ -186,6 +177,9 @@ public class HeaderSerialization {
      * Serialize the atom payload for the provided bagkey, excluding atom prefix. The returned buffer will have
      * allocated room for a prefix byte, but not filled it. The position of the returned buffer will be the start of the
      * payload.
+     * 
+     * @param bagKey the key to write a header for
+     * @return a buffer containing the payload of the header atom
      */
     public static ByteBuffer serializePayload(BagKey.Keyed bagKey) {
         ByteBuffer buf = serialize(bagKey, 0);
@@ -196,7 +190,7 @@ public class HeaderSerialization {
     /**
      * Parses a bag key from the provided atom
      * 
-     * @param buf a buffer containing both the prefix of the atom and its payload
+     * @param atom a buffer containing both the prefix of the atom and its payload
      * @return a bag key
      * @throws AtomLayerException if the header payload could not be parsed
      * @throws BaggageLayerException if the atom is not a header atom
@@ -220,7 +214,7 @@ public class HeaderSerialization {
      * @param prefix the prefix of the atom
      * @param buf the payload of the atom
      * @return a bag key
-     * @throws AtomLayerException if the atom is not a header atom or if the header payload could not be parsed
+     * @throws BaggageLayerException if the atom is not a header atom or if the header payload could not be parsed
      */
     public static BagKey parse(HeaderPrefix prefix, ByteBuffer buf) throws BaggageLayerException {
         buf.mark();
@@ -241,6 +235,7 @@ public class HeaderSerialization {
     /**
      * Parse the payload of an indexed header
      * 
+     * @param prefix the prefix of this atom
      * @param buf the payload of the atom
      * @return the parsed bagkey
      * @throws BaggageLayerException if the atom payload could not be parsed
@@ -256,6 +251,7 @@ public class HeaderSerialization {
     /**
      * Parse the payload of a keyed header
      * 
+     * @param prefix the prefix of this atom
      * @param buf the payload of the atom
      * @return the parsed bagkey
      * @throws BaggageLayerException if the atom payload could not be parsed
@@ -263,17 +259,5 @@ public class HeaderSerialization {
     public static BagKey parseKeyedHeaderPayload(HeaderPrefix prefix, ByteBuffer buf) throws BaggageLayerException {
         return BagKey.named(buf.slice(), prefix.options());
     }
-
-    // /**
-    // * Parse bag options. If the options are invalid, throws a BaggageLayerException
-    // */
-    // public static BagOptions parseBagOptions(ByteBuffer buf) throws BaggageLayerException {
-    // byte optionsValue = buf.get();
-    // BagOptions options = BagOptions.valueOf(optionsValue);
-    // if (options == null) {
-    // throw new BaggageLayerException(String.format("Got invalid bag options %d", optionsValue));
-    // }
-    // return options;
-    // }
 
 }

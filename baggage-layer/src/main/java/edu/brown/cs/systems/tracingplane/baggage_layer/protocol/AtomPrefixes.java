@@ -57,7 +57,12 @@ public class AtomPrefixes {
 
     private AtomPrefixes() {}
 
-    /** Get the {@link AtomPrefix} object for the specified byte */
+    /**
+     * Get the {@link AtomPrefix} object for the specified prefix
+     * 
+     * @param prefix the first byte of an atom
+     * @return the {@link AtomPrefix} object that corresponds to this prefix
+     */
     public static AtomPrefix get(byte prefix) {
         if (prefix >= 0) {
             return prefixes[prefix];
@@ -140,7 +145,7 @@ public class AtomPrefixes {
         int level(int currentLevel) {
             return this.level.level;
         }
-        
+
         BagOptions options() {
             return BagOptions.create(options.merge);
         }

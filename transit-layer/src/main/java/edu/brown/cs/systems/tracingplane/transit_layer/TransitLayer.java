@@ -75,7 +75,7 @@ public interface TransitLayer<B extends Baggage> {
 
     /**
      * Serialize the provided baggage instance to its byte representation. This method should behave as though
-     * {@link branch()} is also being called prior to serialization.
+     * {@link #branch(Baggage)} is also being called prior to serialization.
      * 
      * @param baggage a baggage instance to serialize, possibly null
      * @return the serialized representation of <code>baggage</code>, which might be null or an empty byte array
@@ -84,7 +84,7 @@ public interface TransitLayer<B extends Baggage> {
 
     /**
      * Serialize the provided baggage instance to its byte representation and trim the baggage so that its serialized
-     * size is {@code <= maximumSerializedSize}. This method should behave as though {@link branch()} is also being
+     * size is {@code <= maximumSerializedSize}. This method should behave as though {@link #branch(Baggage)} is also being
      * called prior to serialization.
      * 
      * @param baggage a baggage instance to serialize, possibly null

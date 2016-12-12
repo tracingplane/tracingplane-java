@@ -112,10 +112,28 @@ public class SignedLexVarint {
         return size;
     }
 
+    /**
+     * Interprets the next bytes of {@code buf} as a lexicographically comparable signed 32-bit integer. Reads up to 5
+     * bytes from {@code buf} to decode the value.
+     * 
+     * @param buf a buffer
+     * @return a signed integer read from buf
+     * @throws AtomLayerException if the next bytes are invalid when interpreted as a lexicographically comparable
+     *             varint
+     */
     public static int readLexVarInt32(ByteBuffer buf) throws AtomLayerException {
         return (int) readLexVarInt64(buf);
     }
 
+    /**
+     * Interprets the next bytes of {@code buf} as a lexicographically comparable signed 64-bit integer. Reads up to 9
+     * bytes from {@code buf} to decode the value.
+     * 
+     * @param buf a buffer
+     * @return a signed long read from buf
+     * @throws AtomLayerException if the next bytes are invalid when interpreted as a lexicographically comparable
+     *             varint
+     */
     public static long readLexVarInt64(ByteBuffer buf) throws AtomLayerException {
         byte b0 = buf.get();
         int size = interpretSize(b0);
@@ -152,7 +170,10 @@ public class SignedLexVarint {
         }
     }
 
-    /** Returns true if positive, false if negative */
+    /**
+     * @param b a lexicographically encoded byte
+     * @return true if {@code b > 0}, false otherwise.
+     */
     static boolean interpretSign(byte b) {
         return b < 0;  // if b begins with 1, in our encoding it is positive
     }
@@ -187,8 +208,8 @@ public class SignedLexVarint {
     }
 
     /**
-     * Returns the byte representation of the provided 32 bit signed integer encoded as a lexicographically comparable
-     * varint
+     * @param value a 32-bit signed integer
+     * @return {@code value} encoded as a lexicographically-comparable variable-length integer.
      */
     public static byte[] writeVarInt32(int value) {
         ByteBuffer buf = ByteBuffer.allocate(SignedLexVarint.encodedLength(value));
@@ -197,8 +218,8 @@ public class SignedLexVarint {
     }
 
     /**
-     * Returns the byte representation of the provided 64 bit signed integer encoded as a lexicographically comparable
-     * varint
+     * @param value a 64-bit signed long
+     * @return {@code value} encoded as a lexicographically-comparable variable-length long integer.
      */
     public static byte[] writeVarInt64(long value) {
         ByteBuffer buf = ByteBuffer.allocate(SignedLexVarint.encodedLength(value));

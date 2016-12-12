@@ -6,7 +6,7 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Parser;
 
-public class XTraceParser2 implements Parser<XTrace> {
+public class XTraceParser implements Parser<XTrace> {
 
     public static final BagKey taskIdKey = BagKey.indexed(0);
     public static final BagKey parentEventIdsKey = BagKey.indexed(1);

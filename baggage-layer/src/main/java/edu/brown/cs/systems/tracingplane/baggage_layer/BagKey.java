@@ -179,7 +179,7 @@ public abstract class BagKey implements Comparable<BagKey> {
         return new Keyed(name, options);
     }
 
-    /** An Indexed BagKey is one that uses an integer as identifier (versus arbitrary bytes for a {@Keyed} key) */
+    /** An Indexed BagKey is one that uses an integer as identifier (versus arbitrary bytes for a {@link Keyed} key) */
     public static final class Indexed extends BagKey {
 
         private ByteBuffer byteRepr = null;
@@ -238,7 +238,7 @@ public abstract class BagKey implements Comparable<BagKey> {
 
     }
 
-    /** A Keyed BagKey is one that uses arbitrary bytes as identifier (versus an integer for {@Indexed} key) */
+    /** A Keyed BagKey is one that uses arbitrary bytes as identifier (versus an integer for {@link Indexed} key) */
     public static final class Keyed extends BagKey {
 
         private ByteBuffer byteRepr = null;
@@ -294,7 +294,7 @@ public abstract class BagKey implements Comparable<BagKey> {
             }
             return byteRepr;
         }
-        
+
         @Override
         public String toString() {
             List<String> bytes = Lists.newArrayList();

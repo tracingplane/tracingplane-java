@@ -139,10 +139,12 @@ public class BaggageReader {
     /**
      * Checks to see whether there are more atoms at the current level.
      * 
-     * This is always true, unless the next atom is a prefix for a header at a level <= currentLevel, or we run out of
-     * atoms.
+     * This is always true, unless the next atom is a prefix for a header at a level {@code <= currentLevel}, or we run
+     * out of atoms.
      * 
-     * When this method returns false, {@link exitBag} should be called to return to the parent bag.
+     * When this method returns false, {@link #exit()} should be called to return to the parent bag.
+     * 
+     * @return true if there are more data elements or child bags to read; false if this bag is exhausted
      */
     public boolean hasNext() {
         return nextAtom != null && nextAtomPrefix.level(currentLevel) > currentLevel;
@@ -181,20 +183,21 @@ public class BaggageReader {
     /**
      * <p>
      * Drop remaining data atoms between here and the next child bag / end of bag. This means they will not be added to
-     * the list of unprocessed elements. The method {@link keepData()} lets you keep remaining data atoms as unprocessed
+     * the list of unprocessed elements. The method {@link #keepData()} lets you keep remaining data atoms as unprocessed
      * elements instead if desired.
      * </p>
      * 
      * <p>
      * The default behavior for data atoms is as follows:
+     * </p>
      * <ul>
      * <li>If you do not attempt to read any data from a bag (eg, by jumping straight to a child bag), then all data is
      * automatically added to the list of unprocessed elements.</li>
      * <li>If you read some data from a bag, but not all of it, then the remaining data in the bag is discarded and not
      * added as unprocessed</li>
-     * </p>
+     * </ul>
      * 
-     * The methods {@link dropData()} and {@link keepData()} let the user control this behavior
+     * The methods {@link #dropData()} and {@link #keepData()} let the user control this behavior
      */
     public void dropData() {
         while (hasData()) {
@@ -206,7 +209,8 @@ public class BaggageReader {
      * <p>
      * Drop all remaining data atoms and child atoms in this bag, advancing to the next sibling / parent bag. None of
      * the atoms will be added to the list of unprocessed elements.
-     * 
+     * </p>
+     * <p>
      * In general this method should not be used, as it is likely to violate the 'ignore and propagate' principle.
      * </p>
      */
@@ -222,19 +226,22 @@ public class BaggageReader {
     /**
      * <p>
      * Add all remaining data atoms between here and the next child bag / end of bag to the list of unprocessed
-     * elements. The method {@link dropData()} lets you instead drop the data items if desired.
+     * elements. The method {@link #dropData()} lets you instead drop the data items if desired.
      * </p>
      * 
      * <p>
      * The default behavior for data atoms is as follows:
+     * </p>
      * <ul>
      * <li>If you do not attempt to read any data from a bag (eg, by jumping straight to a child bag), then all data is
      * automatically added to the list of unprocessed elements.</li>
      * <li>If you read some data from a bag, but not all of it, then the remaining data in the bag is discarded and not
      * added as unprocessed</li>
-     * </p>
+     * </ul>
      * 
-     * The methods {@link dropData()} and {@link keepData()} let the user control this behavior
+     * <p>
+     * The methods {@link #dropData()} and {@link #keepData()} let the user control this behavior
+     * </p>
      */
     public void keepData() {
         while (hasData()) {
@@ -250,7 +257,7 @@ public class BaggageReader {
      * dropBag()} lets you instead drop the bag if desired.
      * </p>
      * 
-     * The default behavior is to keep all child bags that are not processed, so a call to {@link keepDataAndChildren()}
+     * The default behavior is to keep all child bags that are not processed, so a call to {@link #keepDataAndChildren()}
      * is not necessary
      */
     public void keepDataAndChildren() {
@@ -269,6 +276,9 @@ public class BaggageReader {
      * That is, if we encounter the bag, we enter the bag and advance to the next atom and return true.
      * 
      * If this method returns false, we are at the first bag after where the expected bag would be
+     * 
+     * @param expect the next BagKey to look for
+     * @return true if the BagKey is found and the bag was entered; false otherwise
      */
     public boolean enter(BagKey expect) {
         advanceToNextBag();
@@ -307,6 +317,8 @@ public class BaggageReader {
      * If there are no more children in the current bag, returns null.
      * 
      * Otherwise, advances to the next child, enters it, and returns its key.
+     * 
+     * @return the key of the next child in this bag if there is one; null otherwise
      */
     public BagKey enter() {
         // If the data atoms of the current bag aren't exhausted, drop them

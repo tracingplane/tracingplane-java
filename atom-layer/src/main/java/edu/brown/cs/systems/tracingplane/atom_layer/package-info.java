@@ -1,15 +1,3 @@
-package edu.brown.cs.systems.tracingplane.atom_layer;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.util.List;
-import edu.brown.cs.systems.tracingplane.atom_layer.protocol.AtomLayerSerialization;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
-import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
-import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
-
 /**
  * <p>
  * The AtomLayer is an implementation of the {@link TransitLayer} that specifies some default behavior for how to
@@ -49,65 +37,11 @@ import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
  * <p>
  * For a system to participate in the tracing plane, it must be capable of propagating at least two bytes of baggage.
  * </p>
- * 
- * <p>
- * The methods in this class are similar to the methods defined by {@link TransitLayer}, with
- * {@link #atoms(BaggageAtoms)} and {@link #wrap(List)} replacing {@link TransitLayer#serialize(Baggage)} and
- * {@link TransitLayer#deserialize(byte[], int, int)}.
- * </p>
- * 
- * @param <B> Some implementation of {@link Baggage} used by this transit layer.
  */
-public interface AtomLayer<B extends BaggageAtoms> extends TransitLayer<B> {
+package edu.brown.cs.systems.tracingplane.atom_layer;
 
-    /**
-     * <p>
-     * Turn a list of atoms into a {@link BaggageAtoms} instance.
-     * </p>
-     * 
-     * @param atoms The atom representation of a BaggageAtoms instance
-     * @return a parsed BaggageAtoms instance
-     */
-    public B wrap(List<ByteBuffer> atoms);
-
-    /**
-     * <p>
-     * Get the atoms that comprise the provided baggage instance.
-     * </p>
-     * 
-     * @param baggage a {@link BaggageAtoms} instance
-     * @return the atoms of this {@link BaggageAtoms} instance
-     */
-    public List<ByteBuffer> atoms(B baggage);
-
-    @Override
-    public default B deserialize(byte[] serialized, int offset, int length) {
-        return wrap(AtomLayerSerialization.deserialize(serialized, offset, length));
-    }
-
-    @Override
-    public default B readFrom(InputStream in) throws IOException {
-        return wrap(AtomLayerSerialization.readFrom(in));
-    }
-
-    @Override
-    public default byte[] serialize(B baggage) {
-        return AtomLayerSerialization.serialize(atoms(baggage));
-    }
-
-    @Override
-    public default void writeTo(OutputStream out, B baggage) throws IOException {
-        AtomLayerSerialization.write(out, atoms(baggage));
-    }
-
-    @Override
-    public default byte[] serialize(B baggage, int maximumSerializedSize) {
-        return AtomLayerSerialization.serialize(atoms(baggage), maximumSerializedSize);
-    }
-
-    @Override
-    public default void writeTo(OutputStream out, B baggage, int maximumSerializedSize) throws IOException {
-        AtomLayerSerialization.write(out, atoms(baggage), maximumSerializedSize);
-    }
-
-}
+import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
+import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
+import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
+import edu.brown.cs.systems.tracingplane.atom_layer.protocol.AtomLayerSerialization;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;

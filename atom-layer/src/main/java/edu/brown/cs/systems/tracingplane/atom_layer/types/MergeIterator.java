@@ -16,7 +16,7 @@ import com.google.common.collect.Lists;
  * </p>
  * 
  * <p>
- * eg, for inputs [1, 2, 3] and [0, 1, 2], the output will be [0, 1, 2, 3] <br />
+ * eg, for inputs [1, 2, 3] and [0, 1, 2], the output will be [0, 1, 2, 3] <br>
  * however, for inputs [1, 2, 1] and [1, 3, 2], the output will be [1, 2, 1, 3, 2]
  * </p>
  * 

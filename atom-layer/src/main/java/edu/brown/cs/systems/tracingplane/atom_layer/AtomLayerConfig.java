@@ -6,6 +6,11 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import edu.brown.cs.systems.tracingplane.atom_layer.impl.RawAtomLayerFactory;
 
+/**
+ * Provides configuration of the {@link AtomLayer} using the TypeSafe Config. Configuration values can be overridden by
+ * placing an {@code application.conf} on the classpath or by specifying java flags, e.g.
+ * {@code -Dtracingplane.atom-layer.factory="factoryclass"}
+ */
 public class AtomLayerConfig {
 
     private static final Logger log = LoggerFactory.getLogger(AtomLayerConfig.class);
@@ -30,14 +35,14 @@ public class AtomLayerConfig {
                                           ClassNotFoundException {
         return ((AtomLayerFactory) Class.forName(atomLayerFactory).newInstance()).newAtomLayer();
     }
-    
+
     private static AtomLayer<?> defaultAtomLayer = null;
 
     public static synchronized AtomLayer<?> defaultAtomLayer() {
         if (defaultAtomLayer == null) {
             AtomLayerConfig config = new AtomLayerConfig();
             try {
-                defaultAtomLayer =  config.createAtomLayer();
+                defaultAtomLayer = config.createAtomLayer();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 log.error(String.format("Unable to instantiate default atom layer factory %s, defaulting to %s",
                                         config.atomLayerFactory, RawAtomLayerFactory.class.getName()));

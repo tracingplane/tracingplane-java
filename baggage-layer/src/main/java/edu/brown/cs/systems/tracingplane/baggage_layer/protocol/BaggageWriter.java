@@ -95,6 +95,9 @@ public class BaggageWriter {
     /**
      * Creates a byte buffer with {@code expectedSize} bytes of free space. The atom can be written to as normal. Not
      * all of the free space must be filled
+     * 
+     * @param expectedSize the amount of space needed
+     * @return a ByteBuffer with at least {@code expectedSize} bytes remaining
      */
     public ByteBuffer newDataAtom(int expectedSize) {
         ByteBuffer buf = backing.newAtom(expectedSize + 1);
@@ -102,7 +105,12 @@ public class BaggageWriter {
         return buf;
     }
 
-    /** Write a data atom with the provided buf content */
+    /**
+     * Write a data atom with the provided buf content
+     * 
+     * @param buf the payload of the data atom to write
+     * @return this BaggageWriter instance
+     */
     public BaggageWriter writeBytes(ByteBuffer buf) {
         // See if this is already prefixed
         if (buf.position() > 0 && buf.get(buf.position() - 1) == DataPrefix.prefix) {
@@ -114,13 +122,23 @@ public class BaggageWriter {
         return this;
     }
 
-    /** Write a data atom with an integer value */
+    /**
+     * Write an integer as a data atom
+     * 
+     * @param value the integer to write as the payload of a data atom
+     * @return this BaggageWriter instance
+     */
     public BaggageWriter writeInt(int value) {
         newDataAtom(Integer.BYTES).putInt(value);
         return this;
     }
 
-    /** Write a data atom with a long value */
+    /**
+     * Write a long as a data atom
+     * 
+     * @param value the long to write as the payload of a data atom
+     * @return this BaggageWriter instance
+     */
     public BaggageWriter writeLong(long value) {
         newDataAtom(Long.BYTES).putLong(value);
         return this;
@@ -130,8 +148,11 @@ public class BaggageWriter {
     public void flush() {
         backing.finish();
     }
-    
-    /** Indicate that writing to this writer has finished, and if the writer was also merging with other atoms, they should be finished */
+
+    /**
+     * Indicate that writing to this writer has finished, and if the writer was also merging with other atoms, they
+     * should be finished
+     */
     public void finish() {
         flush();
         while (nextAtomToMerge != null) {
@@ -140,7 +161,17 @@ public class BaggageWriter {
         }
     }
 
-    /** Should only be called once writing has completed */
+    /**
+     * <p>
+     * Get the atoms that were written to this BaggageWriter
+     * </p>
+     * 
+     * <p>
+     * This method should not be called while writing is in progress
+     * </p>
+     * 
+     * @return the atoms that were written to this BaggageWriter.
+     */
     public List<ByteBuffer> atoms() {
         finish();
         return atoms;

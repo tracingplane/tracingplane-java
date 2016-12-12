@@ -3,28 +3,42 @@ package edu.brown.cs.systems.tracingplane.atom_layer.types;
 import java.nio.ByteBuffer;
 
 /**
+ * <p>
  * Unsigned varint (32 bit and 64 bit) that is encoded in such a way that the lexicographic comparison of the binary
  * encoding is consistent with the numeric comparison of the numeric values.
+ * </p>
  * 
- * For example, consider the integers 130, 257, and 16385
+ * <p>
+ * For example, consider the integers 130, 257, and 16385. Numerically, {@code 130 < 257 < 16385}. Consider their binary
+ * encodings using protobuf-style varints:
+ * </p>
  * 
- * 130 < 257 < 16385
+ * <ul>
+ * <li>130: 1000 0100 0000 0001</li>
+ * <li>257: 1000 0010 0000 0010</li>
+ * <li>16385: 1000 0001 1000 0000 0000 0001</li>
+ * </ul>
  * 
- * However, using protobuf-style varints, their binary encodings are:
+ * <p>
+ * The lexicographical comparison of these encodings will give us {@code 16385 < 257 < 130}.
+ * </p>
  * 
- * 130: 1000 0100 0000 0001 257: 1000 0010 0000 0010 16385: 1000 0001 1000 0000 0000 0001
- * 
- * However, the lexicographical comparison of these encodings has 16385 < 257 < 130
- * 
+ * <p>
  * This happens because the first bit of each byte of a protobuf-style varint says whether there are more bytes in the
  * binary representation (1 means 'more bytes', 0 means 'no more bytes'). Also, protobuf-style varints switch the order
  * of bytes of the encoded integer (that is, least- significant bytes go first).
+ * </p>
  * 
+ * <p>
  * To make binary encodings lexicographically comparable, we must place all of the 'more bytes' prefixes at the start of
  * the encoded representation, and encode bytes with most-significant bytes first.
+ * </p>
  * 
- * For unsigned 64-bit integers, values in the range [0, 2^7) use 1 byte; [2^7, 2^14) use 2 bytes, [2^14, 2^21) use 3
- * bytes, and so on. Negative 64-bit unsigned integers use 9 bytes. Negative 32-bit unsigned integeers use 5 bytes.
+ * <p>
+ * For unsigned 64-bit integers, values in the range {@code [0, 2^7)} use 1 byte; {@code [2^7, 2^14)} use 2 bytes,
+ * {@code [2^14, 2^21)} use 3 bytes, and so on. Negative 64-bit unsigned integers use 9 bytes. Negative 32-bit unsigned
+ * integeers use 5 bytes.
+ * </p>
  * 
  * @author jon
  */

@@ -24,7 +24,11 @@ class ThreadLocalBaggage {
         Baggage.discard(take());
     }
 
-    /** Removes and returns the baggage instance being stored in the current thread */
+    /**
+     * Removes and returns the baggage instance being stored in the current thread
+     * 
+     * @return the baggage instance being stored in the current thread
+     */
     public static Baggage take() {
         Baggage currentBaggage = get();
         if (currentBaggage != null) {

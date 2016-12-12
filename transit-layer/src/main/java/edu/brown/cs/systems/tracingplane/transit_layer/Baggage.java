@@ -29,7 +29,7 @@ import java.util.concurrent.Future;
  * serialized Baggage should be included with the request. When a worker thread completes execution for a request and
  * moves on to the next one, it should drop the previous request's Baggage. In general, when using this layer, you
  * should be thinking more about "what is the logical extent of this request?" and less about
- * "I want to include X, Y, Z IDs with my request". Other layers -- e.g., {@link AtomLayer} and {@link BaggageLayer} --
+ * "I want to include X, Y, Z IDs with my request". Other layers -- e.g., {@code AtomLayer} and {@code BaggageLayer} --
  * provide implementations and interfaces for the <i>contents</i> of Baggage.
  * </p>
  * 
@@ -63,15 +63,15 @@ public interface Baggage {
      * <p>
      * If you wish set the current thread's baggage to a new instance (and discard anything that was previously set),
      * either of the following approaches can be used instead:
+     * </p>
      * <ul>
      * <li>Call {@link #discard()}, which will discard anything previously set, effectively setting the thread's current
-     * baggage to a new empty instance, e.g.,<br/>
+     * baggage to a new empty instance, e.g.,<br>
      * {@code Baggage.discard();}</li>
      * <li>Pass the return value of {@link #newInstance()} to {@link #set(Baggage)}, which will overwrite the thread's
-     * current baggage with the newly created instance, e.g.,<br/>
+     * current baggage with the newly created instance, e.g.,<br>
      * {@code Baggage.set(Baggage.newInstance());}</li>
-     * <ul>
-     * </p>
+     * </ul>
      * 
      * @return An empty Baggage instance. The return value can be null, as null corresponds to the empty baggage.
      */
@@ -102,7 +102,7 @@ public interface Baggage {
      * </p>
      * 
      * <p>
-     * No calls to {@link branch(Baggage)} are necessary on the returned baggage after calling this method, because the
+     * No calls to {@link #branch(Baggage)} are necessary on the returned baggage after calling this method, because the
      * current thread will no longer have access to it.
      * </p>
      * 
@@ -187,7 +187,8 @@ public interface Baggage {
      * a thread pool -- then the concurrent branches should not share one Baggage instance. Instead, concurrent branches
      * should each have their own Baggage instance. This is done by calling {@link #branch()} prior to spinning off the
      * concurrent execution (e.g., before creating the thread or work item) and giving the thread or work item the
-     * copied Baggage. Examples of when {@link branch()} should be called include:
+     * copied Baggage. Examples of when {@link #branch()} should be called include:
+     * </p>
      * <ul>
      * <li>When we create a new thread, branch the current thread's Baggage so that the new thread has its own copy to
      * work with:
@@ -231,7 +232,6 @@ public interface Baggage {
      * 
      * </li>
      * </ul>
-     * </p>
      * 
      * <p>
      * If the concurrent executions later join (e.g., by calling {@link Thread#join()} or awaiting a {@link Future}),
@@ -265,7 +265,8 @@ public interface Baggage {
      * a thread pool -- then the concurrent branches should not share one Baggage instance. Instead, concurrent branches
      * should each have their own Baggage instance. This is done by calling {@link #branch()} prior to spinning off the
      * concurrent execution (e.g., before creating the thread or work item) and giving the thread or work item the
-     * copied Baggage. Examples of when {@link branch()} should be called include:
+     * copied Baggage. Examples of when {@link #branch()} should be called include:
+     * </p>
      * <ul>
      * <li>When we create a new thread, branch the current thread's Baggage so that the new thread has its own copy to
      * work with:
@@ -308,7 +309,6 @@ public interface Baggage {
      * 
      * </li>
      * </ul>
-     * </p>
      * 
      * <p>
      * If the concurrent executions later join (e.g., by calling {@link Thread#join()} or awaiting a {@link Future}),
@@ -333,7 +333,8 @@ public interface Baggage {
      * <p>
      * <code>join</code> should be used if your application uses multiple threads or runnables to process each request.
      * When the concurrent branches of execution complete, use <code>join</code> to merge back together their contents.
-     * Examples of when {@link join(Baggage)} should be called include:
+     * Examples of when {@link #join(Baggage)} should be called include:
+     * </p>
      * <ul>
      * <li>After a concurrent thread finishes, merge its Baggage after we call {@link Thread#join()}:
      * 
@@ -357,6 +358,7 @@ public interface Baggage {
      * <li>After a runnable or similar work object completes execution, merge its Baggage:
      * 
      * <pre>
+     * {@code 
      * class MyRunnable extends Runnable {
      *     Baggage baggage;
      *     public void run() {
@@ -370,7 +372,7 @@ public interface Baggage {
      * Future<?> future = executor.submit(runnable);
      * ...
      * future.get();
-     * Baggage.join(runnable.baggage);
+     * Baggage.join(runnable.baggage);}
      * </pre>
      * 
      * </li>
@@ -384,7 +386,6 @@ public interface Baggage {
      * 
      * </li>
      * </ul>
-     * </p>
      * 
      * <p>
      * After calling join, <code>other</code> should not be used any further. If you wish to continue to use
@@ -418,7 +419,8 @@ public interface Baggage {
      * <p>
      * <code>join</code> should be used if your application uses multiple threads or runnables to process each request.
      * When the concurrent branches of execution complete, use <code>join</code> to merge back together their contents.
-     * Examples of when {@link join(Baggage, Baggage)} should be called include:
+     * Examples of when {@link #join(Baggage, Baggage)} should be called include:
+     * </p>
      * <ul>
      * <li>After a concurrent thread finishes, merge its Baggage after we call {@link Thread#join()}:
      * 
@@ -444,6 +446,7 @@ public interface Baggage {
      * <li>After a runnable or similar work object completes execution, merge its Baggage:
      * 
      * <pre>
+     * {@code 
      * Baggage completedBaggage;
      * 
      * class MyRunnable extends Runnable {
@@ -462,10 +465,9 @@ public interface Baggage {
      * futureA.get();
      * futureB.get();
      * futureC.get();
-     * Baggage.set(completedBaggage);
+     * Baggage.set(completedBaggage);}
      * </pre>
      * </ul>
-     * </p>
      * 
      * <p>
      * After calling join, <code>left</code> and <code>right</code> should not be used any further. If you wish to
@@ -489,8 +491,8 @@ public interface Baggage {
      * 
      * <p>
      * This method does <b>not</b> affect the baggage set for the current thread. If you wish to set or join the
-     * deserialized baggage, you must call the corresponding methods, e.g.,<br />
-     * {@code Baggage.set(Baggage.deserialize(serialized));} <br />
+     * deserialized baggage, you must call the corresponding methods, e.g.,<br>
+     * {@code Baggage.set(Baggage.deserialize(serialized));} <br>
      * {@code Baggage.join(Baggage.deserialize(serialized));}
      * </p>
      * 
@@ -514,8 +516,8 @@ public interface Baggage {
      * 
      * <p>
      * This method does <b>not</b> affect the baggage set for the current thread. If you wish to set or join the
-     * deserialized baggage, you must call the corresponding methods, e.g.,<br />
-     * {@code Baggage.set(Baggage.deserialize(serialized, offset, length));} <br />
+     * deserialized baggage, you must call the corresponding methods, e.g.,<br>
+     * {@code Baggage.set(Baggage.deserialize(serialized, offset, length));} <br>
      * {@code Baggage.join(Baggage.deserialize(serialized, offset, length));}
      * </p>
      * 
@@ -535,6 +537,7 @@ public interface Baggage {
     }
 
     /**
+     * 
      * <p>
      * Deserialize a serialized Baggage instance by reading it from the provided {@link InputStream}. It is expected
      * that the {@link TransitLayer} implementation will precede the baggage bytes with a length prefix.
@@ -542,8 +545,8 @@ public interface Baggage {
      * 
      * <p>
      * This method does <b>not</b> affect the baggage set for the current thread. If you wish to set or join the
-     * deserialized baggage, you must call the corresponding methods, e.g.,<br />
-     * {@code Baggage.set(Baggage.readFrom(in));} <br />
+     * deserialized baggage, you must call the corresponding methods, e.g.,<br>
+     * {@code Baggage.set(Baggage.readFrom(in));} <br>
      * {@code Baggage.join(Baggage.readFrom(in));}
      * </p>
      * 
@@ -553,10 +556,9 @@ public interface Baggage {
      * imply that the bytes are invalid.
      * </p>
      * 
-     * @param serialized the serialized byte representation of Baggage.
-     * @param offset offset into the byte array where the Baggage begins
-     * @param length length of the baggage bytes
+     * @param in the stream to read from
      * @return the deserialized Baggage instance, possibly null
+     * @throws IOException if an exception occurs reading from {@code in}
      */
     public static Baggage readFrom(InputStream in) throws IOException {
         return TransitLayerCompatibility.readFrom(transit, in);

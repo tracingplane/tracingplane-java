@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.Comparator;
 
 /**
- * Some functions I found useful for dealing with byte buffers
+ * Some functions I found useful for working with byte buffers
  */
 public class ByteBuffers {
 
@@ -12,8 +12,11 @@ public class ByteBuffers {
             UnsignedByteBuffer.lexicographicalComparator();
 
     /**
-     * Copies all remaining bytes from src to dest. This is done without modifying the src's position. However, the
-     * dest's position is updated.
+     * <p>Copies all remaining bytes from src to dest. This is done without modifying the src's position. However, the
+     * dest's position is updated.</p>
+     * 
+     * @param src the buffer to copy from. its position will not be updated.
+     * @param dest the buffer to copy to. its position will be updated.
      */
     public static void copyTo(ByteBuffer src, ByteBuffer dest) {
         if (src == null || dest == null) {

@@ -22,7 +22,7 @@ public final class UnsignedByteBuffer {
     /**
      * Returns a comparator that compares two {@code java.nio.ByteBuffer}s
      * <a href="http://en.wikipedia.org/wiki/Lexicographical_order">lexicographically</a>. That is, it compares, using
-     * {@link #compare(byte, byte)}), the first pair of values that follow any common prefix, or when one array is a
+     * {@link UnsignedBytes#compare(byte, byte)}), the first pair of values that follow any common prefix, or when one array is a
      * prefix of the other, treats the shorter array as the lesser. For example,
      * {@code [] < [0x01] < [0x01, 0x7F] < [0x01, 0x80] < [0x02]}. Values are treated as unsigned.
      *
@@ -205,7 +205,7 @@ public final class UnsignedByteBuffer {
             }
         }
 
-        /** Returns the Unsafe-using Comparator, or falls back to the pure-Java implementation if unable to do so. */
+        /** @return the Unsafe-using Comparator, or falls back to the pure-Java implementation if unable to do so. */
         static Comparator<ByteBuffer> getBestComparator() {
             try {
                 Class<?> theClass = Class.forName(UNSAFE_COMPARATOR_NAME);
