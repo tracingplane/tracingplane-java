@@ -35,8 +35,7 @@ public class XTraceSerializer implements Serializer<XTrace> {
     
     public static void main(String[] args) {
         List<Long> parentIds = new ArrayList<>();
-        parentIds.add(10L);
-        parentIds.add(20L);
+        parentIds.add(15L);
         XTrace xtrace = new XTrace(7L, parentIds, true);
         
         BaggageWriter writer = BaggageWriter.create();
