@@ -32,18 +32,17 @@ import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
  * [00, 00, 00, 00, 00, 00, 00, 00, 07]
  * [F8, 01]
  * [00, 00, 00, 00, 00, 00, 00, 00, 0A]
- * [00, 00, 00, 00, 00, 00, 00, 00, 14]
- * }
+ * [00, 00, 00, 00, 00, 00, 00, 00, 14]}
  * </pre>
  * 
  * <p>
  * The AtomLayer does not attempt to interpret the meaning of these bytes. However, it does specify logic for how to
  * merge the atoms for multiple baggage instances, how to drop atoms if a baggage instance is too large, and how to
- * serialize atoms:
+ * serialize atoms, as follows:
  * </p>
  * <ul>
- * <li>The underlying serialization format of atoms, which is to prefix the bytes of each atom with their length
- * (encoded as a protobuf-style varint). For the example above, the serialized representation would be:
+ * <li>Atoms are serialized by prefixing the bytes of each atom with their length (encoded as a protobuf-style varint).
+ * For the example above, the serialized representation would be:
  * 
  * <pre>
  * {@code
@@ -56,10 +55,9 @@ import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
  * </pre>
  * 
  * See the {@link AtomLayerSerialization} class for more information about serialization.</li>
- * <li>The default merge behavior when two branches of an execution join. Two Baggage instances {@code a} and {@code b}
- * are merged by <i>lexicographically</i> merging their respective atoms and dropping duplicates that are encountered.
- * respective lists of atoms while dropping duplicates <i>as they are encountered</i>. For example, suppose we have a
- * second list of atoms:
+ * <li>If we have two baggage instances that are joining, we join the baggages by merging their atoms
+ * <b>lexicographically</b>. During the lexicographic merge, if we encounter duplicate atoms we only include the atom
+ * once. For example, suppose we have a second list of atoms:
  * 
  * <pre>
  * {@code
@@ -84,13 +82,12 @@ import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
  * </pre>
  * 
  * See the {@link Lexicographic} class for more information about lexicographic merging.</li>
- * <li>The default behavior for dropping atoms if a baggage instance is larger than permitted by a system. For example,
- * if a system wants to keep headers less than a certain size, it might mean baggage must be less than 100 bytes in
- * size. To trim baggage, atoms are dropped from the <b>end</b> of the list of atoms. If atoms are dropped, then an
- * {@link BaggageAtoms#OVERFLOW_MARKER OVERFLOW_MARKER} should be appended to the end of the list of atoms. The overflow
- * marker is the empty atom (e.g., zero-length atom) which is lexicographically smaller than all other atoms and
- * therefore tracks the position in the baggage where data was dropped. For example, if our system was extremely
- * capacity-conscious (say, 30 byte limit on baggage size), we would overflow the baggage as follows:
+ * <li>If we need to reduce the size of baggage, we do so by dropping atoms from the end of the list of atoms. Some
+ * systems might have a hard upper limit on baggage size (e.g., no more than 100 bytes in size). Additionally, if atoms
+ * are dropped then an {@link BaggageAtoms#OVERFLOW_MARKER OVERFLOW_MARKER} should be appended to the end of the list of
+ * atoms. The overflow marker is the empty atom (e.g., zero-length atom) which is lexicographically smaller than all
+ * other atoms and therefore tracks the position in the baggage where data was dropped. For example, if our system was
+ * extremely capacity-conscious (say, 30 byte limit on baggage size), we would overflow the baggage as follows:
  * 
  * <pre>
  * {@code
