@@ -1,5 +1,10 @@
 package edu.brown.cs.systems.tracingplane.atom_layer.types;
 
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Some useful utility methods related to bits and bytes
  */
@@ -12,7 +17,7 @@ public class TypeUtils {
     }
 
     public static String toHexString(byte b) {
-        return String.format("%2s", Integer.toHexString(b & 0xFF)).replace(' ', '0');
+        return String.format("%2s", Integer.toHexString(b & 0xFF)).replace(' ', '0').toUpperCase();
     }
 
     public static byte makeByte(String bitPattern) {
@@ -40,4 +45,42 @@ public class TypeUtils {
         }
         return 8;
     }
+    
+    public static String toBinaryString(ByteBuffer atom) {
+        List<String> binaryStrings = new ArrayList<>();
+        for (int i = atom.position(); i < atom.limit(); i++) {
+            binaryStrings.add(toBinaryString(atom.get(i)));
+        }
+        return String.format("[%s]", StringUtils.join(binaryStrings, ", "));
+    }
+    
+    public static String toHexString(ByteBuffer atom) {
+        List<String> hexStrings = new ArrayList<>();
+        for (int i = atom.position(); i < atom.limit(); i++) {
+            hexStrings.add(toHexString(atom.get(i)));
+        }
+        return String.format("[%s]", StringUtils.join(hexStrings, ", "));
+    }
+    
+    public static String toBinaryString(Iterable<ByteBuffer> atoms) {
+        List<String> binaryStrings = new ArrayList<>();
+        for (ByteBuffer atom : atoms) {
+            binaryStrings.add(toBinaryString(atom));
+        }
+        return String.format("[%s]", StringUtils.join(binaryStrings, ", "));
+    }
+    
+    public static String toHexString(Iterable<ByteBuffer> atoms) {
+        return toHexString(atoms, ", ");
+    }
+    
+    public static String toHexString(Iterable<ByteBuffer> atoms, String atomSeparator) {
+        List<String> hexStrings = new ArrayList<>();
+        for (ByteBuffer atom : atoms) {
+            hexStrings.add(toHexString(atom));
+        }
+        return String.format("[%s]", StringUtils.join(hexStrings, atomSeparator));
+    }
+    
+    
 }

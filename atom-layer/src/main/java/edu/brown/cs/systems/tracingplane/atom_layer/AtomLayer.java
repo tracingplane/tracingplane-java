@@ -19,14 +19,27 @@ import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
  * </p>
  * 
  * <p>
- * The AtomLayer implementation of {@link Baggage} is {@link BaggageAtoms}. A BaggageAtoms instance is a list of atoms.
- * At atom is an arbitrary-length array of bytes. The AtomLayer makes no attempt to interpret the meaning of each atom
- * -- this is the job of higher layers such as the BaggageLayer. Atoms are the unit of division at the AtomLayer, so
- * they typically correspond to just one 'thing'.
+ * The AtomLayer implementation of {@link Baggage} is {@link BaggageAtoms}, which is simply a list of <b>atoms</b>. At
+ * atom is an arbitrary-length array of bytes, and most of the APIs for dealing with atoms just use {@link ByteBuffer}
+ * objects for atoms. The AtomLayer is not responsible for understanding the contents of each individual atom. It simply
+ * sees baggage as a list of atoms. For example, it might receive baggage with the following atoms:
  * </p>
  * 
+ * <pre>
+ * {@code
+ * []
+ * [F8, 00]
+ * [00, 00, 00, 00, 00, 00, 00, 00, 07]
+ * [F8, 01]
+ * [00, 00, 00, 00, 00, 00, 00, 00, 0A]
+ * [00, 00, 00, 00, 00, 00, 00, 00, 14]
+ * }
+ * </pre>
+ * 
  * <p>
- * The AtomLayer specifies the following:
+ * The AtomLayer does not attempt to interpret the meaning of these bytes. However, it does specify logic for how to
+ * merge the atoms for multiple baggage instances, how to drop atoms if a baggage instance is too large, and how to
+ * serialize atoms:
  * </p>
  * <ul>
  * <li>The underlying serialization format of atoms, which is to prefix the bytes of each atom with their length
