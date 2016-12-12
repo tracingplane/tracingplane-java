@@ -14,9 +14,6 @@ public class TestDefaultTransitLayer {
 
     @Test
     public void testDefaultTransitLayer() {
-        // The context layer is configured to be the default transit layer --
-        // test that this is the case
-
         assertNotNull(Baggage.transit);
         assertFalse(Baggage.transit instanceof NullTransitLayer);
         assertTrue(Baggage.transit instanceof RawAtomLayer);

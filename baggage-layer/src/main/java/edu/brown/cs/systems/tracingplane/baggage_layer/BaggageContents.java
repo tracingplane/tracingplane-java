@@ -10,7 +10,7 @@ public interface BaggageContents extends BaggageAtoms {
     public static final ByteBuffer TRIMMARKER_ATOM = ByteBuffer.wrap(new byte[] { DataPrefix.prefix });
     public static final ByteBuffer TRIMMARKER_CONTENTS = (ByteBuffer) TRIMMARKER_ATOM.duplicate().position(1);
 
-    public static final BaggageLayer<?> baggageLayer = BaggageLayerFactory.createDefaultBaggageLayer();
+    public static final BaggageLayer<?> baggageLayer = BaggageLayerConfig.defaultBaggageLayer();
 
     // TODO: static methods here for accessing data in bags, plus methods for accessing thread local baggage contents
 

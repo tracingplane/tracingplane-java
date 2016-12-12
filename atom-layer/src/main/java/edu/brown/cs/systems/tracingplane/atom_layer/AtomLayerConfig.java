@@ -21,7 +21,8 @@ public class AtomLayerConfig {
         try {
             Class.forName(atomLayerFactory);
         } catch (ClassNotFoundException e) {
-            log.error("The configured atom layer class {}=\"{}\" was not found; defaulting to raw atom layer");
+            log.error("The configured atom layer class {}=\"{}\" was not found; defaulting to raw atom layer",
+                      ATOM_LAYER_IMPLEMENTATION_KEY, atomLayerFactory);
         }
     }
 
