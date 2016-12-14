@@ -13,6 +13,7 @@
 		<module>atom-layer</module>
 		<module>baggage-layer</module>
 		<module>baggage-buffers</module>
+		<module>baggage-buffers-compiler</module>
 		<module>dist</module>
 	</modules>
 
@@ -32,6 +33,7 @@
 		<junit.version>4.12</junit.version>
 		<commons.logging.version>1.1</commons.logging.version>
 		<jcommander.version>1.48</jcommander.version>
+		<scala.version>2.11.8</scala.version>
 
 		<output.dir>dist</output.dir>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,6 +41,31 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.scala-lang</groupId>
+				<artifactId>scala-compiler</artifactId>
+				<version>${scala.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.scala-lang</groupId>
+				<artifactId>scala-reflect</artifactId>
+				<version>${scala.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.scala-lang</groupId>
+				<artifactId>scala-library</artifactId>
+				<version>${scala.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.scala-lang</groupId>
+				<artifactId>scala-actors</artifactId>
+				<version>${scala.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.scala-lang</groupId>
+				<artifactId>scalap</artifactId>
+				<version>${scala.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.aspectj</groupId>
 				<artifactId>aspectjrt</artifactId>
