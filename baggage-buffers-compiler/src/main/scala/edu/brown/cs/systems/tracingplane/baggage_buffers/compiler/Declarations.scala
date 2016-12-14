@@ -7,20 +7,21 @@ import fastparse.all._
 
 object Declarations {
 
-  /** Eats the following whitespace characters: space, tab */
-  val ws: P[Unit] = P(CharIn(" \t").rep)
+  /** Eats the following whitespace characters: space, tab, comment2 */
+  val ws: P[Unit] = P( (CharIn(" \t") | comment2).rep)
 
-  /** Eats the following whitespace characters: space, tab, newline */
-  val nlws: P[Unit] = P(CharIn(" \t\n").rep)
-
-  /** Eats trailing whitespace, one ore more newlines, then leading whitespace */
-  val nl: P[Unit] = P(ws.? ~ "\n" ~ nlws.?)
+  /** Eats the following whitespace characters: space, tab, newline, comment1, comment2 */
+  val nlws: P[Unit] = P((CharIn(" \t\n") | comment1 | comment2).rep)
 
   /** Match any lower or uppercase letter */
   val letter = P(lowercase | uppercase)
   val lowercase = P(CharIn('a' to 'z'))
   val uppercase = P(CharIn('A' to 'Z'))
   val digit = P(CharIn('0' to '9'))
+  
+  /** One-line comment beginning with double slash */
+  val comment1 = P( "//" ~ CharsWhile(_ != '\n') ~ "\n" )
+  val comment2 = P( "/*" ~ (!"*/" ~ AnyChar).rep ~ "*/" )
   
   /** Matches built-in primitive types */
   val primitiveType: P[BuiltInType] = P(
@@ -55,5 +56,7 @@ object Declarations {
   
   val packagename: P[Seq[String]] = P( (letter ~ (letter | digit | "_").rep).!.rep( min = 1, sep = "." ) )
   val packageDeclaration: P[PackageDeclaration] = P( "package" ~ ws ~ "\"" ~ packagename ~ "\"" ~ ws.? ~ ";").map{ case a => PackageDeclaration(a) }
+  
+//  val bbDeclaration: P[BaggageBuffersDeclaration] = P 
   
 }

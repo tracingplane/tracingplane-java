@@ -1,4 +1,5 @@
 .cache
+.cache-tests
 .idea
 *.cache-main
 *.iml

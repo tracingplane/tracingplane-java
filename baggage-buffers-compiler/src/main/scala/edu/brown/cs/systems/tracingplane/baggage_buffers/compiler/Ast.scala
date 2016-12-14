@@ -50,4 +50,6 @@ object Ast {
   
   case class ImportDeclaration(filename: String)
   
+  case class BaggageBuffersDeclaration(packageDeclaration: Option[PackageDeclaration], imports: Seq[ImportDeclaration], bagDeclarations: Seq[BagDeclaration])
+  
 }
