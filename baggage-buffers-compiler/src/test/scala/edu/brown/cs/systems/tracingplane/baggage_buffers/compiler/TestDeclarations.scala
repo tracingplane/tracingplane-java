@@ -275,5 +275,99 @@ bool notafield = 0
       }
     }
   }
+  
+  test("Simple BB declaration") {
+    val declaration = """
+
+      package "edu.brown";
+  
+      import "file1.bb";
+      import "file2.bb";
+  
+      import "file3.bb";
+  
+      /* This is my first bag */
+      bag FirstBag {
+        bool firstField = 10;
+        int32 secondField = 1;  // cool huh?
+  
+  
+        set<int32> thirdField = 3;
+  
+      }
+  
+      /* This is my second bag */
+      bag SecondBag {
+  
+        float firstField = 0;
+  
+        double secondfield = 10; }
+  
+      /** all done **/
+
+    """
+    
+    bbDeclaration.parse(declaration) match {
+      case failure: Parsed.Failure => fail(ParseError(failure).getMessage)
+      case Parsed.Success(res, _) => {
+        
+        res.packageDeclaration match {
+          case None => fail("Did not parse expected packageDeclaration")
+          case Some(pd) => {
+            assert(pd.packageName.length == 2)
+            assert(pd.packageName(0) == "edu")
+            assert(pd.packageName(1) == "brown")
+          }
+        }
+        
+        assert(res.imports.length == 3)
+        assert(res.imports(0).filename == "file1.bb")
+        assert(res.imports(1).filename == "file2.bb")
+        assert(res.imports(2).filename == "file3.bb")
+        
+        assert(res.bagDeclarations.length == 2)
+        
+        res.bagDeclarations(0) match {
+          case BagDeclaration("FirstBag", fields) => {
+            
+            assert(fields.length == 3)
+            fields(0) match {
+              case FieldDeclaration(BuiltInType.bool, "firstField", 10) => {}
+              case _ => fail("Parsed unexpected FieldDeclaration " + fields(0))
+            }
+            fields(1) match {
+              case FieldDeclaration(BuiltInType.int32, "secondField", 1) => {}
+              case _ => fail("Parsed unexpected FieldDeclaration " + fields(1))
+            }
+            fields(2) match {
+              case FieldDeclaration(fieldtype, "thirdField", 3) => {
+                assert(fieldtype.asInstanceOf[BuiltInType.Set].of == BuiltInType.int32)
+              }
+              case _ => fail("Parsed unexpected FieldDeclaration " + fields(2))
+            }
+            
+          }
+          case _ => fail("Parsed unexepcted BagDeclaration " + res.bagDeclarations(0))
+        }
+        
+        res.bagDeclarations(1) match {
+          case BagDeclaration("SecondBag", fields) => {
+            
+            assert(fields.length == 2)
+            fields(0) match {
+              case FieldDeclaration(BuiltInType.float, "firstField", 0) => {}
+              case _ => fail("Parsed unexpected FieldDeclaration " + fields(0))
+            }
+            fields(1) match {
+              case FieldDeclaration(BuiltInType.double, "secondfield", 10) => {}
+              case _ => fail("Parsed unexpected FieldDeclaration " + fields(1))
+            }
+            
+          }
+          case _ => fail("Parsed unexepcted BagDeclaration " + res.bagDeclarations(1))
+        }
+      }
+    }
+  }
 
 }

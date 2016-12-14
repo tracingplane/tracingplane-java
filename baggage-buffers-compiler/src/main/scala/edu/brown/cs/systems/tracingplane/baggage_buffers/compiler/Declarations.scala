@@ -10,6 +10,9 @@ object Declarations {
   /** Eats the following whitespace characters: space, tab, comment2 */
   val ws: P[Unit] = P( (CharIn(" \t") | comment2).rep)
 
+  /** Ensures at least one newline occurs, eating whitespace and comments */
+  val nl: P[Unit] = P( ws.? ~ "\n" ~ nlws.? )
+  
   /** Eats the following whitespace characters: space, tab, newline, comment1, comment2 */
   val nlws: P[Unit] = P((CharIn(" \t\n") | comment1 | comment2).rep)
 
@@ -57,6 +60,6 @@ object Declarations {
   val packagename: P[Seq[String]] = P( (letter ~ (letter | digit | "_").rep).!.rep( min = 1, sep = "." ) )
   val packageDeclaration: P[PackageDeclaration] = P( "package" ~ ws ~ "\"" ~ packagename ~ "\"" ~ ws.? ~ ";").map{ case a => PackageDeclaration(a) }
   
-//  val bbDeclaration: P[BaggageBuffersDeclaration] = P 
+  val bbDeclaration: P[BaggageBuffersDeclaration] = P( nlws.? ~ (packageDeclaration ~ nl).? ~ (importDeclaration ~ nl).rep ~ (bagDeclaration ~ nl).rep ).map { case (a,b,c) => BaggageBuffersDeclaration(a,b,c) }
   
 }
