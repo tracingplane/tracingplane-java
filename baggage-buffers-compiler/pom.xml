@@ -118,11 +118,37 @@
 						<configuration>
 							<sources>
 								<source>src/main/scala</source>
+							</sources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add-test-source</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<sources>
 								<source>src/test/scala</source>
 							</sources>
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>appassembler-maven-plugin</artifactId>
+				<configuration>
+					<extraJvmArguments>-Xmx1000m
+						-Dlog4j.configuration="log4j-bbcompiler.properties"</extraJvmArguments>
+					<programs>
+						<program>
+							<mainClass>edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.BBC</mainClass>
+							<id>bbc</id>
+						</program>
+					</programs>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
