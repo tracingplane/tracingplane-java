@@ -6,8 +6,6 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Declarations._
 import fastparse.all._
-import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.FieldType.BuiltInType
-import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.FieldType.UserDefined.UserDefinedType
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast._
 
 @RunWith(classOf[JUnitRunner])
@@ -56,12 +54,12 @@ class TestDeclarations extends FunSuite {
 
   test("Test builtin declarations") {
     var Parsed.Success(res, _) = fieldDeclaration.parse("bool test = 1;")
-    assert(res.instanceof == BuiltInType.bool)
+    assert(res.fieldtype == BuiltInType.bool)
     assert(res.name == "test")
     assert(res.index == 1)
 
     var Parsed.Success(res2, _) = fieldDeclaration.parse("int32 test3 = 2;")
-    assert(res2.instanceof == BuiltInType.int32)
+    assert(res2.fieldtype == BuiltInType.int32)
     assert(res2.name == "test3")
     assert(res2.index == 2)
   }
@@ -90,15 +88,15 @@ class TestDeclarations extends FunSuite {
     assert(res.name == "MyBag")
     assert(res.fields.length == 3)
     assert(res.fields(0).isInstanceOf[FieldDeclaration])
-    assert(res.fields(0).instanceof == BuiltInType.bool)
+    assert(res.fields(0).fieldtype == BuiltInType.bool)
     assert(res.fields(0).name == "test")
     assert(res.fields(0).index == 1)
     assert(res.fields(1).isInstanceOf[FieldDeclaration])
-    assert(res.fields(1).instanceof.isInstanceOf[UserDefinedType])
+    assert(res.fields(1).fieldtype.isInstanceOf[UserDefinedType])
     assert(res.fields(1).name == "jon")
     assert(res.fields(1).index == 2)
     assert(res.fields(2).isInstanceOf[FieldDeclaration])
-    assert(res.fields(2).instanceof == BuiltInType.int32)
+    assert(res.fields(2).fieldtype == BuiltInType.int32)
     assert(res.fields(2).name == "third")
     assert(res.fields(2).index == 3)
   }
@@ -113,14 +111,14 @@ class TestDeclarations extends FunSuite {
 
   test("Can have lots of whitespace") {
     var Parsed.Success(res2, _) = fieldDeclaration.parse("int32\t\t  \t  test3   \t   = \t\t   2 \t\t  ; \t\t  ")
-    assert(res2.instanceof == BuiltInType.int32)
+    assert(res2.fieldtype == BuiltInType.int32)
     assert(res2.name == "test3")
     assert(res2.index == 2)
   }
 
   test("Can have little whitespace") {
     var Parsed.Success(res2, _) = fieldDeclaration.parse("int32 test3=2;")
-    assert(res2.instanceof == BuiltInType.int32)
+    assert(res2.fieldtype == BuiltInType.int32)
     assert(res2.name == "test3")
     assert(res2.index == 2)
   }
@@ -140,14 +138,14 @@ class TestDeclarations extends FunSuite {
   }
 
   test("Valid Short Package Declaration") {
-    var Parsed.Success(res, _) = packageDeclaration.parse("package \"mypackage\";")
+    var Parsed.Success(res, _) = packageDeclaration.parse("package mypackage;")
     assert(res.isInstanceOf[PackageDeclaration])
     assert(res.packageName.length == 1)
     assert(res.packageName(0) == "mypackage")
   }
 
   test("Valid Package Declaration Spacing") {
-    packageDeclaration.parse("package \t     \"mypackage\"   \t\t ;") match {
+    packageDeclaration.parse("package \t     mypackage   \t\t ;") match {
       case failure: Parsed.Failure => fail(ParseError(failure).getMessage)
       case Parsed.Success(res, _) => {
         assert(res.isInstanceOf[PackageDeclaration])
@@ -158,7 +156,7 @@ class TestDeclarations extends FunSuite {
   }
 
   test("Valid Package Declaration") {
-    var Parsed.Success(res, _) = packageDeclaration.parse("""package "edu.brown.cs";""")
+    var Parsed.Success(res, _) = packageDeclaration.parse("""package edu.brown.cs;""")
     assert(res.isInstanceOf[PackageDeclaration])
     assert(res.packageName.length == 3)
     assert(res.packageName(0) == "edu")
@@ -167,13 +165,13 @@ class TestDeclarations extends FunSuite {
   }
 
   test("Invalid Package Characters") {
-    var Parsed.Failure(expected, failIndex, extra) = packageDeclaration.parse("""package "e!@#$du.brown.cs";""")
-    assert(failIndex == 10)
+    var Parsed.Failure(expected, failIndex, extra) = packageDeclaration.parse("""package e!@#$du.brown.cs;""")
+    assert(failIndex == 9)
   }
 
   test("Invalid Empty Package") {
-    var Parsed.Failure(expected, failIndex, extra) = packageDeclaration.parse("package \"\";")
-    assert(failIndex == 9)
+    var Parsed.Failure(expected, failIndex, extra) = packageDeclaration.parse("package ;")
+    assert(failIndex == 8)
   }
 
   test("Import package") {
@@ -191,39 +189,25 @@ class TestDeclarations extends FunSuite {
         bool test = 1; // my comment
         int32 third = 3;
     }"""
-
-    bagDeclaration.parse(declaration) match {
-      case failure: Parsed.Failure => fail(ParseError(failure).getMessage)
-      case Parsed.Success(res, _) => {
-        assert(res.name == "MyBag")
-        assert(res.fields.length == 2)
-        assert(res.fields(0).isInstanceOf[FieldDeclaration])
-        assert(res.fields(0).instanceof == BuiltInType.bool)
-        assert(res.fields(0).name == "test")
-        assert(res.fields(0).index == 1)
-        assert(res.fields(1).isInstanceOf[FieldDeclaration])
-        assert(res.fields(1).instanceof == BuiltInType.int32)
-        assert(res.fields(1).name == "third")
-        assert(res.fields(1).index == 3)
-      }
-    }
+    
+    val expect = """bag MyBag {
+        bool test = 1; 
+        int32 third = 3;
+    }"""
+    
+    assert(expect == Parser.removeComments(declaration))
   }
 
   test("Test Multiline Comment") {
-    val comment = """/*
+    val declaration = """/*
       blah
       blah
       blaaaaah
       
       
       */"""
-    
-    comment2.parse(comment) match {
-      case failure: Parsed.Failure => fail(ParseError(failure).getMessage)
-      case Parsed.Success(res, _) => {
-        println("success")
-      }
-    }
+    val expect = """"""
+    assert(expect == Parser.removeComments(declaration))
   }
 
   test("Simple Inline Comment") {
@@ -231,22 +215,12 @@ class TestDeclarations extends FunSuite {
         bool test = 1;
         /* This is my third field */ int32 third = 3;
     }"""
-
-    bagDeclaration.parse(declaration) match {
-      case failure: Parsed.Failure => fail(ParseError(failure).getMessage)
-      case Parsed.Success(res, _) => {
-        assert(res.name == "MyBag")
-        assert(res.fields.length == 2)
-        assert(res.fields(0).isInstanceOf[FieldDeclaration])
-        assert(res.fields(0).instanceof == BuiltInType.bool)
-        assert(res.fields(0).name == "test")
-        assert(res.fields(0).index == 1)
-        assert(res.fields(1).isInstanceOf[FieldDeclaration])
-        assert(res.fields(1).instanceof == BuiltInType.int32)
-        assert(res.fields(1).name == "third")
-        assert(res.fields(1).index == 3)
-      }
-    }
+    
+    val expect = """bag MyBag {
+        bool test = 1;
+         int32 third = 3;
+    }"""
+    assert(expect == Parser.removeComments(declaration))
   }
 
   test("End of line comment") {
@@ -258,28 +232,49 @@ bool notafield = 0
         // blahblah jon = 2;
         /* brief comment here... */ int32 third = 3;
     }"""
+    
+    val expect = """bag MyBag { 
+ 
+        bool test = 1; 
+        
+         int32 third = 3;
+    }"""
 
-    bagDeclaration.parse(declaration) match {
-      case failure: Parsed.Failure => fail(ParseError(failure).getMessage)
-      case Parsed.Success(res, _) => {
-        assert(res.name == "MyBag")
-        assert(res.fields.length == 2)
-        assert(res.fields(0).isInstanceOf[FieldDeclaration])
-        assert(res.fields(0).instanceof == BuiltInType.bool)
-        assert(res.fields(0).name == "test")
-        assert(res.fields(0).index == 1)
-        assert(res.fields(1).isInstanceOf[FieldDeclaration])
-        assert(res.fields(1).instanceof == BuiltInType.int32)
-        assert(res.fields(1).name == "third")
-        assert(res.fields(1).index == 3)
-      }
-    }
+    assert(expect == Parser.removeComments(declaration))
   }
   
-  test("Simple BB declaration") {
+  test("Comment ends file") {
+    val declaration = """//mycomment"""
+    val expect = """"""
+    assert(expect == Parser.removeComments(declaration))
+  }
+  
+  test("Comment2 ends file") {
+    val declaration = """/*mycomment"""
+    val expect = """"""
+    assert(expect == Parser.removeComments(declaration))
+  }
+  
+  test("Simple BB declaration 1") {
+    val declaration = """
+  
+      
+      bag MyBag {
+        bool firstField = 10;  
+      }
+
+
+    """
+    
+    val res = Parser.parseBaggageBuffersFile(declaration)
+    assert(res != null)
+  }
+  
+  
+  test("Simple BB declaration 2") {
     val declaration = """
 
-      package "edu.brown";
+      package edu.brown;
   
       import "file1.bb";
       import "file2.bb";
@@ -306,68 +301,71 @@ bool notafield = 0
       /** all done **/
 
     """
-    
-    bbDeclaration.parse(declaration) match {
-      case failure: Parsed.Failure => fail(ParseError(failure).getMessage)
-      case Parsed.Success(res, _) => {
+    val res = Parser.parseBaggageBuffersFile(declaration)
         
-        res.packageDeclaration match {
-          case None => fail("Did not parse expected packageDeclaration")
-          case Some(pd) => {
-            assert(pd.packageName.length == 2)
-            assert(pd.packageName(0) == "edu")
-            assert(pd.packageName(1) == "brown")
-          }
-        }
-        
-        assert(res.imports.length == 3)
-        assert(res.imports(0).filename == "file1.bb")
-        assert(res.imports(1).filename == "file2.bb")
-        assert(res.imports(2).filename == "file3.bb")
-        
-        assert(res.bagDeclarations.length == 2)
-        
-        res.bagDeclarations(0) match {
-          case BagDeclaration("FirstBag", fields) => {
-            
-            assert(fields.length == 3)
-            fields(0) match {
-              case FieldDeclaration(BuiltInType.bool, "firstField", 10) => {}
-              case _ => fail("Parsed unexpected FieldDeclaration " + fields(0))
-            }
-            fields(1) match {
-              case FieldDeclaration(BuiltInType.int32, "secondField", 1) => {}
-              case _ => fail("Parsed unexpected FieldDeclaration " + fields(1))
-            }
-            fields(2) match {
-              case FieldDeclaration(fieldtype, "thirdField", 3) => {
-                assert(fieldtype.asInstanceOf[BuiltInType.Set].of == BuiltInType.int32)
-              }
-              case _ => fail("Parsed unexpected FieldDeclaration " + fields(2))
-            }
-            
-          }
-          case _ => fail("Parsed unexepcted BagDeclaration " + res.bagDeclarations(0))
-        }
-        
-        res.bagDeclarations(1) match {
-          case BagDeclaration("SecondBag", fields) => {
-            
-            assert(fields.length == 2)
-            fields(0) match {
-              case FieldDeclaration(BuiltInType.float, "firstField", 0) => {}
-              case _ => fail("Parsed unexpected FieldDeclaration " + fields(0))
-            }
-            fields(1) match {
-              case FieldDeclaration(BuiltInType.double, "secondfield", 10) => {}
-              case _ => fail("Parsed unexpected FieldDeclaration " + fields(1))
-            }
-            
-          }
-          case _ => fail("Parsed unexepcted BagDeclaration " + res.bagDeclarations(1))
-        }
+    res.packageDeclaration match {
+      case None => fail("Did not parse expected packageDeclaration")
+      case Some(pd) => {
+        assert(pd.packageName.length == 2)
+        assert(pd.packageName(0) == "edu")
+        assert(pd.packageName(1) == "brown")
       }
     }
+    
+    assert(res.imports.length == 3)
+    assert(res.imports(0).filename == "file1.bb")
+    assert(res.imports(1).filename == "file2.bb")
+    assert(res.imports(2).filename == "file3.bb")
+    
+    assert(res.bagDeclarations.length == 2)
+    
+    res.bagDeclarations(0) match {
+      case BagDeclaration("FirstBag", fields) => {
+        
+        assert(fields.length == 3)
+        fields(0) match {
+          case FieldDeclaration(BuiltInType.bool, "firstField", 10) => {}
+          case _ => fail("Parsed unexpected FieldDeclaration " + fields(0))
+        }
+        fields(1) match {
+          case FieldDeclaration(BuiltInType.int32, "secondField", 1) => {}
+          case _ => fail("Parsed unexpected FieldDeclaration " + fields(1))
+        }
+        fields(2) match {
+          case FieldDeclaration(fieldtype, "thirdField", 3) => {
+            assert(fieldtype.asInstanceOf[BuiltInType.Set].of == BuiltInType.int32)
+          }
+          case _ => fail("Parsed unexpected FieldDeclaration " + fields(2))
+        }
+        
+      }
+      case _ => fail("Parsed unexepcted BagDeclaration " + res.bagDeclarations(0))
+    }
+    
+    res.bagDeclarations(1) match {
+      case BagDeclaration("SecondBag", fields) => {
+        
+        assert(fields.length == 2)
+        fields(0) match {
+          case FieldDeclaration(BuiltInType.float, "firstField", 0) => {}
+          case _ => fail("Parsed unexpected FieldDeclaration " + fields(0))
+        }
+        fields(1) match {
+          case FieldDeclaration(BuiltInType.double, "secondfield", 10) => {}
+          case _ => fail("Parsed unexpected FieldDeclaration " + fields(1))
+        }
+        
+      }
+      case _ => fail("Parsed unexepcted BagDeclaration " + res.bagDeclarations(1))
+    }
+  }
+
+  test("Compact declaration") {
+    val declaration = """bag MyBag1{bool first=1;int32 second=2;}
+bag MyBag2{sint64 third=3;}
+bag MyBag3{bool fourth=4;}
+"""
+    val res = Parser.parseBaggageBuffersFile(declaration)
   }
 
 }
