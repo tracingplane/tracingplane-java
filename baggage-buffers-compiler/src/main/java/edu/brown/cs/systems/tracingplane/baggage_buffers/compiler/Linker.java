@@ -2,6 +2,7 @@ package edu.brown.cs.systems.tracingplane.baggage_buffers.compiler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -87,9 +88,11 @@ public class Linker {
 
             for (ImportDeclaration importDecl : decl.getImportDeclarations()) {
                 String importFileName = importDecl.filename();
-                File importFile = FileUtils.findFile(importFileName, bagPath);
+                List<String> pathToSearch = new ArrayList<>(bagPath);
+                pathToSearch.add(file.getParent());
+                File importFile = FileUtils.findFile(importFileName, pathToSearch);
                 if (importFile == null) {
-                    throw CompileException.importNotFound(importFileName, this.file, bagPath);
+                    throw CompileException.importNotFound(importFileName, this.file, pathToSearch);
                 }
 
                 final BaggageBuffersFile imported;
