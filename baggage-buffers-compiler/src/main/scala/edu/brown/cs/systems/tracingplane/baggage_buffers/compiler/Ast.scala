@@ -12,12 +12,35 @@ object Ast {
     def getParameters(): java.util.List[FieldType] = {
       return parameters.asJava
     }
+    override def toString(): String = {
+      return s"${this.getClass.getSimpleName}<${parameters.mkString(", ")}>"
+    }
   }
   
-  case class UserDefinedType(name: String) extends FieldType
+  case class UserDefinedType(var packageName: String, name: String) extends FieldType {
+    def hasPackageName(): Boolean = {
+      return packageName != null && !packageName.equals("")
+    }
+    override def toString(): String = {
+      if (hasPackageName()) {
+        return s"$packageName.$name"
+      } else {
+        return name
+      }
+    }
+  }
+  
   sealed trait BuiltInType extends FieldType
+  
+  sealed trait PrimitiveType extends BuiltInType {
+    override def toString(): String = {
+      return this.getClass.getSimpleName
+    }
+  }
+  
+  
   object BuiltInType {
-    sealed trait Numeric extends BuiltInType
+    sealed trait Numeric extends PrimitiveType
     sealed trait Float extends Numeric
     sealed trait Signed extends Numeric
     sealed trait Unsigned extends Numeric
@@ -34,17 +57,23 @@ object Ast {
     case object float extends Float
     case object double extends Float
     
-    case object string extends BuiltInType
-    case object bytes extends BuiltInType
+    case object string extends PrimitiveType
+    case object bytes extends PrimitiveType
     
     case class Set(of: FieldType) extends ParameterizedType(List[FieldType](of)) with BuiltInType
     
   }
   
   
-  case class FieldDeclaration(fieldtype: FieldType, name: String, index: Int)
+  case class FieldDeclaration(fieldtype: FieldType, name: String, index: Int) {
+    override def toString(): String = {
+      return s"$fieldtype $name = $index"
+    }
+  }
   
   case class BagDeclaration(name: String, fields: Seq[FieldDeclaration]) {
+    var packageName: String = ""; // Filled in later
+    
     def fullyQualifiedName(packageDeclaration: Option[PackageDeclaration]): String = {
       packageDeclaration match {
         case Some(decl) => return fullyQualifiedName(decl)
@@ -82,6 +111,12 @@ object Ast {
     }
     def getPackageDeclaration(): PackageDeclaration = {
       return packageDeclaration.getOrElse(null)
+    }
+    def getPackageNameString(): String = {
+      packageDeclaration match {
+        case Some(decl) => return decl.getPackageNameString()
+        case _ => return ""
+      }
     }
     def isEmpty(): Boolean = {
       return packageDeclaration.isEmpty && imports.isEmpty && bagDeclarations.isEmpty

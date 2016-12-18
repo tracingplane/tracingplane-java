@@ -1,11 +1,6 @@
 package edu.brown.cs.systems.tracingplane.baggage_buffers.compiler;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -43,8 +38,7 @@ public class BBC {
     }
     
     public static void run(Settings settings) throws CompileException {
-        List<String> bagPath = FileUtils.splitBagPath(settings.bagPath);
-        Linker linker = new Linker(settings.files, bagPath);
+        Linker.process(settings);
     }
 
     public static void main(String[] args) throws IOException {

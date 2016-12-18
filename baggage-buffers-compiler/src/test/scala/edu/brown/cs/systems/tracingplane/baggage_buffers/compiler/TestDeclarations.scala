@@ -93,6 +93,8 @@ class TestDeclarations extends FunSuite {
     assert(res.fields(0).index == 1)
     assert(res.fields(1).isInstanceOf[FieldDeclaration])
     assert(res.fields(1).fieldtype.isInstanceOf[UserDefinedType])
+    assert(res.fields(1).fieldtype.asInstanceOf[UserDefinedType].name == "blahblah")
+    assert(res.fields(1).fieldtype.asInstanceOf[UserDefinedType].packageName == "")
     assert(res.fields(1).name == "jon")
     assert(res.fields(1).index == 2)
     assert(res.fields(2).isInstanceOf[FieldDeclaration])
@@ -366,6 +368,20 @@ bag MyBag2{sint64 third=3;}
 bag MyBag3{bool fourth=4;}
 """
     val res = Parser.parseBaggageBuffersFile(declaration)
+  }
+  
+  test("FullyQualifiedTypeName") {
+    val declaration = """bag MyBag1{edu.brown.something first=1;}"""
+    val res = Parser.parseBaggageBuffersFile(declaration)
+    res.bagDeclarations(0) match {
+      case BagDeclaration("MyBag1", fields) => {
+        fields(0) match {
+          case FieldDeclaration(UserDefinedType("edu.brown", "something"), "first", 1) => {}
+          case _ => fail("Parsed unexpected FieldDeclaration " + fields(0))
+        }
+      }
+      case _ => fail("Parsed unexpected BagDeclaration " + res.bagDeclarations(0))
+    }
   }
 
 }

@@ -3,6 +3,8 @@ package edu.brown.cs.systems.tracingplane.baggage_buffers.compiler;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.*;
 
 public class CompileException extends Exception {
 
@@ -44,8 +46,28 @@ public class CompileException extends Exception {
         return new CompileException(e, "%s: import %s (%s) syntax error: %s", declaredIn, importedAs, importFile, e.getMessage());
     }
     
-    public static CompileException recursiveImport(File first, File second, String secondImportedAs) {
-        return new CompileException("%s: recursive import of %s (%s)", first, secondImportedAs, second);
+    public static CompileException recursiveImport(File first, File second) {
+        return new CompileException("%s: recursive import of %s", first, second);
+    }
+    
+    public static CompileException noFieldsDeclared(File inputFile, String bagName) {
+        return new CompileException("%s: bag %s declares no fields", inputFile, bagName);
+    }
+    
+    public static CompileException duplicateDeclaration(File inputFile, String bagName) {
+        return new CompileException("%s: duplicate declaration of bag %s", inputFile, bagName);
+    }
+    
+    public static CompileException duplicateFieldDeclaration(File inputFile, String bagName, String fieldName, FieldDeclaration... fields) {
+        return new CompileException("%s: %s declares field named %s multiple times (%s)", inputFile, bagName, fieldName, StringUtils.join(fields, ", "));
+    }
+    
+    public static CompileException duplicateFieldDeclaration(File inputFile, String bagName, int fieldIndex, FieldDeclaration... fields) {
+        return new CompileException("%s: %s declares field index %d multiple times (%s)", inputFile, bagName, fieldIndex, StringUtils.join(fields, ", "));
+    }
+    
+    public static CompileException unknownType(File inputFile, String bagName, FieldDeclaration declaration, UserDefinedType userDefined) {
+        return new CompileException("%s: %s declares field with unknown type %s (%s)", inputFile, bagName, userDefined, declaration);
     }
 
 }

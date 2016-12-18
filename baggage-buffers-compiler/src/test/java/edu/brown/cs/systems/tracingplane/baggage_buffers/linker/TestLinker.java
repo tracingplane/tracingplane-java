@@ -1,4 +1,4 @@
-package edu.brown.cs.systems.tracingplane.baggage_buffers.compiler;
+package edu.brown.cs.systems.tracingplane.baggage_buffers.linker;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.CompileException;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Linker;
 
 public class TestLinker {
     
@@ -43,7 +45,7 @@ public class TestLinker {
         List<String> bagPath = Lists.newArrayList();
 
         exception.expect(CompileException.class);
-        Linker linker = new Linker(inputFiles, bagPath);
+        Linker.process(inputFiles, bagPath);
     }
     
     @Test
@@ -52,7 +54,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(fileName);
         List<String> bagPath = Lists.newArrayList();
 
-        Linker linker = new Linker(inputFiles, bagPath);
+        Linker.process(inputFiles, bagPath);
     }
     
     @Test
@@ -62,7 +64,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(first, second);
         List<String> bagPath = Lists.newArrayList();
 
-        Linker linker = new Linker(inputFiles, bagPath);
+        Linker.process(inputFiles, bagPath);
     }
     
     @Test
@@ -73,7 +75,7 @@ public class TestLinker {
         List<String> bagPath = Lists.newArrayList();
 
         exception.expect(CompileException.class);
-        Linker linker = new Linker(inputFiles, bagPath);
+        Linker.process(inputFiles, bagPath);
     }
     
     @Test
@@ -87,7 +89,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(f1.getAbsolutePath(), f2.getAbsolutePath());
         List<String> bagPath = Lists.newArrayList();
 
-        Linker linker = new Linker(inputFiles, bagPath);
+        Linker.process(inputFiles, bagPath);
     }
     
     @Test
@@ -101,8 +103,8 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(f1.getAbsolutePath(), f2.getAbsolutePath());
         List<String> bagPath = Lists.newArrayList();
 
-        exception.expect(CompileException.class); // recursive import
-        Linker linker = new Linker(inputFiles, bagPath);
+        //exception.expect(CompileException.class); // recursive import for now allowed
+        Linker.process(inputFiles, bagPath);
     }
     
     @Test
@@ -116,7 +118,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(f2.getAbsolutePath());
         List<String> bagPath = Lists.newArrayList();
 
-        Linker linker = new Linker(inputFiles, bagPath);
+        Linker.process(inputFiles, bagPath);
     }
     
     @Test
@@ -135,7 +137,7 @@ public class TestLinker {
         List<String> bagPath = Lists.newArrayList();
 
         exception.expect(CompileException.class); // f1 not found on bagpath
-        Linker linker = new Linker(inputFiles, bagPath);
+        Linker.process(inputFiles, bagPath);
     }
     
     @Test
@@ -153,7 +155,64 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(f2.getAbsolutePath());
         List<String> bagPath = Lists.newArrayList(dir.getAbsolutePath());
 
-        Linker linker = new Linker(inputFiles, bagPath);
+        Linker.process(inputFiles, bagPath);
+    }
+    
+    @Test
+    public void testUserDefinedSameFile() throws CompileException, IOException {
+        File f = createFile();
+        write(f, "bag MyBag1 {bool test = 0;}\nbag MyBag2 {MyBag1 test = 3;}");
+
+        List<String> inputFiles = Lists.newArrayList(f.getAbsolutePath());
+        List<String> bagPath = Lists.newArrayList();
+
+        Linker.process(inputFiles, bagPath);
+    }
+    
+    @Test
+    public void testUserDefinedDifferentFileBothInputs() throws CompileException, IOException {
+        File f1 = createFile();
+        File f2 = createFile();
+        
+        write(f1, "bag MyBag1 {bool test = 0;}");
+        write(f2, "import \"%s\";\nbag MyBag2 {MyBag1 test = 0;}", f1.getName());
+
+        List<String> inputFiles = Lists.newArrayList(f1.getAbsolutePath(), f2.getAbsolutePath());
+        List<String> bagPath = Lists.newArrayList();
+
+        Linker.process(inputFiles, bagPath);
+    }
+    
+    @Test
+    public void testUserDefinedImport() throws CompileException, IOException {
+        File dir = Files.createTempDir();
+        dir.deleteOnExit();
+        
+        File f1 = new File(dir, "bagpathimport");
+        File f2 = createFile();
+        
+        write(f1, "bag MyBag1 {bool test = 0;}");
+        write(f2, "import \"%s\";\nbag MyBag2 {MyBag1 test = 0;}", f1.getName());
+
+        List<String> inputFiles = Lists.newArrayList(f2.getAbsolutePath());
+        List<String> bagPath = Lists.newArrayList(dir.getAbsolutePath());
+
+        Linker.process(inputFiles, bagPath);
+    }
+    
+    @Test
+    public void testUserDefinedDoesNotExist() throws CompileException, IOException {
+        File f1 = createFile();
+        File f2 = createFile();
+        
+        write(f1, "bag MyBag1 {bool test = 0;}");
+        write(f2, "import \"%s\";\nbag MyBag2 {MyBag3 test = 0;}", f1.getName());
+
+        List<String> inputFiles = Lists.newArrayList(f1.getAbsolutePath(), f2.getAbsolutePath());
+        List<String> bagPath = Lists.newArrayList();
+
+        exception.expect(CompileException.class); // no such bag MyBag3
+        Linker.process(inputFiles, bagPath);
     }
 
 }

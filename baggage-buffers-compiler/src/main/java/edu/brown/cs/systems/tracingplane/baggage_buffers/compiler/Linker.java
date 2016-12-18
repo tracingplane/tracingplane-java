@@ -8,171 +8,206 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.BaggageBuffersDeclaration;
+import com.google.common.collect.Lists;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.FieldDeclaration;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.ImportDeclaration;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.PackageDeclaration;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.ParameterizedType;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.PrimitiveType;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.UserDefinedType;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.BagDeclaration;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.BaggageBuffersDeclaration;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.FieldType;
 
 public class Linker {
 
-    static final Logger log = LoggerFactory.getLogger(Linker.class);
+    public final List<String> bagPath;
+    public final Map<File, BaggageBuffersDeclaration> loadedFiles = new HashMap<>();
 
-    List<String> bagPath;
-    Map<File, SourceFile> sourceFiles = new HashMap<>();
-    Map<File, BaggageBuffersFile> allFiles = new HashMap<>();
-
-    public Linker(List<String> sourceFileNames, List<String> bagPath) throws CompileException {
+    private Linker(List<String> bagPath) {
         this.bagPath = bagPath;
+    }
 
-        // Check and load the source files. Throws exceptions if they can't be loaded.
-        for (String sourceFileName : sourceFileNames) {
-            SourceFile sourceFile = loadSourceFile(sourceFileName);
-            sourceFiles.put(sourceFile.file, sourceFile);
-            allFiles.put(sourceFile.file, sourceFile);
-        }
+    public static void process(BBC.Settings settings) throws CompileException {
+        process(settings.files, FileUtils.splitBagPath(settings.bagPath));
+    }
 
-        // Resolve the immediate imports of the source files, but don't go any further
-        for (SourceFile sourceFile : sourceFiles.values()) {
-            sourceFile.resolveImports();
+    public static void process(List<String> inputFiles, List<String> bagPath) throws CompileException {
+        Linker linker = new Linker(bagPath);
+        linker.process(inputFiles);
+    }
+
+    private Map<File, BaggageBuffersDeclaration> process(List<String> inputFileNames) throws CompileException {
+        Map<File, BaggageBuffersDeclaration> inputs = loadInputFiles(inputFileNames);
+        loadedFiles.putAll(inputs);
+
+        for (File inputFile : inputs.keySet()) {
+            BaggageBuffersDeclaration decl = inputs.get(inputFile);
+
+            checkForDuplicateBagDeclarations(inputFile, decl);
+            checkForEmptyBagDeclarations(inputFile, decl);
+            checkForDuplicateFieldDeclarations(inputFile, decl);
+            resolveFieldPackageNames(inputFile, decl);
         }
         
-        // Validate the imports
-        for (SourceFile sourceFile : sourceFiles.values()) {
-            sourceFile.validateImports();
+        return inputs;
+    }
+
+    public static void checkForDuplicateBagDeclarations(File inputFile,
+                                                        BaggageBuffersDeclaration bbDecl) throws CompileException {
+        Set<String> bagsSeen = new HashSet<>();
+        for (BagDeclaration bagDecl : bbDecl.getBagDeclarations()) {
+            String bagName = bagDecl.name();
+            if (bagsSeen.contains(bagName)) {
+                throw CompileException.duplicateDeclaration(inputFile, bagName);
+            }
+            bagsSeen.add(bagName);
         }
     }
 
-    private SourceFile loadSourceFile(String fileName) throws CompileException {
-        File file = FileUtils.getFile(fileName);
-        if (file == null) {
-            throw CompileException.sourceFileNotFound(fileName);
+    public static void checkForEmptyBagDeclarations(File inputFile,
+                                                    BaggageBuffersDeclaration bbDecl) throws CompileException {
+        for (BagDeclaration bagDecl : bbDecl.getBagDeclarations()) {
+            if (bagDecl.getFieldDeclarations().isEmpty()) {
+                throw CompileException.noFieldsDeclared(inputFile, bagDecl.name());
+            }
         }
-        String fileContents;
-        try {
-            fileContents = FileUtils.readFully(file);
-        } catch (IOException e) {
-            throw CompileException.sourceFileNotReadable(fileName, file, e);
-        }
-        BaggageBuffersDeclaration decl;
-        try {
-            decl = Parser.parseBaggageBuffersFile(fileContents);
-        } catch (Exception e) {
-            throw CompileException.sourceFileSyntaxError(fileName, file, e);
-        }
-
-        return new SourceFile(fileName, file, fileContents, decl);
     }
 
-    public class BaggageBuffersFile {
-
-        public final File file;
-        public final String fileContents;
-        public final BaggageBuffersDeclaration decl;
-        public final Multimap<BaggageBuffersFile, String> imports;
-        public final Set<BaggageBuffersFile> importedBy;
-
-        protected BaggageBuffersFile(File file, String fileContents, BaggageBuffersDeclaration decl) {
-            this.file = file;
-            this.fileContents = fileContents;
-            this.decl = decl;
-            this.imports = HashMultimap.create();
-            this.importedBy = new HashSet<>();
-        }
-
-        public void resolveImports() throws CompileException {
-            imports.clear();
-
-            for (ImportDeclaration importDecl : decl.getImportDeclarations()) {
-                String importFileName = importDecl.filename();
-                List<String> pathToSearch = new ArrayList<>(bagPath);
-                pathToSearch.add(file.getParent());
-                File importFile = FileUtils.findFile(importFileName, pathToSearch);
-                if (importFile == null) {
-                    throw CompileException.importNotFound(importFileName, this.file, pathToSearch);
+    public static void checkForDuplicateFieldDeclarations(File inputFile,
+                                                          BaggageBuffersDeclaration bbDecl) throws CompileException {
+        for (BagDeclaration bagDecl : bbDecl.getBagDeclarations()) {
+            Map<String, FieldDeclaration> names = new HashMap<>();
+            Map<Integer, FieldDeclaration> indices = new HashMap<>();
+            for (FieldDeclaration fieldDecl : bagDecl.getFieldDeclarations()) {
+                if (names.containsKey(fieldDecl.name())) {
+                    throw CompileException.duplicateFieldDeclaration(inputFile, bagDecl.name(), fieldDecl.name(),
+                                                                     names.get(fieldDecl.name()), fieldDecl);
                 }
-
-                final BaggageBuffersFile imported;
-                if (allFiles.containsKey(importFile)) {
-                    imported = allFiles.get(importFile);
-                } else {
-                    imported = loadImport(importFile, importFileName);
-                    allFiles.put(importFile, imported);
-                }
-
-                if (imports.containsKey(importFile)) {
-                    log.warn("{}: duplicate import of {} (imported as {}, {})", file, importFile, importFileName,
-                             StringUtils.join(imports.get(imported), ", "));
-                }
-                imports.put(imported, importFileName);
-                imported.importedBy.add(this);
-            }
-        }
-
-        public void validateImports() throws CompileException {
-            this.validateImports(new Stack<>());
-        }
-
-        private void validateImports(Stack<BaggageBuffersFile> pathToHere) throws CompileException {
-            pathToHere.push(this);
-            for (BaggageBuffersFile importedFile : imports.keySet()) {
-                if (pathToHere.contains(importedFile)) {
-                    throw CompileException.recursiveImport(this.file, importedFile.file,
-                                                           StringUtils.join(imports.get(importedFile), ", "));
-                } else {
-                    importedFile.validateImports(pathToHere);
+                if (indices.containsKey(fieldDecl.index())) {
+                    throw CompileException.duplicateFieldDeclaration(inputFile, bagDecl.name(), fieldDecl.index(),
+                                                                     indices.get(fieldDecl.index()), fieldDecl);
                 }
             }
-            pathToHere.pop();
         }
+    }
 
-        public ImportFile loadImport(File importFile, String importedAs) throws CompileException {
-            String importFileContents;
+    public static void fillPackageNames(BaggageBuffersDeclaration bbDecl) {
+        PackageDeclaration packageDecl = bbDecl.getPackageDeclaration();
+        if (packageDecl != null) {
+            String packageName = packageDecl.getPackageNameString();
+
+            for (BagDeclaration bagDecl : bbDecl.getBagDeclarations()) {
+                bagDecl.packageName_$eq(packageName);
+            }
+        }
+    }
+
+    public void resolveFieldPackageNames(File inputFile, BaggageBuffersDeclaration bbDecl) throws CompileException {
+        List<BaggageBuffersDeclaration> searchPath = new ArrayList<>();
+        searchPath.add(bbDecl);
+        for (ImportDeclaration idecl : Lists.reverse(bbDecl.getImportDeclarations())) {
+            searchPath.add(getImport(inputFile, idecl.filename()));
+        }
+        
+        for (BagDeclaration bagDecl : bbDecl.getBagDeclarations()) {
+            for (FieldDeclaration fieldDecl : bagDecl.getFieldDeclarations()) {
+                resolveField(inputFile, bagDecl.name(), fieldDecl, fieldDecl.fieldtype(), searchPath);
+            }
+        }
+    }
+    
+    public void resolveField(File inputFile, String bagName, FieldDeclaration fieldDecl, FieldType fieldType, List<BaggageBuffersDeclaration> searchPath) throws CompileException {
+        if (fieldType instanceof PrimitiveType) {
+            return;
+        } else if (fieldType instanceof UserDefinedType) {
+            UserDefinedType userDefined = ((UserDefinedType) fieldType);
+            BagDeclaration declaration = findBag(userDefined.name(), userDefined.packageName(), searchPath);
+            if (declaration == null) {
+                throw CompileException.unknownType(inputFile, bagName, fieldDecl, userDefined);
+            }
+            userDefined.packageName_$eq(declaration.packageName());
+            
+        } else if (fieldType instanceof ParameterizedType) {
+            for (FieldType parameterType : ((ParameterizedType) fieldType).getParameters()) {
+                resolveField(inputFile, bagName, fieldDecl, parameterType, searchPath);
+            }
+        } else {
+            // Unexpected occurrence
+            throw new RuntimeException("Encountered unexpected class for fieldType " + fieldType + ", " + fieldType.getClass().getName());
+        }
+    }
+
+    public BagDeclaration findBag(String bagNameToFind, String packageNameToFind,
+                                  List<BaggageBuffersDeclaration> toSearch) {
+        boolean searchAllPackages = packageNameToFind == null || "".equals(packageNameToFind);
+        for (BaggageBuffersDeclaration decl : toSearch) {
+            if (!(searchAllPackages && packageNameToFind.equals(decl.getPackageNameString()))) {
+                continue;
+            }
+            
+            for (BagDeclaration bagDecl : decl.getBagDeclarations()) {
+                if (bagDecl.name().equals(bagNameToFind)) {
+                    return bagDecl;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static Map<File, BaggageBuffersDeclaration> loadInputFiles(List<String> fileNames) throws CompileException {
+        Map<File, BaggageBuffersDeclaration> loadedInputFiles = new HashMap<>();
+
+        for (String fileName : fileNames) {
+            // Input files do not search the bag path
+            File file = FileUtils.getFile(fileName);
+            if (file == null) {
+                throw CompileException.sourceFileNotFound(fileName);
+            }
+
+            // Only load once
+            if (loadedInputFiles.containsKey(file)) {
+                continue;
+            }
+
+            // Read and parse
             try {
-                importFileContents = FileUtils.readFully(importFile);
+                String fileContents = FileUtils.readFully(file);
+                BaggageBuffersDeclaration decl = Parser.parseBaggageBuffersFile(fileContents);
+                fillPackageNames(decl);
+                loadedInputFiles.put(file, decl);
             } catch (IOException e) {
-                throw CompileException.importNotReadable(importFile, this.file, importedAs, e);
-            }
-            BaggageBuffersDeclaration importDecl;
-            try {
-                importDecl = Parser.parseBaggageBuffersFile(importFileContents);
+                throw CompileException.sourceFileNotReadable(fileName, file, e);
             } catch (Exception e) {
-                throw CompileException.importFileSyntaxError(importFile, this.file, importedAs, e);
-            }
-            return new ImportFile(importFile, importFileContents, importDecl);
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (other == null || !(other instanceof BaggageBuffersFile)) {
-                return false;
-            } else {
-                return file.equals(((BaggageBuffersFile) other).file);
+                throw CompileException.sourceFileSyntaxError(fileName, file, e);
             }
         }
 
+        return loadedInputFiles;
     }
 
-    public class SourceFile extends BaggageBuffersFile {
-
-        public final String fileName;
-
-        protected SourceFile(String fileName, File file, String fileContents, BaggageBuffersDeclaration decl) {
-            super(file, fileContents, decl);
-            this.fileName = fileName;
+    public BaggageBuffersDeclaration getImport(File importedBy, String importedAs) throws CompileException {
+        List<String> pathToSearch = new ArrayList<>();
+        pathToSearch.add(importedBy.getParent());
+        pathToSearch.addAll(bagPath);
+        File importFile = FileUtils.findFile(importedAs, pathToSearch);
+        if (importFile == null) {
+            throw CompileException.importNotFound(importedAs, importedBy, pathToSearch);
         }
 
-    }
-
-    public class ImportFile extends BaggageBuffersFile {
-
-        protected ImportFile(File file, String fileContents, BaggageBuffersDeclaration decl) {
-            super(file, fileContents, decl);
+        if (!loadedFiles.containsKey(importFile)) {
+            try {
+                BaggageBuffersDeclaration decl = Parser.parseBaggageBuffersFile(FileUtils.readFully(importFile));
+                fillPackageNames(decl);
+                loadedFiles.put(importFile, decl);
+            } catch (IOException e) {
+                throw CompileException.importNotReadable(importFile, importedBy, importedAs, e);
+            } catch (Exception e) {
+                throw CompileException.importFileSyntaxError(importFile, importedBy, importedAs, e);
+            }
         }
 
+        return loadedFiles.get(importFile);
     }
 
 }
