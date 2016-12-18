@@ -46,14 +46,14 @@ object Declarations {
 
   /** Matches built-in parameterized types */
   val parameterizedType: P[BuiltInType] = P(
-      ("set<" ~/ (primitiveType | userDefinedType) ~ ">").map(of => BuiltInType.Set(of)))
+      ("set<" ~/ (fqUserDefinedType | primitiveType | nonFqUserDefinedType) ~ ">").map(of => BuiltInType.Set(of)))
 
-  val userDefinedType: P[UserDefinedType] = P( (name.rep(sep=".").! ~ ".").? ~ name.! ).map { 
-    case (Some(pName), name) => UserDefinedType(pName, name)
-    case (None, name) => UserDefinedType("", name)
+  val fqUserDefinedType: P[UserDefinedType] = P( name.!.rep( min = 2, sep = "." ) ).map { 
+    case components => UserDefinedType(components.dropRight(1).mkString("."), components.last) 
   }
+  val nonFqUserDefinedType: P[UserDefinedType] = P ( name.! ).map(UserDefinedType("", _))
 
-  val fieldtype: P[FieldType] = P(primitiveType | parameterizedType | userDefinedType)
+  val fieldtype: P[FieldType] = P( fqUserDefinedType | primitiveType | parameterizedType | nonFqUserDefinedType )
   val fieldindex: P[Int] = P(CharIn('0' to '9').rep).!.map(_.toInt)
 
   val fieldDeclaration: P[FieldDeclaration] = P(fieldtype ~ ws ~ name.! ~ eatws ~/ "=" ~ eatws ~/ fieldindex ~ eatws ~/ ";").map { case (a, b, c) => FieldDeclaration(a, b, c) }

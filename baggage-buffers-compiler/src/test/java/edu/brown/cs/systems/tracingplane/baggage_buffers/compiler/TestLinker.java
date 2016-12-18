@@ -1,17 +1,21 @@
-package edu.brown.cs.systems.tracingplane.baggage_buffers.linker;
+package edu.brown.cs.systems.tracingplane.baggage_buffers.compiler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
-import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.CompileException;
-import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Linker;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.BaggageBuffersDeclaration;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.FieldType;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.UserDefinedType;
 
 public class TestLinker {
     
@@ -201,6 +205,40 @@ public class TestLinker {
     }
     
     @Test
+    public void testUserDefinedImportWithPackage() throws CompileException, IOException {
+        File dir = Files.createTempDir();
+        dir.deleteOnExit();
+        
+        File f1 = new File(dir, "bagpathimport");
+        File f2 = createFile();
+        
+        write(f1, "package edu.brown.cs;\nbag MyBag1 {bool test = 0;}");
+        write(f2, "import \"%s\";\nbag MyBag2 {MyBag1 test = 0;}", f1.getName());
+
+        List<String> inputFiles = Lists.newArrayList(f2.getAbsolutePath());
+        List<String> bagPath = Lists.newArrayList(dir.getAbsolutePath());
+
+        Linker.process(inputFiles, bagPath);
+    }
+    
+    @Test
+    public void testFullyQualifiedUserDefinedImport() throws CompileException, IOException {
+        File dir = Files.createTempDir();
+        dir.deleteOnExit();
+        
+        File f1 = new File(dir, "bagpathimport");
+        File f2 = createFile();
+        
+        write(f1, "package edu.brown.cs;\nbag MyBag1 {bool test = 0;}");
+        write(f2, "import \"%s\";\nbag MyBag2 {edu.brown.cs.MyBag1 test = 0;}", f1.getName());
+
+        List<String> inputFiles = Lists.newArrayList(f2.getAbsolutePath());
+        List<String> bagPath = Lists.newArrayList(dir.getAbsolutePath());
+
+        Linker.process(inputFiles, bagPath);
+    }
+    
+    @Test
     public void testUserDefinedDoesNotExist() throws CompileException, IOException {
         File f1 = createFile();
         File f2 = createFile();
@@ -213,6 +251,45 @@ public class TestLinker {
 
         exception.expect(CompileException.class); // no such bag MyBag3
         Linker.process(inputFiles, bagPath);
+    }
+    
+    @Test
+    public void testFullyQualifiedUserDefinedDoesNotExist() throws CompileException, IOException {
+        File f1 = createFile();
+        File f2 = createFile();
+        
+        write(f1, "bag MyBag1 {bool test = 0;}");
+        write(f2, "import \"%s\";\nbag MyBag2 {bad.MyBag1 test = 0;}", f1.getName());
+
+        List<String> inputFiles = Lists.newArrayList(f1.getAbsolutePath(), f2.getAbsolutePath());
+        List<String> bagPath = Lists.newArrayList();
+
+        exception.expect(CompileException.class); // no such bag bad.MyBag1
+        Linker.process(inputFiles, bagPath);
+    }
+
+    
+    @Test
+    public void testPackageResolvesCorrectly() throws CompileException, IOException {
+        File dir = Files.createTempDir();
+        dir.deleteOnExit();
+        
+        File f1 = new File(dir, "bagpathimport");
+        File f2 = createFile();
+        
+        write(f1, "package edu.brown.cs;\nbag MyBag1 {bool test = 0;}");
+        write(f2, "import \"%s\";\nbag MyBag2 {MyBag1 test = 0;}", f1.getName());
+
+        List<String> inputFiles = Lists.newArrayList(f2.getAbsolutePath());
+        List<String> bagPath = Lists.newArrayList(dir.getAbsolutePath());
+
+        Map<File, BaggageBuffersDeclaration> processed = Linker.process(inputFiles, bagPath);
+        BaggageBuffersDeclaration decl = processed.get(f2);
+        FieldType ft = decl.getBagDeclarations().get(0).getFieldDeclarations().get(0).fieldtype();
+        assertTrue(ft instanceof UserDefinedType);
+        UserDefinedType uft = (UserDefinedType) ft;
+        assertTrue(uft.hasPackageName());
+        assertEquals("edu.brown.cs", uft.packageName());
     }
 
 }

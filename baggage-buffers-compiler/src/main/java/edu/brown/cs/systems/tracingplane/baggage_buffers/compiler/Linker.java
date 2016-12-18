@@ -32,9 +32,9 @@ public class Linker {
         process(settings.files, FileUtils.splitBagPath(settings.bagPath));
     }
 
-    public static void process(List<String> inputFiles, List<String> bagPath) throws CompileException {
+    public static Map<File, BaggageBuffersDeclaration> process(List<String> inputFiles, List<String> bagPath) throws CompileException {
         Linker linker = new Linker(bagPath);
-        linker.process(inputFiles);
+        return linker.process(inputFiles);
     }
 
     private Map<File, BaggageBuffersDeclaration> process(List<String> inputFileNames) throws CompileException {
@@ -142,13 +142,11 @@ public class Linker {
                                   List<BaggageBuffersDeclaration> toSearch) {
         boolean searchAllPackages = packageNameToFind == null || "".equals(packageNameToFind);
         for (BaggageBuffersDeclaration decl : toSearch) {
-            if (!(searchAllPackages && packageNameToFind.equals(decl.getPackageNameString()))) {
-                continue;
-            }
-            
-            for (BagDeclaration bagDecl : decl.getBagDeclarations()) {
-                if (bagDecl.name().equals(bagNameToFind)) {
-                    return bagDecl;
+            if (searchAllPackages || packageNameToFind.equals(decl.getPackageNameString())) {
+                for (BagDeclaration bagDecl : decl.getBagDeclarations()) {
+                    if (bagDecl.name().equals(bagNameToFind)) {
+                        return bagDecl;
+                    }
                 }
             }
         }

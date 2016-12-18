@@ -115,15 +115,17 @@
 					<sourceIncludes>
 						<sourceInclude>**/*.scala</sourceInclude>
 						<sourceInclude>**/*.java</sourceInclude>
+						<sourceInclude>src/test/scala</sourceInclude>
 					</sourceIncludes>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.9.1</version>
 				<executions>
 					<execution>
-						<id>add-source</id>
+						<id>include-scala-source</id>
 						<phase>generate-sources</phase>
 						<goals>
 							<goal>add-source</goal>
@@ -135,8 +137,8 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>add-test-source</id>
-						<phase>generate-test-sources</phase>
+						<id>include-scala-test-source</id>
+						<phase>generate-sources</phase>
 						<goals>
 							<goal>add-test-source</goal>
 						</goals>
