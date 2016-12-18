@@ -28,13 +28,14 @@ public class Linker {
         this.bagPath = bagPath;
     }
 
-    public static void process(BBC.Settings settings) throws CompileException {
-        process(settings.files, FileUtils.splitBagPath(settings.bagPath));
+    public static Set<BaggageBuffersDeclaration> link(BBC.Settings settings) throws CompileException {
+        return link(settings.files, FileUtils.splitBagPath(settings.bagPath));
     }
 
-    public static Map<File, BaggageBuffersDeclaration> process(List<String> inputFiles, List<String> bagPath) throws CompileException {
+    public static Set<BaggageBuffersDeclaration> link(List<String> inputFiles, List<String> bagPath) throws CompileException {
         Linker linker = new Linker(bagPath);
-        return linker.process(inputFiles);
+        Map<File, BaggageBuffersDeclaration> processed = linker.process(inputFiles);
+        return new HashSet<>(processed.values());
     }
 
     private Map<File, BaggageBuffersDeclaration> process(List<String> inputFileNames) throws CompileException {

@@ -3,11 +3,13 @@ package edu.brown.cs.systems.tracingplane.baggage_buffers.compiler;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.BaggageBuffersDeclaration;
 
 public class BBC {
 
@@ -27,18 +29,21 @@ public class BBC {
         boolean version = false;
 
         @Parameter(names = { "-h", "--help" }, help = true)
-        private boolean help = false;
+        boolean help = false;
 
-        @Parameter(names = { "--java_out" }, description = "Generate Java source file.")
-        private boolean java = false;
+        @Parameter(names = { "--java_out" }, description = "Output directory to generate Java source files")
+        String javaOut = null;
 
         @Parameter(description = "file1 file2 ...")
-        public List<String> files = new ArrayList<>();
+        List<String> files = new ArrayList<>();
 
     }
     
     public static void run(Settings settings) throws CompileException {
-        Linker.process(settings);
+        Set<BaggageBuffersDeclaration> linked = Linker.link(settings);
+        if (settings.javaOut != null) {
+            new JavaCompiler().compile(settings.javaOut, linked);
+        }
     }
 
     public static void main(String[] args) throws IOException {

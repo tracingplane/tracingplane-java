@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -49,7 +50,7 @@ public class TestLinker {
         List<String> bagPath = Lists.newArrayList();
 
         exception.expect(CompileException.class);
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -58,7 +59,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(fileName);
         List<String> bagPath = Lists.newArrayList();
 
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -68,7 +69,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(first, second);
         List<String> bagPath = Lists.newArrayList();
 
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -79,7 +80,7 @@ public class TestLinker {
         List<String> bagPath = Lists.newArrayList();
 
         exception.expect(CompileException.class);
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -93,7 +94,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(f1.getAbsolutePath(), f2.getAbsolutePath());
         List<String> bagPath = Lists.newArrayList();
 
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -108,7 +109,7 @@ public class TestLinker {
         List<String> bagPath = Lists.newArrayList();
 
         //exception.expect(CompileException.class); // recursive import for now allowed
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -122,7 +123,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(f2.getAbsolutePath());
         List<String> bagPath = Lists.newArrayList();
 
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -141,7 +142,7 @@ public class TestLinker {
         List<String> bagPath = Lists.newArrayList();
 
         exception.expect(CompileException.class); // f1 not found on bagpath
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -159,7 +160,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(f2.getAbsolutePath());
         List<String> bagPath = Lists.newArrayList(dir.getAbsolutePath());
 
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -170,7 +171,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(f.getAbsolutePath());
         List<String> bagPath = Lists.newArrayList();
 
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -184,7 +185,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(f1.getAbsolutePath(), f2.getAbsolutePath());
         List<String> bagPath = Lists.newArrayList();
 
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -201,7 +202,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(f2.getAbsolutePath());
         List<String> bagPath = Lists.newArrayList(dir.getAbsolutePath());
 
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -218,7 +219,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(f2.getAbsolutePath());
         List<String> bagPath = Lists.newArrayList(dir.getAbsolutePath());
 
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -235,7 +236,7 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(f2.getAbsolutePath());
         List<String> bagPath = Lists.newArrayList(dir.getAbsolutePath());
 
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -250,7 +251,7 @@ public class TestLinker {
         List<String> bagPath = Lists.newArrayList();
 
         exception.expect(CompileException.class); // no such bag MyBag3
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
     
     @Test
@@ -265,7 +266,7 @@ public class TestLinker {
         List<String> bagPath = Lists.newArrayList();
 
         exception.expect(CompileException.class); // no such bag bad.MyBag1
-        Linker.process(inputFiles, bagPath);
+        Linker.link(inputFiles, bagPath);
     }
 
     
@@ -283,8 +284,8 @@ public class TestLinker {
         List<String> inputFiles = Lists.newArrayList(f2.getAbsolutePath());
         List<String> bagPath = Lists.newArrayList(dir.getAbsolutePath());
 
-        Map<File, BaggageBuffersDeclaration> processed = Linker.process(inputFiles, bagPath);
-        BaggageBuffersDeclaration decl = processed.get(f2);
+        Set<BaggageBuffersDeclaration> processed = Linker.link(inputFiles, bagPath);
+        BaggageBuffersDeclaration decl = processed.iterator().next();
         FieldType ft = decl.getBagDeclarations().get(0).getFieldDeclarations().get(0).fieldtype();
         assertTrue(ft instanceof UserDefinedType);
         UserDefinedType uft = (UserDefinedType) ft;
