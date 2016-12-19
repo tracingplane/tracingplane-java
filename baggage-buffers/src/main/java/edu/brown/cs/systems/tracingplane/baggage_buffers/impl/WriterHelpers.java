@@ -31,12 +31,12 @@ public class WriterHelpers {
     }
 
     /** Write an unsigned long, encoded lexicographically */
-    public static void writeUInt64(BaggageWriter writer, int value) {
+    public static void writeUInt64(BaggageWriter writer, long value) {
         UnsignedLexVarint.writeLexVarUInt64(writer.newDataAtom(9), value);
     }
 
     /** Write a signed long, encoded lexicographically */
-    public static void writeSInt64(BaggageWriter writer, int value) {
+    public static void writeSInt64(BaggageWriter writer, long value) {
         SignedLexVarint.writeLexVarInt64(writer.newDataAtom(9), value);
     }
 

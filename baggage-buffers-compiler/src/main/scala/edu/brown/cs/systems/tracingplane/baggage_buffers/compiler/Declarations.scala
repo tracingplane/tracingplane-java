@@ -46,7 +46,7 @@ object Declarations {
 
   /** Matches built-in parameterized types */
   val parameterizedType: P[BuiltInType] = P(
-      ("set<" ~/ (fqUserDefinedType | primitiveType | nonFqUserDefinedType) ~ ">").map(of => BuiltInType.Set(of)))
+      (("set<" | "Set<") ~/ (fqUserDefinedType | primitiveType | nonFqUserDefinedType) ~ ">").map(of => BuiltInType.Set(of)))
 
   val fqUserDefinedType: P[UserDefinedType] = P( name.!.rep( min = 2, sep = "." ) ).map { 
     case components => UserDefinedType(components.dropRight(1).mkString("."), components.last) 

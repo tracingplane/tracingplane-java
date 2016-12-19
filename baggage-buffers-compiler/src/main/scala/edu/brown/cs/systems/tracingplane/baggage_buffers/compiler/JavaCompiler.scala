@@ -175,7 +175,7 @@ class JavaCompiler extends Compiler {
         if ($instance.$javaName != null) {
             $builder.enter($bagKey);
             for ($paramJavaClass ${javaName}Instance : $instance.$javaName) {
-                ${getJavaWriteMethod(builder, s"$instance.$javaName", param)};
+                ${getJavaWriteMethod(builder, s"${javaName}Instance", param)};
             }
             $builder.sortData();
             $builder.exit();
@@ -254,7 +254,7 @@ class JavaCompiler extends Compiler {
       case BuiltInType.int64 => return s"$ReaderHelpers.ToUnsignedLexVarInt64"
       case BuiltInType.sint64 => return s"$ReaderHelpers.ToSignedLexVarInt64"
       case BuiltInType.fixed64 => return s"$ReaderHelpers.ToLong"
-      case BuiltInType.sfixed64 => return s"$ReaderHelpers.ToFloat"
+      case BuiltInType.sfixed64 => return s"$ReaderHelpers.ToLong"
       
       case BuiltInType.float => return s"$ReaderHelpers.ToFloat"
       case BuiltInType.double => return s"$ReaderHelpers.ToDouble"
