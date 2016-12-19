@@ -1,6 +1,7 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
 
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import com.google.common.collect.Lists;
@@ -15,6 +16,7 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.Dat
 public class BaggageWriter {
 
     private int currentLevel = -1;
+    private int currentBagBeginIndex = 0;
     private boolean wroteOverflow = false;
     private final List<ByteBuffer> atoms = Lists.newArrayList();
 
@@ -57,11 +59,13 @@ public class BaggageWriter {
         } else if (field instanceof BagKey.Keyed) {
             writeHeader(currentLevel, (BagKey.Keyed) field);
         }
+        currentBagBeginIndex = atoms.size();
         return this;
     }
 
     public BaggageWriter exit() {
         currentLevel--;
+        currentBagBeginIndex = atoms.size();
         return this;
     }
 
@@ -112,7 +116,7 @@ public class BaggageWriter {
      * @return this BaggageWriter instance
      */
     public BaggageWriter writeBytes(ByteBuffer buf) {
-        // See if this is already prefixed
+        backing.finish();
         if (buf.position() > 0 && buf.get(buf.position() - 1) == DataPrefix.prefix) {
             buf.position(buf.position() - 1);
             addAtom(buf);
@@ -121,27 +125,10 @@ public class BaggageWriter {
         }
         return this;
     }
-
-    /**
-     * Write an integer as a data atom
-     * 
-     * @param value the integer to write as the payload of a data atom
-     * @return this BaggageWriter instance
-     */
-    public BaggageWriter writeInt(int value) {
-        newDataAtom(Integer.BYTES).putInt(value);
-        return this;
-    }
-
-    /**
-     * Write a long as a data atom
-     * 
-     * @param value the long to write as the payload of a data atom
-     * @return this BaggageWriter instance
-     */
-    public BaggageWriter writeLong(long value) {
-        newDataAtom(Long.BYTES).putLong(value);
-        return this;
+    
+    /** Sort any data written between the start of the current bag and now */
+    public void sortData() {
+        Collections.sort(atoms.subList(currentBagBeginIndex, atoms.size()));
     }
 
     /** Ensure that any buffers created with newDataAtom are finished. */

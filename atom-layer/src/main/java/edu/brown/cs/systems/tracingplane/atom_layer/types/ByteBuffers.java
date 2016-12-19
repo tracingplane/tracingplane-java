@@ -36,7 +36,7 @@ public class ByteBuffers {
 
     public static ByteBuffer copyWithPrefix(byte prefix, ByteBuffer src) {
         ByteBuffer buf = ByteBuffer.allocate(src.remaining() + 1);
-        buf.put(0, prefix);
+        buf.put(prefix);
         copyTo(src, buf);
         buf.position(0);
         return buf;
@@ -56,6 +56,26 @@ public class ByteBuffers {
     /** Copies the remaining bytes form src to a byte array. This is done without modifying the src position. */
     public static byte[] copyRemainingBytes(ByteBuffer src) {
         return copyRemaining(src).array();
+    }
+    
+    /** Read the remaining bytes from a bytebuffer as a string */
+    public static String getString(ByteBuffer buf) {
+        if (buf == null) {
+            return null;
+        }
+        
+        final byte[] array;
+        final int offset;
+        final int length = buf.remaining();
+        if (buf.hasArray()) {
+            array = buf.array();
+            offset = buf.arrayOffset() + buf.position();
+        } else {
+            array = new byte[length];
+            offset = 0;
+            buf.get(array);
+        }
+        return new String(array, offset, length);
     }
 
 }

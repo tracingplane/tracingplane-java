@@ -74,16 +74,16 @@ public abstract class TestSerializationDeserializationSpeed {
             BaggageWriter writer = BaggageWriter.create();
             writer.enter(outer);
             writer.enter(inner);
-            writer.writeLong(77);
+            writer.newDataAtom(8).putLong(77);
             writer.exit();
             writer.enter(inner2);
-            writer.writeLong(7);
-            writer.writeLong(2);
-            writer.writeLong(1000);
+            writer.newDataAtom(8).putLong(7);
+            writer.newDataAtom(8).putLong(2);
+            writer.newDataAtom(8).putLong(1000);
             writer.exit();
             writer.exit();
             writer.enter(outer2);
-            writer.writeInt(55);
+            writer.newDataAtom(8).putLong(55);
             writer.exit();
             return writer.atoms();
         }

@@ -63,5 +63,19 @@ public class TestByteBuffers {
         dest.limit(183);
         assertEquals(src, dest);
     }
+    
+    @Test
+    public void testCopyWithPrefix() {
+        ByteBuffer buf = ByteBuffer.allocate(4);
+        buf.putInt(0, 55);
+        
+        byte prefix = 109;
+        
+        ByteBuffer copied = ByteBuffers.copyWithPrefix(prefix, buf);
+        
+        assertEquals(prefix, copied.get());
+        assertEquals(55, copied.getInt());
+        
+    }
 
 }
