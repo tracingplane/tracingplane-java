@@ -3,6 +3,7 @@ package edu.brown.cs.systems.tracingplane.baggage_buffers.gen.xtrace;
 import java.util.ArrayList;
 import java.util.List;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.impl.WriterHelpers;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Serializer;
@@ -19,7 +20,7 @@ public class XTraceSerializer implements Serializer<XTrace> {
 
             if (instance.taskId != null) {
                 builder.enter(taskIdKey);
-                builder.writeLong(instance.taskId);
+                WriterHelpers.writeFixed64(builder, instance.taskId);
                 builder.exit();
             }
 

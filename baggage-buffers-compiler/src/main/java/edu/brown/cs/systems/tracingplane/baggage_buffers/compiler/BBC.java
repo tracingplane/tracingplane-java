@@ -39,7 +39,7 @@ public class BBC {
 
     }
     
-    public static void run(Settings settings) throws CompileException {
+    public static void compile(Settings settings) throws CompileException {
         Set<BaggageBuffersDeclaration> linked = Linker.link(settings);
         if (settings.javaOut != null) {
             new JavaCompiler().compile(settings.javaOut, linked);
@@ -68,7 +68,7 @@ public class BBC {
         }
 
         try {
-            run(settings);
+            compile(settings);
         } catch (Exception e) {
             log.error(e.getMessage());
         }

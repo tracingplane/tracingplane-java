@@ -42,6 +42,10 @@ public class CompileException extends Exception {
         return new CompileException(e, "Source file %s (%s) syntax error: %s", fileName, file, e.getMessage());
     }
     
+    public static CompileException syntaxError(Exception e) {
+        return new CompileException(e, "Syntax error: %s", e.getMessage());
+    }
+    
     public static CompileException importFileSyntaxError(File importFile, File declaredIn, String importedAs, Exception e) {
         return new CompileException(e, "%s: import %s (%s) syntax error: %s", declaredIn, importedAs, importFile, e.getMessage());
     }

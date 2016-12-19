@@ -74,6 +74,8 @@ object Ast {
   case class BagDeclaration(name: String, fields: Seq[FieldDeclaration]) {
     var packageName: String = ""; // Filled in later
     
+    fields.sortWith(_.index < _.index)
+    
     def fullyQualifiedName(packageDeclaration: Option[PackageDeclaration]): String = {
       packageDeclaration match {
         case Some(decl) => return fullyQualifiedName(decl)

@@ -15,6 +15,7 @@ import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.PackageDec
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.ParameterizedType;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.PrimitiveType;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.UserDefinedType;
+import fastparse.core.ParseError;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.BagDeclaration;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.BaggageBuffersDeclaration;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.FieldType;
@@ -36,6 +37,24 @@ public class Linker {
         Linker linker = new Linker(bagPath);
         Map<File, BaggageBuffersDeclaration> processed = linker.process(inputFiles);
         return new HashSet<>(processed.values());
+    }
+    
+    public static BaggageBuffersDeclaration link(String inputFileContents, List<String> bagPath) throws CompileException {
+        try {
+            BaggageBuffersDeclaration decl = Parser.parseBaggageBuffersFile(inputFileContents);
+            new Linker(new ArrayList<String>()).process(decl);
+            return decl;
+        } catch (ParseError<?, ?> e) {
+            throw CompileException.syntaxError(e);
+        }
+    }
+    
+    private void process(BaggageBuffersDeclaration decl) throws CompileException {
+        fillPackageNames(decl);
+        checkForDuplicateBagDeclarations(null, decl);
+        checkForEmptyBagDeclarations(null, decl);
+        checkForDuplicateFieldDeclarations(null, decl);
+        resolveFieldPackageNames(null, decl);
     }
 
     private Map<File, BaggageBuffersDeclaration> process(List<String> inputFileNames) throws CompileException {
@@ -177,7 +196,7 @@ public class Linker {
                 loadedInputFiles.put(file, decl);
             } catch (IOException e) {
                 throw CompileException.sourceFileNotReadable(fileName, file, e);
-            } catch (Exception e) {
+            } catch (ParseError<?, ?> e) {
                 throw CompileException.sourceFileSyntaxError(fileName, file, e);
             }
         }
@@ -201,7 +220,7 @@ public class Linker {
                 loadedFiles.put(importFile, decl);
             } catch (IOException e) {
                 throw CompileException.importNotReadable(importFile, importedBy, importedAs, e);
-            } catch (Exception e) {
+            } catch (ParseError<?, ?> e) {
                 throw CompileException.importFileSyntaxError(importFile, importedBy, importedAs, e);
             }
         }
