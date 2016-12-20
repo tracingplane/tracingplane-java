@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.beust.jcommander.JCommander;
@@ -46,7 +47,9 @@ public class BBC {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
+        PropertyConfigurator.configure(BBC.class.getClassLoader().getResourceAsStream("log4j-bbcompiler.properties"));
+        
         // Parse the args
         Settings settings = new Settings();
         JCommander jc = new JCommander(settings, args);
