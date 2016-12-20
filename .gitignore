@@ -10,3 +10,4 @@ target
 .settings
 .project
 .DS_Store
+resources/bbc.jar

@@ -12,8 +12,8 @@
 		<module>transit-layer</module>
 		<module>atom-layer</module>
 		<module>baggage-layer</module>
-		<module>baggage-buffers</module>
 		<module>baggage-buffers-compiler</module>
+		<module>baggage-buffers</module>
 		<module>dist</module>
 	</modules>
 
