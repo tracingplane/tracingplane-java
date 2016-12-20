@@ -1,5 +1,16 @@
 package edu.brown.cs.systems.baggage_buffers.gen.example;
 
+bag SimpleBag {
+
+	set<fixed64> ids = 1;
+}
+
+bag SimpleBag2 {
+
+	int32 first_field = 1;
+	string second_field = 2;
+}
+
 bag ExampleBag {
 
 	bool boolfield = 0;
@@ -19,5 +30,12 @@ bag ExampleBag {
 	
 	set<int32> int32set = 11;
 	set<string> stringset = 12;
+	
+	SimpleBag simple_bag = 15;
+	
+	Set<string> simple_bag_2 = 16;
+	
+	
+	Map<string, SimpleBag2> bag_map = 20;
 	
 }
