@@ -18,8 +18,8 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixTypes.
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.AtomPrefix;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.HeaderPrefix;
 
-/** TODO: documentation, tests, test exceptions and so forth */
-public class BaggageReader {
+/** TODO: documentation */
+public class BaggageReader implements ElementReader {
 
     private static final Logger log = LoggerFactory.getLogger(BaggageReader.class);
 

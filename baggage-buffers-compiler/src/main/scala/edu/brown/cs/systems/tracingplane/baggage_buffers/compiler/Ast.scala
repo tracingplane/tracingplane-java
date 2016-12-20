@@ -3,6 +3,8 @@ package edu.brown.cs.systems.tracingplane.baggage_buffers.compiler
 import scala.collection.JavaConverters._
 import scala.collection.mutable.Map
 import fastparse.all._
+import scala.reflect.runtime.universe._
+
 
 object Ast {
 
@@ -34,7 +36,9 @@ object Ast {
   
   sealed trait PrimitiveType extends BuiltInType {
     override def toString(): String = {
-      return this.getClass.getSimpleName
+      val className = this.getClass.getName
+      return className.substring(BuiltInType.getClass.getName.length(), className.length()-1)
+//      return this.getClass.getSimpleName // SI-2034
     }
   }
   
@@ -60,7 +64,8 @@ object Ast {
     case object string extends PrimitiveType
     case object bytes extends PrimitiveType
     
-    case class Set(of: FieldType) extends ParameterizedType(List[FieldType](of)) with BuiltInType
+    case class Set(of: PrimitiveType) extends ParameterizedType(List[FieldType](of)) with BuiltInType
+    case class Map(keyType: PrimitiveType, valueType: FieldType) extends ParameterizedType(List[FieldType](keyType, valueType)) with BuiltInType 
     
   }
   

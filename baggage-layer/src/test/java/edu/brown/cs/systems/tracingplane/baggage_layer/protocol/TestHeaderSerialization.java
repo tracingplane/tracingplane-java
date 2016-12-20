@@ -44,7 +44,7 @@ public class TestHeaderSerialization {
     }
 
     private static BagKey.Keyed named(ByteBuffer key, BagOptions options) {
-        return (BagKey.Keyed) BagKey.named(key, options);
+        return (BagKey.Keyed) BagKey.keyed(key, options);
     }
 
     @Test

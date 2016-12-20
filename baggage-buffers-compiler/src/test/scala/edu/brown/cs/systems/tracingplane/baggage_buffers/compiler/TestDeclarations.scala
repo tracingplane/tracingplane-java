@@ -383,5 +383,15 @@ bag MyBag3{bool fourth=4;}
       case _ => fail("Parsed unexpected BagDeclaration " + res.bagDeclarations(0))
     }
   }
+  
+  test("Simple Map") {
+    val declaration = """bag MyBag1{map<int32, int32> first=1;}"""
+    Parser.parseBaggageBuffersFile(declaration)
+  }
+  
+  test("FQ Map") {
+    val declaration = """bag MyBag1{map<int32, edu.brown.mytype> first=1;}"""
+    Parser.parseBaggageBuffersFile(declaration)
+  }
 
 }

@@ -257,7 +257,7 @@ public class HeaderSerialization {
      * @throws BaggageLayerException if the atom payload could not be parsed
      */
     public static BagKey parseKeyedHeaderPayload(HeaderPrefix prefix, ByteBuffer buf) throws BaggageLayerException {
-        return BagKey.named(buf.slice(), prefix.options());
+        return BagKey.keyed(buf.slice(), prefix.options());
     }
 
 }

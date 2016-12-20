@@ -26,14 +26,14 @@ public class TestBagKey {
                 assertEquals(1, BagKey.named(key).compareTo(BagKey.indexed(i)));
             }
             for (ByteBuffer buf : bufs) {
-                assertEquals(-1, BagKey.indexed(i).compareTo(BagKey.named(buf)));
-                assertEquals(1, BagKey.named(buf).compareTo(BagKey.indexed(i)));
+                assertEquals(-1, BagKey.indexed(i).compareTo(BagKey.keyed(buf)));
+                assertEquals(1, BagKey.keyed(buf).compareTo(BagKey.indexed(i)));
             }
         }
 
         for (ByteBuffer a : bufs) {
             for (ByteBuffer b : bufs) {
-                assertEquals(Lexicographic.compare(a, b), BagKey.named(a).compareTo(BagKey.named(b)));
+                assertEquals(Lexicographic.compare(a, b), BagKey.keyed(a).compareTo(BagKey.keyed(b)));
             }
         }
     }

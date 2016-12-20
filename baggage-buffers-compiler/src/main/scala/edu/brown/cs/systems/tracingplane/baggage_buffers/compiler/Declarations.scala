@@ -29,7 +29,7 @@ object Declarations {
   val name = P( letter ~ (letter | digit | "_").rep )
   
   /** Matches built-in primitive types */
-  val primitiveType: P[BuiltInType] = P(
+  val primitiveType: P[PrimitiveType] = P(
     "bool".!.map(_ => BuiltInType.bool) |
       "int32".!.map(_ => BuiltInType.int32) |
       "int64".!.map(_ => BuiltInType.int64) |
@@ -46,7 +46,8 @@ object Declarations {
 
   /** Matches built-in parameterized types */
   val parameterizedType: P[BuiltInType] = P(
-      (("set<" | "Set<") ~/ (fqUserDefinedType | primitiveType | nonFqUserDefinedType) ~ ">").map(of => BuiltInType.Set(of)))
+      (("set<" | "Set<") ~ eatws ~/ primitiveType ~ eatws ~ ">").map(BuiltInType.Set(_)) |
+      (("map<" | "Map<") ~ eatws ~/ primitiveType ~ eatws ~ "," ~ eatws ~/ fieldtype ~ eatws ~ ">").map { case (k, v) => BuiltInType.Map(k, v) })
 
   val fqUserDefinedType: P[UserDefinedType] = P( name.!.rep( min = 2, sep = "." ) ).map { 
     case components => UserDefinedType(components.dropRight(1).mkString("."), components.last) 

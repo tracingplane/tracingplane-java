@@ -12,8 +12,12 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageContents;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.AtomPrefixes.DataPrefix;
 
-/** Used for writing out baggage atoms that adhere to the baggage protocol TODO: comments and documentation */
-public class BaggageWriter {
+/**
+ * Used for writing out baggage atoms that adhere to the baggage protocol
+ * 
+ * TODO: comments and documentation
+ */
+public class BaggageWriter implements ElementWriter {
 
     private int currentLevel = -1;
     private int currentBagBeginIndex = 0;
@@ -125,7 +129,7 @@ public class BaggageWriter {
         }
         return this;
     }
-    
+
     /** Sort any data written between the start of the current bag and now */
     public void sortData() {
         Collections.sort(atoms.subList(currentBagBeginIndex, atoms.size()));

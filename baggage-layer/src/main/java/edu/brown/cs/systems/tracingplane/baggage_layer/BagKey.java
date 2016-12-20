@@ -18,8 +18,8 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.HeaderSerializat
  * </p>
  * 
  * <p>
- * BagKey instances should be created with the static methods {@link indexed} and {@link named}. As per the Baggage
- * protocol, fields can either be named (using arbitrary bytes) or indexed (with an unsigned integer). Indexes for
+ * BagKey instances should be created with the static methods {@link indexed} and {@link keyed}. As per the Baggage
+ * protocol, fields can either be keyed (using arbitrary bytes) or indexed (with an unsigned integer). Indexes for
  * fields are statically assigned for efficiency in more established protocols. It is recommended to use named keys for
  * ad-hoc data.
  * </p>
@@ -76,7 +76,7 @@ public abstract class BagKey implements Comparable<BagKey> {
          * path plus the created key appended to the end.
          */
         public BagPath append(ByteBuffer key) {
-            return append(named(key));
+            return append(keyed(key));
         }
 
         /**
@@ -92,7 +92,7 @@ public abstract class BagKey implements Comparable<BagKey> {
          * path plus the created key appended to the end.
          */
         public BagPath append(ByteBuffer key, BagOptions options) {
-            return append(named(key, options));
+            return append(keyed(key, options));
         }
 
         /**
@@ -100,7 +100,7 @@ public abstract class BagKey implements Comparable<BagKey> {
          * path plus the created key appended to the end.
          */
         public BagPath append(String key, BagOptions options) {
-            return append(named(key, options));
+            return append(keyed(key, options));
         }
 
         @Override
@@ -158,25 +158,25 @@ public abstract class BagKey implements Comparable<BagKey> {
     }
 
     public static BagKey named(String name) {
-        return named(name, null);
+        return keyed(name, null);
     }
 
-    public static BagKey named(String name, BagOptions options) {
-        return named(ByteBuffer.wrap(name.getBytes()), options);
+    public static BagKey keyed(String name, BagOptions options) {
+        return keyed(ByteBuffer.wrap(name.getBytes()), options);
     }
 
-    public static BagKey named(ByteBuffer name) {
-        return named(name, null);
+    public static BagKey keyed(ByteBuffer key) {
+        return keyed(key, null);
     }
 
-    public static BagKey named(ByteBuffer name, BagOptions options) {
+    public static BagKey keyed(ByteBuffer key, BagOptions options) {
         if (options == null) {
             options = BagOptions.defaultOptions;
         }
-        if (name == null) {
-            name = ByteBuffer.allocate(0);
+        if (key == null) {
+            key = ByteBuffer.allocate(0);
         }
-        return new Keyed(name, options);
+        return new Keyed(key, options);
     }
 
     /** An Indexed BagKey is one that uses an integer as identifier (versus arbitrary bytes for a {@link Keyed} key) */
