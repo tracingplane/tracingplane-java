@@ -14,6 +14,7 @@
 		<module>baggage-layer</module>
 		<module>baggage-buffers-compiler</module>
 		<module>baggage-buffers</module>
+		<module>baggage-buffers-examples</module>
 		<module>dist</module>
 	</modules>
 
