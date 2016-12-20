@@ -6,6 +6,9 @@ import edu.brown.cs.systems.tracingplane.atom_layer.types.SignedLexVarint;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.UnsignedLexVarint;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.ElementWriter;
 
+/**
+ * Helper methods used by compiled baggagebuffers classes
+ */
 public class WriterHelpers {
 
     private WriterHelpers() {}

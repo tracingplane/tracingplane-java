@@ -13,6 +13,9 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.ElementWriter;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Serializer;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Serializer.ElementSerializer;
 
+/**
+ * Serializers for built-in types used by compiled baggage buffers classes
+ */
 public class Serializers {
 
     private Serializers() {}

@@ -17,6 +17,9 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.ElementReader;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Parser;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Parser.ElementParser;
 
+/**
+ * Parsers for built-in types used by compiled baggage buffers classes
+ */
 public class Parsers {
 
     private Parsers() {}

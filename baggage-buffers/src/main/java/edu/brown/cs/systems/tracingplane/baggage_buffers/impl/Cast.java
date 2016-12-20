@@ -6,6 +6,9 @@ import edu.brown.cs.systems.tracingplane.atom_layer.types.ByteBuffers;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.SignedLexVarint;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.UnsignedLexVarint;
 
+/**
+ * Functions for converting to and from built-in baggagebuffers types and java types
+ */
 public class Cast {
     
     public static Boolean to_bool(ByteBuffer buf) {

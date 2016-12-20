@@ -8,6 +8,9 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.ElementReader;
 
+/**
+ * Helper methods used by compiled baggagebuffers classes
+ */
 public class ReaderHelpers {
 
     private ReaderHelpers() {}

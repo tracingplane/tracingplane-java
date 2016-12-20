@@ -11,6 +11,7 @@ bag SimpleBag2 {
 	string second_field = 2;
 }
 
+
 bag ExampleBag {
 
 	bool boolfield = 0;

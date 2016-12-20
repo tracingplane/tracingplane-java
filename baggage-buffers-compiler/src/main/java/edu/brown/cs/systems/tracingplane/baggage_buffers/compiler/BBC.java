@@ -1,6 +1,5 @@
 package edu.brown.cs.systems.tracingplane.baggage_buffers.compiler;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

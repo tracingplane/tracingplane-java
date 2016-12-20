@@ -9,7 +9,7 @@ import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.BuiltInTyp
 /** Compiles BaggageBuffers declarations to Java */
 class JavaCompiler extends Compiler {
   
-  def compile(outputDir: String, bagDecl: BagDeclaration): Unit = {
+  override def compile(outputDir: String, bagDecl: BagDeclaration): Unit = {
     JavaCompiler.compile(outputDir, bagDecl)
   }
   
