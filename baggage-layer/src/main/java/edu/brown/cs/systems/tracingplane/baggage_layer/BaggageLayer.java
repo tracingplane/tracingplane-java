@@ -23,20 +23,21 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter;
  */
 public interface BaggageLayer<B extends BaggageContents> extends AtomLayer<B> {
 
-    B parse(BaggageReader reader);
+    /** Read an instance of {@code B} from the provided BaggageReader */
+    B read(BaggageReader reader);
 
-    void serialize(BaggageWriter writer, B instance);
+    /** Write the provided instance of {@code B} by creating and writing it to a BaggageWriter */
+    BaggageWriter write(B instance);
 
     @Override
     public default B wrap(List<ByteBuffer> atoms) {
-        return parse(BaggageReader.create(atoms));
+        return read(BaggageReader.create(atoms));
     }
 
     @Override
     public default List<ByteBuffer> atoms(B baggage) {
-        BaggageWriter writer = BaggageWriter.create();
-        serialize(writer, baggage);
-        return writer.atoms();
+        BaggageWriter writer = write(baggage);
+        return writer == null ? null : writer.atoms();
     }
 
 }

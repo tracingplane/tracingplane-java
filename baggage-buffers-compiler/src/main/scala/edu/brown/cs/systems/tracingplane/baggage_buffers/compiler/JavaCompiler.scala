@@ -10,33 +10,59 @@ import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.BuiltInTyp
 class JavaCompiler extends Compiler {
   
   override def compile(outputDir: String, bagDecl: BagDeclaration): Unit = {
-    JavaCompiler.compile(outputDir, bagDecl)
+    new CompilerInstance(bagDecl).compile(outputDir)
   }
   
-  object JavaCompiler {
+  class CompilerInstance(bagDecl: BagDeclaration) {
     
-    def compile(bagDecl: BagDeclaration): String = {
+    def compile(): String = {
       return JavaCompilerUtils.formatIndentation(new BagToCompile(bagDecl).declaration, "    ");
     }
     
-    def compile(outputDir: String, bagDecl: BagDeclaration): Unit = {
+    def compile(outputDir: String): Unit = {
       val toCompile = new BagToCompile(bagDecl)
       val text = JavaCompilerUtils.formatIndentation(toCompile.declaration, "    ");
       JavaCompilerUtils.writeOutputFile(outputDir, toCompile.PackageName, toCompile.Name, text)
     }
     
-    // Baggage layer
-    val BagKey = "edu.brown.cs.systems.tracingplane.baggage_layer.BagKey"
-    val Parser = "edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Parser"
-    val Serializer = "edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Serializer"
-    val BaggageReader = "edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader"
-    val BaggageWriter = "edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter"
+    var importedAndReserved = List[String](bagDecl.name, "Handler")
+    var toImport = List[String]()
+    
+    def importIfPossible(fqn: String): String = {
+      val className = fqn.drop(fqn.lastIndexOf(".")+1)
+      if (importedAndReserved contains className) {
+        return fqn
+      } else {
+        toImport = toImport :+ fqn
+        importedAndReserved = importedAndReserved :+ className
+        return className
+      }
+    }
+    
+    // Built-in types that are used
+    val Set = importIfPossible("java.util.Set")
+    val Map = importIfPossible("java.util.Map")
+    
+    // Baggage layer api
+    val BagKey = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_layer.BagKey")
+    val BaggageReader = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader")
+    val BaggageWriter = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter")
+    
+    // Baggage buffers api
+    val Bag = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.Bag")
+    val Parser = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.Parser")
+    val Serializer = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.Serializer")
+    val Brancher = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.Brancher")
+    val Joiner = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.Joiner")
+    val BaggageHandler = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.BaggageHandler")
     
     // Baggage buffers helpers
-    val ReaderHelpers = "edu.brown.cs.systems.tracingplane.baggage_buffers.impl.ReaderHelpers"
-    val WriterHelpers = "edu.brown.cs.systems.tracingplane.baggage_buffers.impl.WriterHelpers"
-    val Parsers = "edu.brown.cs.systems.tracingplane.baggage_buffers.impl.Parsers"
-    val Serializers = "edu.brown.cs.systems.tracingplane.baggage_buffers.impl.Serializers"
+    val ReaderHelpers = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.impl.ReaderHelpers")
+    val WriterHelpers = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.impl.WriterHelpers")
+    val Parsers = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.impl.Parsers")
+    val Serializers = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.impl.Serializers")
+    val Branchers = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.impl.Branchers")
+    val Joiners = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.impl.Joiners")
     
     
     def javaName(name: String): String = JavaCompilerUtils.formatCamelCase(name)
@@ -57,17 +83,19 @@ class JavaCompiler extends Compiler {
         case BuiltInType.string => return "String"
         case BuiltInType.bytes => return "java.nio.ByteBuffer"
         
-        case BuiltInType.Set(of) => return s"java.util.Set<${javaType(of)}>"
-        case BuiltInType.Map(k, v) => return s"java.util.Map<${javaType(k)}, ${javaType(v)}>"
+        case BuiltInType.Set(of) => return s"$Set<${javaType(of)}>"
+        case BuiltInType.Map(k, v) => return s"$Map<${javaType(k)}, ${javaType(v)}>"
         
         case UserDefinedType(packageName, name) => return s"$packageName.${javaName(name)}"
       }
     }
     
+    def handler(udt: UserDefinedType): String = s"${udt.packageName}.${udt.name}.Handler.instance"
+    
     def parser(fieldType: FieldType): String = {
       fieldType match {
         case prim: PrimitiveType => return s"$Parsers.${prim}Parser()"
-        case UserDefinedType(packageName, name) => return s"$packageName.$name._parser"
+        case udt: UserDefinedType => return handler(udt)
         case BuiltInType.Set(of) => return s"$Parsers.setParser(${parser(of)})"
         case BuiltInType.Map(k, v) => return s"$Parsers.mapParser(${keyParser(k)}, ${parser(v)})"
       }
@@ -76,9 +104,27 @@ class JavaCompiler extends Compiler {
     def serializer(fieldType: FieldType): String = {
       fieldType match {
         case prim: PrimitiveType => return s"$Serializers.${prim}Serializer()"
-        case UserDefinedType(packageName, name) => return s"$packageName.$name._serializer"
+        case udt: UserDefinedType => return handler(udt)
         case BuiltInType.Set(of) => return s"$Serializers.setSerializer(${serializer(of)})"
         case BuiltInType.Map(k, v) => return s"$Serializers.mapSerializer(${keySerializer(k)}, ${serializer(v)})"
+      }
+    }
+    
+    def joiner(fieldType: FieldType): String = {
+      fieldType match {
+        case prim: PrimitiveType => return s"$Joiners.<${javaType(fieldType)}>first()"
+        case udt: UserDefinedType => return handler(udt)
+        case BuiltInType.Set(of) => return s"$Joiners.<${javaType(of)}>setUnion()"
+        case BuiltInType.Map(k, v) => return s"$Joiners.<${javaType(k)}, ${javaType(v)}>mapMerge(${joiner(v)})"
+      }
+    }
+    
+    def brancher(fieldType: FieldType): String = {
+      fieldType match {
+        case prim: PrimitiveType => return s"$Branchers.<${javaType(fieldType)}>noop()"
+        case udt: UserDefinedType => return handler(udt)
+        case BuiltInType.Set(of) => return s"$Branchers.<${javaType(of)}>set()"
+        case BuiltInType.Map(k, v) => return s"$Branchers.<${javaType(k)}, ${javaType(v)}>map(${brancher(v)})"
       }
     }
     
@@ -90,20 +136,21 @@ class JavaCompiler extends Compiler {
       return s"$WriterHelpers.from_$primitiveType"    
     }
     
-    class FieldToCompile(decl: FieldDeclaration) {
+    abstract class FieldToCompile(decl: FieldDeclaration) {
       
       val Name: String = javaName(decl.name)
       val Type: String = javaType(decl.fieldtype)
       val DefaultValue: String = "null"
+      val fieldDeclaration = s"public $Type $Name = $DefaultValue;"
       
       val BagKeyName = s"_${Name}Key"
-      val ParserName = s"_${Name}Parser"
-      val SerializerName = s"_${Name}Serializer"
-      
-      val fieldDeclaration = s"public $Type $Name = $DefaultValue;"
       val bagKeyFieldDeclaration = s"private static final $BagKey $BagKeyName = $BagKey.indexed(${decl.index});"
-      val parserFieldDeclaration = s"private static final $Parser<$Type> $ParserName = ${parser(decl.fieldtype)};"
-      val serializerFieldDeclaration = s"private static final $Serializer<$Type> $SerializerName = ${serializer(decl.fieldtype)};"
+      
+      val ParserName: String
+      val SerializerName: String
+      val BrancherName: String
+      val JoinerName: String
+      val privateFieldsDeclaration: String
       
       def parseStatement(reader: String, instance: String) = s"""
           if ($reader.enter($BagKeyName)) {
@@ -118,6 +165,34 @@ class JavaCompiler extends Compiler {
               $writer.exit();
           }"""
       
+      def branchStatement(instance: String, newInstance: String) = s"$newInstance.$Name = $BrancherName.branch($instance.$Name);"
+      
+      def joinStatement(left: String, right: String, newInstance: String) = s"$newInstance.$Name = $JoinerName.join($left.$Name, $right.$Name);"
+      
+    }
+    
+    class BuiltInFieldToCompile(decl: FieldDeclaration) extends FieldToCompile(decl) {
+      val ParserName = s"_${Name}Parser"
+      val SerializerName = s"_${Name}Serializer"
+      val BrancherName = s"_${Name}Brancher"
+      val JoinerName = s"_${Name}Joiner"
+      
+      val privateFieldsDeclaration: String = s"""
+          private static final $Parser<$Type> $ParserName = ${parser(decl.fieldtype)};
+          private static final $Serializer<$Type> $SerializerName = ${serializer(decl.fieldtype)};
+          private static final $Brancher<$Type> $BrancherName = ${brancher(decl.fieldtype)};
+          private static final $Joiner<$Type> $JoinerName = ${joiner(decl.fieldtype)};"""
+    }
+    
+    class UserDefinedFieldToCompile(decl: FieldDeclaration, userfield: UserDefinedType) extends FieldToCompile(decl) {
+      val HandlerName = s"_${Name}Handler"
+      val ParserName = HandlerName
+      val SerializerName = HandlerName
+      val BrancherName = HandlerName
+      val JoinerName = HandlerName
+      
+      val privateFieldsDeclaration: String = s"""
+          private static final $BaggageHandler<$Type> $HandlerName = ${handler(userfield)};"""
     }
     
     class BagToCompile(decl: BagDeclaration) {
@@ -125,26 +200,42 @@ class JavaCompiler extends Compiler {
       val Name: String = javaName(decl.name)
       val PackageName: String = decl.packageName
       
-      val fields = decl.fields.sortWith(_.index < _.index).map(new FieldToCompile(_))
-      
-      val ParserClass = s"${Name}Parser"
-      val SerializerClass = s"${Name}Serializer"
+      val fields = decl.fields.sortWith(_.index < _.index).map {
+        x => x match {
+          case FieldDeclaration(fieldtype: UserDefinedType, _, _) => new UserDefinedFieldToCompile(x, fieldtype)
+          case _ => new BuiltInFieldToCompile(x) 
+        }
+      }
       
       val declaration = s"""/** Generated by BaggageBuffersCompiler */
         package ${decl.packageName};
+
+        ${toImport.map(x => s"import $x;").mkString("\n")}
     
-        public class $Name {
+        public class $Name implements $Bag {
     
             ${fields.map(_.fieldDeclaration).mkString("\n")}
         
             public boolean _overflow = false;
-        
-            ${fields.map(_.bagKeyFieldDeclaration).mkString("\n")}
-            
-            public static final $Parser<$Name> _parser = new $ParserClass();
-            private static class $ParserClass implements $Parser<$Name> {
 
-                ${fields.map(_.parserFieldDeclaration).mkString("\n")}
+            @Override
+            public $BaggageHandler<?> handler() {
+                return Handler.instance;
+            }
+            
+            public static class Handler implements $BaggageHandler<$Name> {
+
+                public static final Handler instance = new Handler();
+                
+                private Handler(){}
+        
+                ${fields.map(_.bagKeyFieldDeclaration).mkString("\n")}
+                ${fields.map(_.privateFieldsDeclaration).mkString("\n")}
+                
+                @Override
+                public boolean isInstance($Bag bag) {
+                    return bag == null || bag instanceof $Name;
+                }
     
                 @Override
                 public $Name parse($BaggageReader reader) {
@@ -154,12 +245,6 @@ class JavaCompiler extends Compiler {
     
                     return instance;
                 }
-            }
-    
-            public static final $Serializer<$Name> _serializer = new $SerializerClass();
-            private static class $SerializerClass implements $Serializer<$Name> {
-
-                ${fields.map(_.serializerFieldDeclaration).mkString("\n")}
     
                 @Override
                 public void serialize($BaggageWriter writer, $Name instance) {
@@ -170,7 +255,29 @@ class JavaCompiler extends Compiler {
                     writer.didOverflowHere(instance._overflow);
                     ${fields.map(_.serializeStatement("writer", "instance")).mkString("\n")}
                 }
-        
+    
+                @Override
+                public $Name branch($Name instance) {
+                    if (instance == null) {
+                        return null;
+                    }
+                    
+                    $Name newInstance = new $Name();
+                    ${fields.map(_.branchStatement("instance", "newInstance")).mkString("\n")}
+                    return newInstance;
+                }
+    
+                @Override
+                public $Name join($Name left, $Name right) {
+                    if (left == null) {
+                        return right;
+                    } else if (right == null) {
+                        return left;
+                    } else {
+                        ${fields.map(_.joinStatement("left", "right", "left")).mkString("\n")}
+                        return left;
+                    }
+                }
             }
         }"""
       

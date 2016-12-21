@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
 
 /**
  * Contains static methods for trimming baggage atoms to size extents.
@@ -71,6 +72,65 @@ public class AtomLayerOverflow {
             return subList;
         } else {
             return atoms;
+        }
+    }
+    
+    public static List<ByteBuffer> trimToFirstOverflow(List<ByteBuffer> atoms) {
+        if (atoms == null) {
+            return null;
+        }
+        int overflowAt = atoms.indexOf(OVERFLOW_MARKER);
+        if (overflowAt < 0 || overflowAt >= atoms.size() - 1) {
+            return atoms;
+        } else {
+            return atoms.subList(0, overflowAt + 1);
+        }
+    }
+
+    /**
+     * Merge the provided atoms until an overflow marker is encountered. Include the encountered overflow marker then
+     * stop.
+     */
+    public static List<ByteBuffer> mergeOverflowAtoms(List<ByteBuffer> a, List<ByteBuffer> b) {
+        if (a == null) {
+            return trimToFirstOverflow(b);
+        } else if (b == null) {
+            return trimToFirstOverflow(a);
+        }
+        
+        int ia = 0, ib = 0, size_a = a.size(), size_b = b.size();
+        final List<ByteBuffer> merged = new ArrayList<>(size_a + size_b);
+        ByteBuffer previous = null;
+        boolean different = false;
+        while (ia < size_a && ib < size_b && !OVERFLOW_MARKER.equals(previous)) {
+            int comparison = Lexicographic.compare(a.get(ia), b.get(ib));
+            if (comparison == 0) {
+                merged.add(previous = a.get(ia));
+                ia++;
+                ib++;
+            } else if (comparison < 0) {
+                merged.add(previous = a.get(ia));
+                ia++;
+                different = true;
+            } else if (comparison > 0) {
+                merged.add(previous = b.get(ib));
+                ib++;
+                different = true;
+            }
+        }
+
+        while (ia < size_a && !OVERFLOW_MARKER.equals(previous)) {
+            merged.add(previous = a.get(ia++));
+        }
+
+        while (ib < size_b && !OVERFLOW_MARKER.equals(previous)) {
+            merged.add(previous = b.get(ib++));
+        }
+        
+        if (!different && ia == size_a && ib == size_b) {
+            return size_a < size_b ? b : a;
+        } else {
+            return merged;
         }
     }
 

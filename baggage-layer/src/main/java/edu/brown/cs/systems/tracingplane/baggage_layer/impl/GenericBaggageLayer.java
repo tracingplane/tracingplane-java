@@ -1,8 +1,6 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer.impl;
 
-import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageHandler;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayer;
-import edu.brown.cs.systems.tracingplane.baggage_layer.impl.GenericBaggageContents.GenericBaggageContentsHandler;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
@@ -26,8 +24,6 @@ import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
  */
 public class GenericBaggageLayer implements BaggageLayer<GenericBaggageContents> {
 
-    private static final BaggageHandler<GenericBaggageContents> handler = GenericBaggageContentsHandler.instance();
-
     @Override
     public boolean isInstance(Baggage baggage) {
         return baggage == null || baggage instanceof GenericBaggageContents;
@@ -43,11 +39,7 @@ public class GenericBaggageLayer implements BaggageLayer<GenericBaggageContents>
 
     @Override
     public GenericBaggageContents branch(GenericBaggageContents from) {
-        if (from != null) {
-            return handler.branch(from);
-        } else {
-            return null;
-        }
+        return from == null ? null : from.branch();
     }
 
     @Override
@@ -59,18 +51,23 @@ public class GenericBaggageLayer implements BaggageLayer<GenericBaggageContents>
         } else if (right == null) {
             return left;
         } else {
-            return handler.join(left, right);
+            return left.mergeWith(right);
         }
     }
 
     @Override
-    public GenericBaggageContents parse(BaggageReader reader) {
-        return handler.parse(reader);
+    public GenericBaggageContents read(BaggageReader reader) {
+        return GenericBaggageContents.parseFrom(reader);
     }
 
     @Override
-    public void serialize(BaggageWriter writer, GenericBaggageContents instance) {
-        handler.serialize(writer, instance);
+    public BaggageWriter write(GenericBaggageContents instance) {
+        if (instance == null) {
+            return null;
+        }
+        BaggageWriter writer = BaggageWriter.create();
+        instance.serializeTo(writer);
+        return writer;
     }
 
 }

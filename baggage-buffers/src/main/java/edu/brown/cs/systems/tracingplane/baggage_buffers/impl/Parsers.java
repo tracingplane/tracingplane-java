@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,11 +12,11 @@ import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Parser;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Parser.ElementParser;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.ElementReader;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Parser;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.Parser.ElementParser;
 
 /**
  * Parsers for built-in types used by compiled baggage buffers classes
@@ -77,7 +78,7 @@ public class Parsers {
     }
 
     public static <T> ElementParser<Set<T>> setParser(ElementParser<T> elementParser) {
-        return collect(elementParser, () -> new TreeSet<T>());
+        return collect(elementParser, () -> new HashSet<T>());
     }
 
     public static <T> ElementParser<List<T>> listParser(ElementParser<T> elementParser) {

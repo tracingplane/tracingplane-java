@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 import com.google.common.collect.Lists;
@@ -74,6 +75,67 @@ public class TestOverflowMarker {
             assertEquals(bufs, trimmed);
         }
 
+    }
+    
+    @Test
+    public void testMergeOverflowAtoms() {
+        List<ByteBuffer> nullList = null;
+        List<ByteBuffer> emptyList = new ArrayList<ByteBuffer>();
+        List<ByteBuffer> justMarker = Lists.<ByteBuffer>newArrayList(BaggageAtoms.OVERFLOW_MARKER);
+        
+        assertEquals(nullList, AtomLayerOverflow.mergeOverflowAtoms(nullList, nullList));
+        assertEquals(emptyList, AtomLayerOverflow.mergeOverflowAtoms(emptyList, nullList));
+        assertEquals(emptyList, AtomLayerOverflow.mergeOverflowAtoms(nullList, emptyList));
+        assertEquals(emptyList, AtomLayerOverflow.mergeOverflowAtoms(emptyList, emptyList));
+
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(justMarker, nullList));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(justMarker, emptyList));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(justMarker, justMarker));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(nullList, justMarker));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(emptyList, justMarker));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(justMarker, justMarker));
+
+        ByteBuffer a = ByteBuffer.allocate(77);
+        List<ByteBuffer> aFirst = Lists.newArrayList(a, BaggageAtoms.OVERFLOW_MARKER);
+
+        assertEquals(aFirst, AtomLayerOverflow.mergeOverflowAtoms(aFirst, nullList));
+        assertEquals(aFirst, AtomLayerOverflow.mergeOverflowAtoms(aFirst, emptyList));
+        assertEquals(aFirst, AtomLayerOverflow.mergeOverflowAtoms(aFirst, aFirst));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(aFirst, justMarker));
+
+        assertEquals(aFirst, AtomLayerOverflow.mergeOverflowAtoms(nullList, aFirst));
+        assertEquals(aFirst, AtomLayerOverflow.mergeOverflowAtoms(emptyList, aFirst));
+        assertEquals(aFirst, AtomLayerOverflow.mergeOverflowAtoms(aFirst, aFirst));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(justMarker, aFirst));
+
+        List<ByteBuffer> aLast = Lists.newArrayList(BaggageAtoms.OVERFLOW_MARKER, a);
+
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(aLast, nullList));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(aLast, emptyList));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(aLast, aLast));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(aLast, aFirst));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(aLast, justMarker));
+
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(nullList, aLast));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(emptyList, aLast));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(aLast, aLast));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(aFirst, aLast));
+        assertEquals(justMarker, AtomLayerOverflow.mergeOverflowAtoms(justMarker, aLast));
+
+
+        ByteBuffer b = ByteBuffer.allocate(4);
+        ByteBuffer c = ByteBuffer.allocate(8);
+        ByteBuffer d = ByteBuffer.allocate(12);
+        
+        List<ByteBuffer> test1 = Lists.newArrayList(b, c, a, BaggageAtoms.OVERFLOW_MARKER, d);
+        List<ByteBuffer> test2 = Lists.newArrayList(b, c, a, BaggageAtoms.OVERFLOW_MARKER);
+
+        assertEquals(test2, AtomLayerOverflow.mergeOverflowAtoms(test1, test2));
+        assertEquals(test2, AtomLayerOverflow.mergeOverflowAtoms(test1, test1));
+        assertEquals(test2, AtomLayerOverflow.mergeOverflowAtoms(test2, test2));
+        assertEquals(test2, AtomLayerOverflow.mergeOverflowAtoms(test1, aFirst));
+        assertEquals(test2, AtomLayerOverflow.mergeOverflowAtoms(test2, aFirst));
+        
     }
 
 }

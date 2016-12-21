@@ -1,4 +1,7 @@
-package edu.brown.cs.systems.tracingplane.baggage_layer.protocol;
+package edu.brown.cs.systems.tracingplane.baggage_buffers.api;
+
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.ElementWriter;
 
 public interface Serializer<T> {
 

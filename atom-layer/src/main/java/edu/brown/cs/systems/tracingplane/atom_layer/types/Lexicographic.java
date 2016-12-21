@@ -144,6 +144,10 @@ public class Lexicographic {
                 different = true;
             }
         }
+        
+        if (!different) {
+            return size_a < size_b ? b : a;
+        }
 
         while (ia < size_a) {
             merged.add(a.get(ia++));
@@ -152,12 +156,8 @@ public class Lexicographic {
         while (ib < size_b) {
             merged.add(b.get(ib++));
         }
-
-        if (different) {
-            return merged;
-        } else {
-            return a;
-        }
+        
+        return merged;
     }
 
     /**

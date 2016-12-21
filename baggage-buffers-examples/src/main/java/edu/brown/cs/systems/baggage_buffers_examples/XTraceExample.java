@@ -1,17 +1,13 @@
 package edu.brown.cs.systems.baggage_buffers_examples;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import com.google.common.collect.Sets;
-import edu.brown.cs.systems.baggage_buffers.gen.example.ExampleBag;
-import edu.brown.cs.systems.baggage_buffers.gen.example.SimpleBag2;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter;
 import edu.brown.xtrace.XTraceMetadata;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
 
 public class XTraceExample {
     
@@ -30,11 +26,11 @@ public class XTraceExample {
 
         BaggageWriter writer = BaggageWriter.create();
         
-        XTraceMetadata._serializer.serialize(writer, xmd);
+        XTraceMetadata.Handler.instance.serialize(writer, xmd);
         
         BaggageWriter writer2 = BaggageWriter.create();
         
-        XTraceMetadata._serializer.serialize(writer2, xmd2);
+        XTraceMetadata.Handler.instance.serialize(writer2, xmd2);
         
         List<ByteBuffer> atoms = Lexicographic.merge(writer.atoms(), writer2.atoms());
         
@@ -42,7 +38,7 @@ public class XTraceExample {
         
         BaggageReader reader = BaggageReader.create(atoms);
         
-        XTraceMetadata xmd3 = XTraceMetadata._parser.parse(reader);
+        XTraceMetadata xmd3 = XTraceMetadata.Handler.instance.parse(reader);
         
         System.out.println(xmd3.taskId);
         for (Long parentId : xmd3.parentEventIds) {
