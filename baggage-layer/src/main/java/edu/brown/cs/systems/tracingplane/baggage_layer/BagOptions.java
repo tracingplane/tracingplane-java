@@ -31,7 +31,7 @@ public class BagOptions implements Comparable<BagOptions> {
     public static final BagOptions defaultOptions = values[0];
 
     public static enum MergeBehavior {
-        TakeAll, TakeFirst;
+                                      TakeAll, TakeFirst;
     }
 
     public final MergeBehavior merge;
@@ -61,7 +61,7 @@ public class BagOptions implements Comparable<BagOptions> {
     public int compareTo(BagOptions o) {
         return merge.compareTo(o.merge);
     }
-    
+
     public static BagOptions[] values() {
         return values;
     }

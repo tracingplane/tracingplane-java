@@ -1,14 +1,32 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer.impl;
 
-import java.nio.ByteBuffer;
-import java.util.List;
-import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
-import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey.BagPath;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageHandler;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayer;
+import edu.brown.cs.systems.tracingplane.baggage_layer.impl.GenericBaggageContents.GenericBaggageContentsHandler;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 
-/** TODO: documentation and description */
+/**
+ * <p>
+ * GenericBaggageLayer is the default baggage layer implementation when baggage buffers is <b>not</b> used. It is a
+ * better idea to use BaggageBuffers, because the GenericBaggageLayer creates lists and maps of baggage contents,
+ * whereas BaggageBuffers is smarter and provides a <b>much</b> cleaner interface.
+ * </p>
+ * 
+ * <p>
+ * The logic for branch, join, parse and serialize is in {@link GenericBaggageContentsHandler}, in keeping with the
+ * style for baggagebuffers generated code.
+ * </p>
+ * 
+ * <p>
+ * Because this is a clunky implementation, there is no API for accessing or manipulating the contents of the baggage
+ * beyond checking if it's an instance of {@link GenericBaggageContents} then casting and accessing the data directly.
+ * </p>
+ */
 public class GenericBaggageLayer implements BaggageLayer<GenericBaggageContents> {
+
+    private static final BaggageHandler<GenericBaggageContents> handler = GenericBaggageContentsHandler.instance();
 
     @Override
     public boolean isInstance(Baggage baggage) {
@@ -26,7 +44,7 @@ public class GenericBaggageLayer implements BaggageLayer<GenericBaggageContents>
     @Override
     public GenericBaggageContents branch(GenericBaggageContents from) {
         if (from != null) {
-            return from.branch();
+            return handler.branch(from);
         } else {
             return null;
         }
@@ -36,84 +54,23 @@ public class GenericBaggageLayer implements BaggageLayer<GenericBaggageContents>
     public GenericBaggageContents join(GenericBaggageContents left, GenericBaggageContents right) {
         if (left == null && right == null) {
             return null;
-        } else if (left != null) {
-            return left.mergeWith(right);
+        } else if (left == null) {
+            return right;
+        } else if (right == null) {
+            return left;
         } else {
-            return right.mergeWith(left);
+            return handler.join(left, right);
         }
     }
 
     @Override
-    public GenericBaggageContents wrap(List<ByteBuffer> atoms) {
-        // TODO Auto-generated method stub
-        return null;
+    public GenericBaggageContents parse(BaggageReader reader) {
+        return handler.parse(reader);
     }
 
     @Override
-    public List<ByteBuffer> atoms(GenericBaggageContents baggage) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean checkOverflow(GenericBaggageContents baggage, BagPath path, boolean includeChildren,
-                                 boolean includeTrimmed) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean exists(GenericBaggageContents baggage, BagPath path) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public List<ByteBuffer> get(GenericBaggageContents baggage, BagPath path) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void add(GenericBaggageContents baggage, BagPath path, ByteBuffer data) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void add(GenericBaggageContents baggage, BagPath path, List<ByteBuffer> datas) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void replace(GenericBaggageContents baggage, BagPath path, ByteBuffer data) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void replace(GenericBaggageContents baggage, BagPath path, List<ByteBuffer> datas) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void clear(GenericBaggageContents baggage, BagPath path) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void drop(GenericBaggageContents baggage, BagPath path) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public List<BagKey> children(GenericBaggageContents baggage, BagPath path) {
-        // TODO Auto-generated method stub
-        return null;
+    public void serialize(BaggageWriter writer, GenericBaggageContents instance) {
+        handler.serialize(writer, instance);
     }
 
 }

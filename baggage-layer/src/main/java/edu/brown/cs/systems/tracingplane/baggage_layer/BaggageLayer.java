@@ -3,7 +3,8 @@ package edu.brown.cs.systems.tracingplane.baggage_layer;
 import java.nio.ByteBuffer;
 import java.util.List;
 import edu.brown.cs.systems.tracingplane.atom_layer.AtomLayer;
-import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey.BagPath;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter;
 
 /**
  * <p>
@@ -22,24 +23,20 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey.BagPath;
  */
 public interface BaggageLayer<B extends BaggageContents> extends AtomLayer<B> {
 
-    public boolean checkOverflow(B baggage, BagPath path, boolean includeChildren, boolean includeTrimmed);
+    B parse(BaggageReader reader);
 
-    public boolean exists(B baggage, BagPath path);
+    void serialize(BaggageWriter writer, B instance);
 
-    public List<ByteBuffer> get(B baggage, BagPath path);
+    @Override
+    public default B wrap(List<ByteBuffer> atoms) {
+        return parse(BaggageReader.create(atoms));
+    }
 
-    public void add(B baggage, BagPath path, ByteBuffer data);
-
-    public void add(B baggage, BagPath path, List<ByteBuffer> datas);
-
-    public void replace(B baggage, BagPath path, ByteBuffer data);
-
-    public void replace(B baggage, BagPath path, List<ByteBuffer> datas);
-
-    public void clear(B baggage, BagPath path);
-
-    public void drop(B baggage, BagPath path);
-
-    public List<BagKey> children(B baggage, BagPath path);
+    @Override
+    public default List<ByteBuffer> atoms(B baggage) {
+        BaggageWriter writer = BaggageWriter.create();
+        serialize(writer, baggage);
+        return writer.atoms();
+    }
 
 }

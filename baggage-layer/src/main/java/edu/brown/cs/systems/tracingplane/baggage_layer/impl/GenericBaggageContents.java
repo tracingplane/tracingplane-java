@@ -2,12 +2,26 @@ package edu.brown.cs.systems.tracingplane.baggage_layer.impl;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageContents;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageHandler;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader;
+import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter;
 
+/**
+ * <p>
+ * An implementation of baggage that does not interpret any of the baggage contents. As a result it stores data in maps.
+ * This is just the default implementation if baggagebuffers aren't used; it is not an efficient implementation because
+ * branching entails duplicating the maps and lists storing data.
+ * </p>
+ */
 public class GenericBaggageContents implements BaggageContents {
 
     public boolean dataDidOverflow = false;
@@ -18,13 +32,41 @@ public class GenericBaggageContents implements BaggageContents {
     public Map<BagKey, GenericBaggageContents> children = null;
 
     public GenericBaggageContents branch() {
-        // TODO Auto-generated method stub
-        return null;
+        GenericBaggageContents copy = new GenericBaggageContents();
+        copy.dataDidOverflow = dataDidOverflow;
+        copy.dataWasTrimmed = dataWasTrimmed;
+        copy.childDidOverflow = childDidOverflow;
+        copy.childWasTrimmed = childWasTrimmed;
+        if (data != null) {
+            copy.data = new ArrayList<>(data);
+        }
+        if (children != null) {
+            copy.children = Maps.newTreeMap();
+            for (BagKey key : children.keySet()) {
+                copy.children.put(key, children.get(key).branch());
+            }
+        }
+        return copy;
     }
 
     public GenericBaggageContents mergeWith(GenericBaggageContents other) {
-        // TODO Auto-generated method stub
-        return null;
+        this.dataDidOverflow |= other.dataDidOverflow;
+        this.dataWasTrimmed |= other.dataWasTrimmed;
+        this.childDidOverflow |= other.childDidOverflow;
+        this.childWasTrimmed |= other.childWasTrimmed;
+        this.data = Lexicographic.merge(this.data, other.data);
+        if (this.children == null) {
+            this.children = other.children;
+        } else if (other.children != null) {
+            for (BagKey key : other.children.keySet()) {
+                if (children.containsKey(key)) {
+                    children.get(key).mergeWith(other.children.get(key));
+                } else {
+                    children.put(key, other.children.get(key));
+                }
+            }
+        }
+        return this;
     }
 
     public void addData(ByteBuffer dataItem) {
@@ -44,6 +86,83 @@ public class GenericBaggageContents implements BaggageContents {
             children.put(key, child);
             childWasTrimmed |= child.dataWasTrimmed || child.childWasTrimmed;
         }
+    }
+
+    public static class GenericBaggageContentsHandler implements BaggageHandler<GenericBaggageContents> {
+
+        private static final GenericBaggageContentsHandler instance = new GenericBaggageContentsHandler();
+
+        private GenericBaggageContentsHandler() {}
+
+        public static GenericBaggageContentsHandler instance() {
+            return instance;
+        }
+
+        @Override
+        public GenericBaggageContents join(GenericBaggageContents first, GenericBaggageContents second) {
+            return first.mergeWith(second);
+        }
+
+        @Override
+        public GenericBaggageContents branch(GenericBaggageContents from) {
+            return from.branch();
+        }
+
+        @Override
+        public void serialize(BaggageWriter builder, GenericBaggageContents baggage) {
+            if (baggage != null) {
+                builder.didTrimHere(baggage.dataWasTrimmed);
+
+                if (baggage.data != null) {
+                    for (ByteBuffer data : baggage.data) {
+                        builder.writeBytes(data);
+                    }
+                }
+
+                if (baggage.children != null) {
+                    List<BagKey> childKeys = Lists.newArrayList(baggage.children.keySet());
+                    Collections.sort(childKeys);
+                    for (BagKey key : childKeys) {
+                        builder.enter(key);
+                        serialize(builder, baggage.children.get(key));
+                        builder.exit();
+                    }
+                }
+            }
+        }
+
+        @Override
+        public GenericBaggageContents parse(BaggageReader reader) {
+            if (reader.hasNext()) {
+                GenericBaggageContents baggage = new GenericBaggageContents();
+                parseData(reader, baggage);
+                parseChildren(reader, baggage);
+                return baggage;
+            }
+            return null;
+        }
+
+        private void parseData(BaggageReader reader, GenericBaggageContents baggage) {
+            ByteBuffer nextData = null;
+            while ((nextData = reader.nextData()) != null) {
+                if (BaggageContents.TRIMMARKER_CONTENTS.equals(nextData)) {
+                    baggage.dataWasTrimmed = true;
+                } else {
+                    baggage.addData(nextData);
+                }
+            }
+            baggage.dataDidOverflow = reader.didOverflow();
+        }
+
+        private void parseChildren(BaggageReader reader, GenericBaggageContents baggage) {
+            BagKey nextChild = null;
+            while ((nextChild = reader.enter()) != null) {
+                baggage.addChild(nextChild, parse(reader));
+                reader.exit();
+            }
+            baggage.childDidOverflow = reader.didOverflow();
+        }
+
     }
 
 }

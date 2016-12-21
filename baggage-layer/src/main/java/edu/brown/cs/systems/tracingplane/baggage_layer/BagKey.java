@@ -13,8 +13,7 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.HeaderSerializat
 
 /**
  * <p>
- * A {@link BagKey} is used to look up data items and child bags within a baggage instance. A {@link BagPath} is a list
- * of zero or more bag keys that acts much like a path in a file system.
+ * A {@link BagKey} is used to look up data items and child bags within a baggage instance.
  * </p>
  * 
  * <p>
@@ -25,111 +24,6 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.HeaderSerializat
  * </p>
  */
 public abstract class BagKey implements Comparable<BagKey> {
-
-    /**
-     * Zero or more BagKeys represent a path to data in baggage. Paths can be used to access data from BaggageContents.
-     */
-    public static class BagPath implements Comparable<BagPath> {
-
-        public final BagKey[] keys;
-
-        private BagPath(BagKey[] keys) {
-            this.keys = keys;
-        }
-
-        /** Creates and returns a new path that joins the provided keys */
-        public static BagPath from(BagKey... keys) {
-            return new BagPath(keys);
-        }
-
-        /** Creates and returns a new path that joins the provided keys */
-        public static BagPath from(List<BagKey> keys) {
-            return from(keys.toArray(new BagKey[keys.size()]));
-        }
-
-        /** Returns a new BagPath that is equal to this path plus the provided key appended to the end */
-        public BagPath append(BagKey key) {
-            BagKey[] newKeys = new BagKey[keys.length + 1];
-            System.arraycopy(keys, 0, newKeys, 0, keys.length);
-            newKeys[keys.length] = key;
-            return new BagPath(newKeys);
-        }
-
-        /**
-         * Creates and appends a new indexed key to the end of this bag path. Returns a new BagPath that is equal to
-         * this path plus the created key appended to the end.
-         */
-        public BagPath append(int index) {
-            return append(indexed(index));
-        }
-
-        /**
-         * Creates and appends a new indexed key to the end of this bag path. Returns a new BagPath that is equal to
-         * this path plus the created key appended to the end.
-         */
-        public BagPath append(int index, BagOptions options) {
-            return append(indexed(index, options));
-        }
-
-        /**
-         * Creates and appends a new named key to the end of this bag path. Returns a new BagPath that is equal to this
-         * path plus the created key appended to the end.
-         */
-        public BagPath append(ByteBuffer key) {
-            return append(keyed(key));
-        }
-
-        /**
-         * Creates and appends a new named key to the end of this bag path. Returns a new BagPath that is equal to this
-         * path plus the created key appended to the end.
-         */
-        public BagPath append(String key) {
-            return append(named(key));
-        }
-
-        /**
-         * Creates and appends a new named key to the end of this bag path. Returns a new BagPath that is equal to this
-         * path plus the created key appended to the end.
-         */
-        public BagPath append(ByteBuffer key, BagOptions options) {
-            return append(keyed(key, options));
-        }
-
-        /**
-         * Creates and appends a new named key to the end of this bag path. Returns a new BagPath that is equal to this
-         * path plus the created key appended to the end.
-         */
-        public BagPath append(String key, BagOptions options) {
-            return append(keyed(key, options));
-        }
-
-        @Override
-        public int compareTo(BagPath o) {
-            int size = Math.min(keys.length, o.keys.length);
-            for (int i = 0; i < size; i++) {
-                int comparison = keys[i].compareTo(o.keys[i]);
-                if (comparison != 0) {
-                    return comparison;
-                }
-            }
-            return Integer.compare(keys.length, o.keys.length);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o != null && o instanceof BagPath) {
-                return keys.equals(((BagPath) o).keys);
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return keys.hashCode();
-        }
-
-    }
 
     protected static final int PRIORITY_INDEXED_BAG = 0;
     protected static final int PRIORITY_KEYED_BAG = 1;

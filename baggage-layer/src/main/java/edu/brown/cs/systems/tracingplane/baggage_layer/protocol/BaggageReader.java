@@ -183,8 +183,8 @@ public class BaggageReader implements ElementReader {
     /**
      * <p>
      * Drop remaining data atoms between here and the next child bag / end of bag. This means they will not be added to
-     * the list of unprocessed elements. The method {@link #keepData()} lets you keep remaining data atoms as unprocessed
-     * elements instead if desired.
+     * the list of unprocessed elements. The method {@link #keepData()} lets you keep remaining data atoms as
+     * unprocessed elements instead if desired.
      * </p>
      * 
      * <p>
@@ -257,8 +257,8 @@ public class BaggageReader implements ElementReader {
      * dropBag()} lets you instead drop the bag if desired.
      * </p>
      * 
-     * The default behavior is to keep all child bags that are not processed, so a call to {@link #keepDataAndChildren()}
-     * is not necessary
+     * The default behavior is to keep all child bags that are not processed, so a call to
+     * {@link #keepDataAndChildren()} is not necessary
      */
     public void keepDataAndChildren() {
         keepData();
