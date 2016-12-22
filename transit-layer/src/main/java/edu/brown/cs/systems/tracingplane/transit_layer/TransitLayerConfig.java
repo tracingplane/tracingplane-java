@@ -1,6 +1,5 @@
 package edu.brown.cs.systems.tracingplane.transit_layer;
 
-import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.typesafe.config.Config;
@@ -10,9 +9,6 @@ import edu.brown.cs.systems.tracingplane.transit_layer.impl.NullTransitLayerFact
 public class TransitLayerConfig {
 
     private static final Logger log = LoggerFactory.getLogger(TransitLayerConfig.class);
-    static {
-        BasicConfigurator.configure();
-    }
 
     private static final String TRANSIT_LAYER_IMPLEMENTATION_KEY = "tracingplane.transit-layer.factory";
 

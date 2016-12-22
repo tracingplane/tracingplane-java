@@ -163,14 +163,15 @@ public class Serializers {
             }
         };
     }
-    
-    public static <K, V> Serializer<Map<K, V>> mapSerializer(Function<K, ByteBuffer> keySerializer, Serializer<V> valueSerializer) {
+
+    public static <K, V> Serializer<Map<K, V>> mapSerializer(Function<K, ByteBuffer> keySerializer,
+                                                             Serializer<V> valueSerializer) {
         return new Serializer<Map<K, V>>() {
             public void serialize(BaggageWriter writer, Map<K, V> instance) {
                 if (instance == null) {
                     return;
                 }
-                
+
                 SortedMap<ByteBuffer, K> keys = new TreeMap<ByteBuffer, K>(Lexicographic.BYTE_BUFFER_COMPARATOR);
                 for (K key : instance.keySet()) {
                     ByteBuffer serializedKey = keySerializer.apply(key);
@@ -178,7 +179,7 @@ public class Serializers {
                         keys.put(serializedKey, key);
                     }
                 }
-                
+
                 for (ByteBuffer serializedKey : keys.keySet()) {
                     V value = instance.get(keys.get(serializedKey));
                     if (value != null) {
@@ -187,7 +188,7 @@ public class Serializers {
                         writer.exit();
                     }
                 }
-            }  
+            }
         };
     }
 

@@ -9,7 +9,7 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.impl.GenericBaggageLayerF
 
 public class BaggageLayerConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(AtomLayerConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(BaggageLayerConfig.class);
 
     private static final String BAGGAGE_LAYER_IMPLEMENTATION_KEY = "tracingplane.baggage-layer.factory";
 
@@ -22,6 +22,7 @@ public class BaggageLayerConfig {
         try {
             Class.forName(baggageLayerFactory);
         } catch (ClassNotFoundException e) {
+            System.out.println("eee " +  e);
             log.error("The configured baggage layer class {}=\"{}\" was not found; defaulting to simple context layer",
                       BAGGAGE_LAYER_IMPLEMENTATION_KEY, baggageLayerFactory);
         }
@@ -40,6 +41,7 @@ public class BaggageLayerConfig {
             try {
                 defaultBaggageLayer = config.createBaggageLayer();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                System.out.println("eeeeee2" + e);
                 log.error(String.format("Unable to instantiate default baggage layer factory %s, defaulting to %s",
                                         config.baggageLayerFactory, GenericBaggageLayerFactory.class));
                 return new GenericBaggageLayerFactory().newBaggageLayer();

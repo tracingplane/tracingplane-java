@@ -1,5 +1,7 @@
 package edu.brown.cs.systems.tracingplane.baggage_buffers;
 
+import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Bag;
+import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayer;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter;
@@ -50,6 +52,68 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
     @Override
     public BaggageWriter write(BaggageBuffersContents instance) {
         return instance == null ? null : instance.serialize();
+    }
+
+    /**
+     * Access the current thread's baggage and retrieve the object stored in the specified bag
+     * 
+     * @param key the key to look up
+     * @return the object if the current thread's baggage is an instance of {@link BaggageBuffersContents} and has an
+     *         object mapped to the specified key; else null
+     */
+    public static Bag get(BagKey key) {
+        return get(Baggage.get(), key);
+    }
+
+    /**
+     * Attempts to retrieve the object stores in the specified bagkey from the provided baggage.
+     * 
+     * @param baggage a Baggage object that should be an instance of {@link BaggageBuffersContents}
+     * @param key the key to look up
+     * @return the object if the provided baggage is an instance of {@link BaggageBuffersContents} and has an object
+     *         mapped to the specified key; else null
+     */
+    public static Bag get(Baggage baggage, BagKey key) {
+        if (baggage instanceof BaggageBuffersContents) {
+            return ((BaggageBuffersContents) baggage).get(key);
+        }
+        return null;
+    }
+
+    /**
+     * Map the specified key to the provided bag. Updates the baggage being stored for the current thread.
+     * 
+     * @param key the key to access
+     * @param bag the new bag to map to this key
+     */
+    public static void set(BagKey key, Bag value) {
+        if (key != null) {
+            Baggage original = Baggage.get();
+            Baggage updated = set(original, key, value);
+            if (original != updated) {
+                Baggage.set(updated);
+            }
+        }
+    }
+
+    /**
+     * Map the specified key to the provided bag. Returns a possibly new baggage instance with the updated mapping.
+     * 
+     * @param baggage the baggage to modify
+     * @param key the key to update
+     * @param bag the new bag to map to this key
+     * @return a possibly new baggage instance with the updated mapping.
+     */
+    public static Baggage set(Baggage baggage, BagKey key, Bag value) {
+        if (key != null) {
+            if (baggage instanceof BaggageBuffersContents) {
+                return ((BaggageBuffersContents) baggage).put(key, value);
+            } else {
+                return new BaggageBuffersContents().put(key, value);
+            }
+        } else {
+            return baggage;
+        }
     }
 
 }

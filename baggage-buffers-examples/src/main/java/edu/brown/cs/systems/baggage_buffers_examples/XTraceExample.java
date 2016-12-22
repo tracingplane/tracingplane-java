@@ -12,6 +12,8 @@ import edu.brown.xtrace.XTraceMetadata;
 public class XTraceExample {
     
     public static void main(String[] args) {
+        
+        
         XTraceMetadata xmd = new XTraceMetadata();
         
         xmd.taskId = 100L;

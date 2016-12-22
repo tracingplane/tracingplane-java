@@ -18,7 +18,7 @@ public class XTrace implements Bag {
             @Override
             public void serialize(BaggageWriter writer, XTrace instance) {
                 // TODO Auto-generated method stub
-                
+
             }
 
             @Override
@@ -37,7 +37,7 @@ public class XTrace implements Bag {
             public boolean isInstance(Bag bag) {
                 return bag instanceof XTrace;
             }
-            
+
         };
     }
 

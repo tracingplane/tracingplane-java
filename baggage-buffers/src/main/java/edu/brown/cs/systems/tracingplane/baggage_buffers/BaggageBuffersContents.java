@@ -7,7 +7,6 @@ import java.util.TreeMap;
 import edu.brown.cs.systems.tracingplane.atom_layer.protocol.AtomLayerOverflow;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Bag;
-import edu.brown.cs.systems.tracingplane.baggage_buffers.api.BaggageHandler;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageContents;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader;
@@ -64,25 +63,6 @@ public class BaggageBuffersContents implements BaggageContents {
      * rather than the whole baggage.
      * 
      */
-
-    /* Implementation notes: Could be volatile or atomic reference, but not trying to optimize for adding handlers at
-     * runtime (only at init). Could be treemap if the performance different is fine */
-    private static BagKey[] handlerKeys;
-    private static BaggageHandler<?>[] handlers;
-    
-    static {
-        BaggageBuffersConfig config = new BaggageBuffersConfig();
-        int size = config.handlers.size();
-        handlerKeys = new BagKey[size];
-        handlers = new BaggageHandler[size];
-        int i = 0;
-        for (BagKey k : config.handlers.keySet()) {
-            handlerKeys[i] = k;
-            handlers[i] = config.handlers.get(i);
-            i++;
-        }
-    }
-
     private Map<BagKey, Bag> bags = null;
     private List<ByteBuffer> overflowAtoms = null;
     private List<ByteBuffer> unprocessedAtoms = null;
@@ -92,13 +72,16 @@ public class BaggageBuffersContents implements BaggageContents {
         return bags == null ? null : bags.get(key);
     }
 
-    /** Remove the mapping for the specified key and return the mapped value if there was one */
-    public Bag remove(BagKey key) {
-        return bags == null ? null : bags.remove(key);
+    /** Remove the mapping for the specified key. Returns this object */
+    public BaggageBuffersContents remove(BagKey key) {
+        if (bags != null) {
+            bags.remove(key);
+        }
+        return this;
     }
 
-    /** Set the value for a key */
-    public void put(BagKey key, Bag value) {
+    /** Set the value for a key.  Returns this object */
+    public BaggageBuffersContents put(BagKey key, Bag value) {
         if (value == null) {
             remove(key);
         } else {
@@ -107,6 +90,7 @@ public class BaggageBuffersContents implements BaggageContents {
             }
             bags.put(key, value);
         }
+        return this;
     }
 
     BaggageWriter serialize() {
@@ -165,10 +149,11 @@ public class BaggageBuffersContents implements BaggageContents {
 
         // Parse the contents that we have handlers for
         BaggageBuffersContents bbcontents = null;
-        for (int i = 0, len = handlerKeys.length; i < len; i++) {
-            BagKey key = handlerKeys[i];
+        Registrations reg = Registrations.instance;
+        for (int i = 0, len = reg.keys.length; i < len; i++) {
+            BagKey key = reg.keys[i];
             if (reader.enter(key)) {
-                Bag parsed = handlers[i].parse(reader);
+                Bag parsed = reg.handlers[i].parse(reader);
                 if (parsed == null) {
                     continue;
                 }

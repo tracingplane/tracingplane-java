@@ -43,12 +43,21 @@ class JavaCompiler extends Compiler {
     val Set = importIfPossible("java.util.Set")
     val Map = importIfPossible("java.util.Map")
     
+    // Logging
+    val Logger = importIfPossible("org.slf4j.Logger")
+    val LoggerFactory = importIfPossible("org.slf4j.LoggerFactory")
+    
+    // Transit layer api
+    val Baggage = importIfPossible("edu.brown.cs.systems.tracingplane.transit_layer.Baggage")
+    
     // Baggage layer api
     val BagKey = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_layer.BagKey")
     val BaggageReader = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader")
     val BaggageWriter = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter")
     
     // Baggage buffers api
+    val BaggageBuffers = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.BaggageBuffers")
+    val Registrations = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.Registrations")
     val Bag = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.Bag")
     val Parser = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.Parser")
     val Serializer = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.Serializer")
@@ -199,6 +208,7 @@ class JavaCompiler extends Compiler {
       
       val Name: String = javaName(decl.name)
       val PackageName: String = decl.packageName
+      val varName: String = Name.head.toLower + Name.tail
       
       val fields = decl.fields.sortWith(_.index < _.index).map {
         x => x match {
@@ -213,10 +223,98 @@ class JavaCompiler extends Compiler {
         ${toImport.map(x => s"import $x;").mkString("\n")}
     
         public class $Name implements $Bag {
+
+            private static final $Logger _log = $LoggerFactory.getLogger($Name.class);
     
             ${fields.map(_.fieldDeclaration).mkString("\n")}
         
             public boolean _overflow = false;
+
+            /**
+             * <p>
+             * Get the {@link $Name} set in the {@link $Baggage} carried by the current thread. If no baggage is being
+             * carried by the current thread, or if there is no $Name in it, then this method returns {@code null}.
+             * </p>
+             * 
+             * <p>
+             * To get $Name from a specific Baggage instance, use {@link #getFrom($Baggage)}.
+             * </p>
+             * 
+             * @return the $Name being carried in the {@link $Baggage} of the current thread, or {@code null}
+             *         if none is being carried. The returned instance maybe be modified and modifications will be reflected in
+             *         the baggage.
+             */
+            public static $Name get() {
+                $Bag bag = $BaggageBuffers.get(Handler.registration());
+                if (bag instanceof $Name) {
+                    return ($Name) bag;
+                } else {
+                    return null;
+                }
+            }
+        
+            /**
+             * <p>
+             * Get the {@link $Name} set in {@code baggage}. If {@code baggage} has no $Name set then
+             * this method returns null.
+             * </p>
+             * 
+             * <p>
+             * This method does <b>not</b> affect the Baggage being carried by the current thread.  To get $Name
+             * from the current thread's Baggage, use {@link #get()}.
+             * </p>
+             * 
+             * @param baggage A baggage instance to get the {@link $Name} from
+             * @return the {@link $Name} instance being carried in {@code baggage}, or {@code null} if none is being carried.
+             *         The returned instance can be modified, and modifications will be reflected in the baggage.
+             */
+            public static $Name getFrom($Baggage baggage) {
+                $Bag bag = $BaggageBuffers.get(Handler.registration());
+                if (bag instanceof $Name) {
+                    return ($Name) bag;
+                } else if (bag != null) {
+                    Handler.checkRegistration();
+                }
+                return null;
+            }
+        
+            /**
+             * <p>
+             * Update the {@link $Name} set in the current thread's baggage. This method will overwrite any existing
+             * $Name set in the current thread's baggage.
+             * </p>
+             * 
+             * <p>
+             * To set the {@link $Name} in a specific {@link $Baggage} instance, use
+             * {@link #setIn($Baggage, $Name)}
+             * </p>
+             * 
+             * @param $varName the new {@link $Name} to set in the current thread's {@link $Baggage}. If {@code null}
+             *            then any existing mappings will be removed.
+             */
+            public static void set($Name $varName) {
+                $BaggageBuffers.set(Handler.registration(), $varName);
+            }
+        
+            /**
+             * <p>
+             * Update the {@link $Name} set in {@code baggage}. This method will overwrite any existing
+             * $Name set in {@code baggage}.
+             * </p>
+             * 
+             * <p>
+             * This method does <b>not</b> affect the {@link $Baggage} being carried by the current thread. To set the
+             * {@link $Name} for the current thread, use {@link #set($Name)}
+             * </p>
+             * 
+             * @param baggage A baggage instance to set the {@link $Name} in
+             * @param $varName the new $Name to set in {@code baggage}. If {@code null}, it will remove any
+             *            mapping present.
+             * @return a possibly new {@link $Baggage} instance that contains all previous mappings plus the new mapping.
+             */
+            public static $Baggage setIn($Baggage baggage, $Name $varName) {
+                return $BaggageBuffers.set(baggage, Handler.registration(), $varName);
+            }
 
             @Override
             public $BaggageHandler<?> handler() {
@@ -226,6 +324,22 @@ class JavaCompiler extends Compiler {
             public static class Handler implements $BaggageHandler<$Name> {
 
                 public static final Handler instance = new Handler();
+                private static $BagKey registration = null;
+
+                static synchronized $BagKey checkRegistration() {
+                    registration = $Registrations.lookup(instance);
+                    if (registration == null) {
+                        _log.error("$Name MUST be registered to a key before it can be propagated.  " +
+                                   "There is currently no registration for $Name and it will not be propagated. " +
+                                   "To register a bag set the baggage-buffers.bags property in your application.conf " +
+                                   "or with -Dbaggage-buffers.bags flag (eg, for key 10, -Dbaggage-buffers.bags.10=" + $Name.class.getName());
+                    }
+                    return registration;
+                }
+
+                static BagKey registration() {
+                    return registration == null ? checkRegistration() : registration;
+                }
                 
                 private Handler(){}
         

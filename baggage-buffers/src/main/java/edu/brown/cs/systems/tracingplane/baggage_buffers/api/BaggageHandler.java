@@ -29,7 +29,7 @@ public interface BaggageHandler<T extends Bag> extends Parser<T>, Serializer<T>,
             }
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     public default T branch(Bag from) {
         if (isInstance(from)) {

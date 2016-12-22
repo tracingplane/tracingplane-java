@@ -21,7 +21,7 @@ public class Branchers {
             }
         };
     }
-    
+
     public static <V> Brancher<Set<V>> set() {
         return new Brancher<Set<V>>() {
             public Set<V> branch(Set<V> from) {
@@ -29,7 +29,7 @@ public class Branchers {
             }
         };
     }
-    
+
     public static <K, V> Brancher<Map<K, V>> map(Brancher<V> valueBrancher) {
         return new Brancher<Map<K, V>>() {
             public Map<K, V> branch(Map<K, V> from) {

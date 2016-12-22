@@ -27,7 +27,6 @@ public class WriterHelpers {
     public static final Function<String, ByteBuffer> from_string = v -> Cast.from_string(v);
     public static final Function<ByteBuffer, ByteBuffer> from_bytes = v -> Cast.from_bytes(v);
 
-
     /** Write a boolean data atom */
     public static void writeBool(ElementWriter writer, boolean value) {
         byte toWrite = (byte) (value ? 1 : 0);

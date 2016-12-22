@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -134,7 +133,7 @@ public class Parsers {
     }
 
     static <In, Out> ElementParser<Out> combine(ElementParser<In> elementParser, Supplier<Out> defaultValueGenerator,
-                                         BiFunction<Out, In, Out> combiner) {
+                                                BiFunction<Out, In, Out> combiner) {
         return new ElementParser<Out>() {
             public Out parse(ElementReader reader) {
                 Out combined = null;
@@ -151,7 +150,7 @@ public class Parsers {
     }
 
     static <In, Out extends Collection<In>> ElementParser<Out> collect(ElementParser<In> elementParser,
-                                                                Supplier<Out> defaultValueGenerator) {
+                                                                       Supplier<Out> defaultValueGenerator) {
         BiFunction<Out, In, Out> combiner = (c, v) -> {
             c.add(v);
             return c;
