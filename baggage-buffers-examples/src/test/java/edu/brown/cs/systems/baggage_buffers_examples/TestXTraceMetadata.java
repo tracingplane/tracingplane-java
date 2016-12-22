@@ -47,8 +47,11 @@ public class TestXTraceMetadata {
         // Merge them explicitly
         Baggage b3 = Baggage.join(Baggage.branch(b1), Baggage.branch(b2));
         
+        System.out.println(b3);
+        
         // Get the merged XTraceMetadata
         XTraceMetadata xmd3 = XTraceMetadata.getFrom(b3);
+        System.out.println(xmd3);
         assertEquals(Long.valueOf(100L), xmd3.taskId);
         assertEquals(Sets.newHashSet(200L, 300L, 500L, 1000L), xmd3.parentEventIds);
     }

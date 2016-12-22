@@ -280,7 +280,7 @@ class JavaCompiler extends Compiler {
              *         The returned instance can be modified, and modifications will be reflected in the baggage.
              */
             public static $Name getFrom($Baggage baggage) {
-                $Bag bag = $BaggageBuffers.get(Handler.registration());
+                $Bag bag = $BaggageBuffers.get(baggage, Handler.registration());
                 if (bag instanceof $Name) {
                     return ($Name) bag;
                 } else if (bag != null) {
