@@ -1,6 +1,18 @@
-= Tracing Plane =
+# Tracing Plane
+
+
+![Narrow Waist](/doc/figures/narrowwaist.png)
+
+
+### Transit Layer   |
 
 The Tracing Plane is a layered design for context propagation in distributed systems.  This repository contains documentation, specification, and a reference implementation for this design.
+
+The Tracing Plane consists of **four layers**
+
+* The **Transit Layer**: a library for passing request contexts around your system (e.g., storing them in thread-local storage, serializing them, copying them for new threads, etc.)
+* The *Atom Layer*: the primitive binary representation of request contexts is as *atoms* -- an atom is an arbitrary-length byte array; a request context is an array of atoms.  The atom layer is the 'narrow waist' of context propagation.  It is a super simple specification with straightforward rules for how to branch and join contenxts.  The atom layer lets any system propagate any context it receives from the outside world without needing to know the meaning of the data in that context.  The atom layer also enables systems to impose *size constraints*.
+* The *Baggage Layer*: a protocol that specifies data formats for atoms that enables composition of contexts -- that is, multiple people can propagate different things concurrently. The protocol supports a variety of data types (primitives, sets, maps, counters, clocks, etc.).  The protocol is robust to *overflow* -- that is, if the serialized representation is too large, we can simply chop it to the length we desire.  Finally, the system (e.g., the transit layer) doesn't need to be able to interpret 
 
 === What problem are you trying to solve? ===
 
