@@ -1,4 +1,4 @@
-# <img src="doc/figures/baggage.png" style="width:50px; margin-bottom: -7px; padding-right: 10px" />The Tracing Plane and Baggage
+# <img src="doc/figures/baggage.png" width="50" style="margin-bottom: -7px; padding-right: 10px" />The Tracing Plane and Baggage
 
 The Tracing Plane is a layered design for context propagation in distributed systems.  The tracing plane enables interoperability between systems and tracing applications.  It is designed to provide a simple "narrow waist" for tracing, much like how TCP/IP provides a narrow waist for the internet.
 
