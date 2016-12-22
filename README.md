@@ -1,12 +1,27 @@
-# Tracing Plane
+# <img src="doc/figures/baggage.png" style="width:50px; margin-bottom: -7px; padding-right: 10px" />The Tracing Plane and Baggage
+
+The Tracing Plane is a layered design for context propagation in distributed systems.  The tracing plane enables interoperability between systems and tracing applications.  It is designed to provide a simple "narrow waist" for tracing, much like how TCP/IP provides a narrow waist for the internet.
+
+Baggage is our name for **general purpose request context** in distributed systems, and Baggage is implemented by the Tracing Plane.  Though many systems already have request contexts -- e.g., Go's [context package](https://golang.org/pkg/context/); Span contexts in [Zipkin](https://github.com/openzipkin/zipkin), [OpenTracing](http://opentracing.io/) and [Dapper](https://research.google.com/pubs/archive/36356.pdf); request tags in [Census](https://github.com/grpc/grpc/tree/master/src/core/ext/census); etc. -- none of them are *general purpose*.  What this means is that if I instrument my distributed system to pass around Zipkin span contents, then later wish to use Census,  I must **reinstrument everything** in order to pass around Census tags.  That *sucks*.
+
+This repository contains our Java reference implementation for the Tracing Plane and Baggage.  This is an active research project at Brown University by [Jonathan Mace](http://cs.brown.edu/people/jcmace/) and [Prof. Rodrigo Fonseca](http://cs.brown.edu/~rfonseca/).  It is motivated by many years of collective experience in end-to-end tracing and numerous tracing-related research projects including [X-Trace](https://www.usenix.org/legacy/event/nsdi07/tech/full_papers/fonseca/fonseca.pdf), [Quanto](https://www.usenix.org/legacy/event/osdi08/tech/full_papers/fonseca/fonseca.pdf), [Retro](http://cs.brown.edu/people/jcmace/papers/mace15retro.pdf), [Pivot Tracing](http://cs.brown.edu/people/jcmace/papers/mace15pivot.pdf).  You can also check out our research group's [GitHub](http://brownsys.github.io/tracing-framework/).  Keep an eye out for our research paper on Baggage, which will appear later in 2017!
+
+#### Table of Contents ####
+* Overview of The Tracing Plane TODO
+* I need more details TODO (FAQ for researchers, tracing application devs, system devs, and curious observers)
+* Getting started - downloading, prerequisites, and building TODO
+* Simple example - baggage buffers TODO
+* Tutorial - instrument your system TODO
+* Project Status TODO
+
+## The Tracing Plane ##
 
 
-![Narrow Waist](/doc/figures/narrowwaist.png)
+<img src="doc/figures/narrowwaist.png" alt="Narrow Waist" style="width: 600px;"/>
 
 
-### Transit Layer   |
+### Transit Layer
 
-The Tracing Plane is a layered design for context propagation in distributed systems.  This repository contains documentation, specification, and a reference implementation for this design.
 
 The Tracing Plane consists of **four layers**
 
