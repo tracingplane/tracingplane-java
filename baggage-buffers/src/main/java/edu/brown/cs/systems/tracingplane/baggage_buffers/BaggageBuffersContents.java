@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import org.apache.commons.lang3.StringUtils;
+import com.google.common.collect.Lists;
 import edu.brown.cs.systems.tracingplane.atom_layer.protocol.AtomLayerOverflow;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Bag;
@@ -184,6 +186,16 @@ public class BaggageBuffersContents implements BaggageContents {
         }
 
         return bbcontents;
+    }
+    
+    @Override
+    public String toString() {
+        List<String> lines = Lists.newArrayList();
+        for (BagKey key : bags.keySet()) {
+            Bag bag = bags.get(key);
+            lines.add(String.format("%s: %s", key, bag));
+        }
+        return StringUtils.join(lines, "\n");
     }
 
 }

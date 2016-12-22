@@ -64,6 +64,7 @@ class JavaCompiler extends Compiler {
     val Brancher = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.Brancher")
     val Joiner = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.Joiner")
     val BaggageHandler = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.BaggageHandler")
+    val BBUtils = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.impl.BBUtils")
     
     // Baggage buffers helpers
     val ReaderHelpers = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.impl.ReaderHelpers")
@@ -137,6 +138,14 @@ class JavaCompiler extends Compiler {
       }
     }
     
+    def toStringStatement(fieldtype: FieldType, instance: String): String = {
+      fieldtype match {
+        case set: BuiltInType.Set => s"$BBUtils.toString($instance)"
+        case BuiltInType.Map(k, v) => s"$BBUtils.toString($instance, _v -> ${toStringStatement(v, "_v")})"
+        case _ => s"String.valueOf($instance)"
+      } 
+    }
+    
     def keyParser(primitiveType: PrimitiveType): String = {
       return s"$ReaderHelpers.to_$primitiveType"
     }
@@ -177,6 +186,8 @@ class JavaCompiler extends Compiler {
       def branchStatement(instance: String, newInstance: String) = s"$newInstance.$Name = $BrancherName.branch($instance.$Name);"
       
       def joinStatement(left: String, right: String, newInstance: String) = s"$newInstance.$Name = $JoinerName.join($left.$Name, $right.$Name);"
+      
+      def toString(instance: String) = s"""$instance.$Name == null ? "" : BBUtils.indent(String.format("$Name = %s\\n", ${toStringStatement(decl.fieldtype, s"$instance.$Name")}))"""
       
     }
     
@@ -319,6 +330,15 @@ class JavaCompiler extends Compiler {
             @Override
             public $BaggageHandler<?> handler() {
                 return Handler.instance;
+            }
+
+            @Override
+            public String toString() {
+                StringBuilder b = new StringBuilder();
+                b.append("$Name{\\n");
+                ${fields.map(x => s"b.append(${x.toString("this")});").mkString("\n")}
+                b.append("}");
+                return b.toString();
             }
             
             public static class Handler implements $BaggageHandler<$Name> {

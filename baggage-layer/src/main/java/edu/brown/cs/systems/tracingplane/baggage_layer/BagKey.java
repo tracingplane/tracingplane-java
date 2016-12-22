@@ -130,6 +130,11 @@ public abstract class BagKey implements Comparable<BagKey> {
             return byteRepr;
         }
 
+        @Override
+        public String toString() {
+            return "Bag" + index;
+        }
+        
     }
 
     /** A Keyed BagKey is one that uses arbitrary bytes as identifier (versus an integer for {@link Indexed} key) */
