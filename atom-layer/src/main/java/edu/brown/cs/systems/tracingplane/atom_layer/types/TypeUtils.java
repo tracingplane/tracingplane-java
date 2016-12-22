@@ -81,6 +81,10 @@ public class TypeUtils {
         }
         return String.format("[%s]", StringUtils.join(hexStrings, atomSeparator));
     }
+
+    public static String toHexString(byte[] serialize) {
+        return toHexString(ByteBuffer.wrap(serialize));
+    }
     
     
 }

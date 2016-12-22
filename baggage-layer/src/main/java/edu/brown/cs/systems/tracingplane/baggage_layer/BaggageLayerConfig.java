@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import edu.brown.cs.systems.tracingplane.atom_layer.AtomLayerConfig;
 import edu.brown.cs.systems.tracingplane.baggage_layer.impl.GenericBaggageLayerFactory;
 
 public class BaggageLayerConfig {

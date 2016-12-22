@@ -9,7 +9,7 @@ public interface BaggageHandler<T extends Bag> extends Parser<T>, Serializer<T>,
     @SuppressWarnings("unchecked")
     public default void serialize(BaggageWriter writer, Bag bag) {
         if (isInstance(bag)) {
-            serialize(writer, (T) bag);
+            ((Serializer<T>) this).serialize(writer, (T) bag);
         }
     }
 
@@ -17,7 +17,7 @@ public interface BaggageHandler<T extends Bag> extends Parser<T>, Serializer<T>,
     public default T join(Bag first, Bag second) {
         if (isInstance(first)) {
             if (isInstance(second)) {
-                return join((T) first, (T) second);
+                return ((Joiner<T>) this).join((T) first, (T) second);
             } else {
                 return (T) first;
             }
@@ -33,7 +33,7 @@ public interface BaggageHandler<T extends Bag> extends Parser<T>, Serializer<T>,
     @SuppressWarnings("unchecked")
     public default T branch(Bag from) {
         if (isInstance(from)) {
-            return branch((T) from);
+            return ((Brancher<T>) this).branch((T) from);
         } else {
             return null;
         }

@@ -14,7 +14,7 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
  */
 public class Registrations {
 
-    static final Registrations instance = Registrations.create();
+    static Registrations instance = Registrations.create();
 
     private static final Logger log = LoggerFactory.getLogger(Registrations.class);
 
@@ -56,14 +56,24 @@ public class Registrations {
             i++;
         }
     }
-    
+
     /**
      * Look up the global static registration of this handler
+     * 
      * @param handler the handler to look up
      * @return the bag key that this handler is registered to, otherwise null
      */
     public static BagKey lookup(BaggageHandler<?> handler) {
         return instance.handlersToKeys.get(handler);
+    }
+
+    /**
+     * Registers the provided key with the provided handler into the process's default registrations. HIGHLY recommended
+     * NOT to do this -- instead you should statically configure the registration of keys to handlers. However, for
+     * trialling code and testing, this is an easier way to avoid error messages.
+     */
+    public static void register(BagKey key, BaggageHandler<?> handler) {
+        instance = instance.add(key, handler);
     }
 
     @SuppressWarnings("unchecked")
