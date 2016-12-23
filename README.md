@@ -8,8 +8,21 @@ Baggage is our name for **general purpose request context** in distributed syste
 
 This repository contains our Java reference implementation for the Tracing Plane and Baggage.  This is an active research project at Brown University by [Jonathan Mace](http://cs.brown.edu/people/jcmace/) and [Prof. Rodrigo Fonseca](http://cs.brown.edu/~rfonseca/).  It is motivated by many years of collective experience in end-to-end tracing and numerous tracing-related research projects including [X-Trace](https://www.usenix.org/legacy/event/nsdi07/tech/full_papers/fonseca/fonseca.pdf), [Quanto](https://www.usenix.org/legacy/event/osdi08/tech/full_papers/fonseca/fonseca.pdf), [Retro](http://cs.brown.edu/people/jcmace/papers/mace15retro.pdf), [Pivot Tracing](http://cs.brown.edu/people/jcmace/papers/mace15pivot.pdf).  You can also check out our research group's [GitHub](http://brownsys.github.io/tracing-framework/).  Keep an eye out for our research paper on Baggage, which will appear later in 2017!
 
-#### Table of Contents ####
-* Overview of The Tracing Plane TODO
+### Table of Contents ###
+
+* [1. Introduction](#1-introduction)
+* [2. Overview of The Tracing Plane](#2-overview-of-the-tracing-plane)
+	* [2.1. Transit Layer (for System Developers)](#21-transit-layer-for-system-developers)
+	* [2.2. Baggage Buffers (for Tracing Applications)](#22-baggage-buffers-for-tracing-applications)
+	* [2.3. Tracing Plane Internals: Atom Layer](#23-tracing-plane-internals-atom-layer)
+	    * [Atom Layer: Lexicographic Merge](#atom-layer-lexicographic-merge)
+	       * [Example 1](#example-1)
+	       * [Example 2](#example-2)
+	       * [Why Lexicographic Merge?](#why-lexicographic-merge)
+	    * [Atom Layer: Overflow](#atom-layer-overflow)
+	* [2.4. Tracing Plane Internals: Baggage Layer](#24-tracing-plane-internals-baggage-layer)
+
+      
 * I need more details TODO (FAQ for researchers, tracing application devs, system devs, and curious observers)
 * Getting started - downloading, prerequisites, and building TODO
 * Simple example - baggage buffers TODO
@@ -95,7 +108,7 @@ Notice in this example that even though some atoms exist in both A and B, such a
 #### Atom Layer: Overflow ####
 
 
-## 2.3. Tracing Plane Internals: Baggage Layer ##
+## 2.4. Tracing Plane Internals: Baggage Layer ##
 
 * The *Baggage Layer*: a protocol that specifies data formats for atoms that enables composition of contexts -- that is, multiple people can propagate different things concurrently. The protocol supports a variety of data types (primitives, sets, maps, counters, clocks, etc.).  The protocol is robust to *overflow* -- that is, if the serialized representation is too large, we can simply chop it to the length we desire.  Finally, the system (e.g., the transit layer) doesn't need to be able to interpret 
 
