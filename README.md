@@ -12,15 +12,16 @@ This repository contains our Java reference implementation for the Tracing Plane
 
 * [1. Introduction](#1-introduction)
 * [2. Overview of The Tracing Plane](#2-overview-of-the-tracing-plane)
-	* [2.1. Transit Layer (for System Developers)](#21-transit-layer-for-system-developers)
-	* [2.2. Baggage Buffers (for Tracing Applications)](#22-baggage-buffers-for-tracing-applications)
-	* [2.3. Tracing Plane Internals: Atom Layer](#23-tracing-plane-internals-atom-layer)
-	    * [Atom Layer: Lexicographic Merge](#atom-layer-lexicographic-merge)
-	       * [Example 1](#example-1)
-	       * [Example 2](#example-2)
-	       * [Why Lexicographic Merge?](#why-lexicographic-merge)
-	    * [Atom Layer: Overflow](#atom-layer-overflow)
-	* [2.4. Tracing Plane Internals: Baggage Layer](#24-tracing-plane-internals-baggage-layer)
+  * [2.1. Transit Layer (for System Developers)](#21-transit-layer-for-system-developers)
+  * [2.2. Baggage Buffers (for Tracing Applications)](#22-baggage-buffers-for-tracing-applications)
+  * [2.3. Tracing Plane Internals: Atom Layer](#23-tracing-plane-internals-atom-layer)
+    * [Atom Layer: Lexicographic Merge](#atom-layer-lexicographic-merge)
+       * [Example 1](#example-1)
+       * [Example 2](#example-2)
+       * [Why Lexicographic Merge?](#why-lexicographic-merge)
+    * [Atom Layer: Overflow](#atom-layer-overflow)
+* [2.4. Tracing Plane Internals: Baggage Layer](#24-tracing-plane-internals-baggage-layer)
+
 
       
 * I need more details TODO (FAQ for researchers, tracing application devs, system devs, and curious observers)
@@ -47,6 +48,8 @@ The Transit Layer is an **instrumentation abstraction** that makes no attempt to
 To the transit layer, baggage is only ever an opaque object or byte array.  When system developers instrument their system, they only need to consider where requests go -- they do not need to think about how to manipulate and update request contexts while requests execute.
 
 ## 2.2. Baggage Buffers (for Tracing Applications) ##
+
+Baggage Buffers is an [Interface Definition Language](https://en.wikipedia.org/wiki/Interface_description_language) for tracing contexts.  
 
 
 ## 2.3. Tracing Plane Internals: Atom Layer ##
