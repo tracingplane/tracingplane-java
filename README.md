@@ -1,4 +1,6 @@
-# <img src="doc/figures/baggage.png" width="40"/> The Tracing Plane and Baggage
+# <img src="doc/figures/baggage.png" width="40"/> The Tracing Plane and Baggage #
+
+## 1. Introduction ##
 
 The Tracing Plane is a layered design for context propagation in distributed systems.  The tracing plane enables interoperability between systems and tracing applications.  It is designed to provide a simple "narrow waist" for tracing, much like how TCP/IP provides a narrow waist for the internet.
 
@@ -15,13 +17,13 @@ This repository contains our Java reference implementation for the Tracing Plane
 * Overview of APIs for each layer TODO
 * Project Status TODO
 
-## The Tracing Plane ##
+## 2. Overview of The Tracing Plane ##
 
-The Tracing Plane has four layers, illustrated in green.  The text below describes each layer at a high level.  Later text describes the corresponding Java APIs for our Java implementations.
+The Tracing Plane has four layers, illustrated in green in the figure below.  Depending on who you are, your entry point to the Tracing Plane differs.  System developers use the Transit Layer APIs to instrument their system to pass baggage around.  Tracing application developers use the Baggage Buffers IDL to generate contexts and APIs for their tracing application.  In the middle, the Atom and Baggage layers provide generic interfaces that together enable a multitude of different kinds of tracing applications to coexist.
 
 <img src="doc/figures/narrowwaist.png" alt="Narrow Waist" width="600"/>
 
-### Transit Layer ###
+## 2.1. Transit Layer (for System Developers) ##
 
 The **Transit Layer** has just one purpose: abstract the task of system instrumentation so that it only has to be done once.  System instrumentation is the most laborious part of tracing.  You have to modify every system component to make sure request contexts are passed around -- for example, passed to new threads when they're created, included in continuations and thread pool queues, serialized to RPC headers, etc.
 
@@ -29,20 +31,25 @@ Many systems *already have this kind of instrumentation* -- they already pass ar
 
 The Transit Layer is an **instrumentation abstraction** that makes no attempt to interpret the contents or meaning of the baggage being carried.  This lets you **reuse existing instrumentation** whenever you want to deploy a new tracing application.  Instrumentation reuse overcomes an *enormous* barrier to entry -- we cannot overstate how useful this is!
 
-To the transit layer, baggage is only ever an opaque object or byte array.  As a result, the transit layer must **delegate** logic for the following two tasks:
+To the transit layer, baggage is only ever an opaque object or byte array.  When system developers instrument their system, they only need to consider where requests go -- they do not need to think about how to manipulate and update request contexts while requests execute.
+
+## 2.2. Baggage Buffers (for Tracing Applications) ##
+
+
+## 2.3. Tracing Plane Internals: Atom Layer ##
+
+As described in [Section 2.1](#2.1.-Transit-Layer-(for-System-Developers)), the Transit Layer abstracts the task of system instrumentation so that it only has to be done once.  To the transit layer, and to system developers using Transit Layer APIs, baggage is only ever an opaque object or byte array.  As a result, the transit layer **delegates** logic for the following two tasks:
 
   1. Dividing and combining contexts when executions branch and rejoin.  If baggage is just a cryptic array of bytes [ 0x08, 0xAF, ...], how are you supposed to take two different arrays and merge them into one?
   2. Enforcing capacity restrictions on baggage.  Again, if baggage is just a cryptic array of bytes, how can you ditch some of the bytes if the array is too big?
 
-### Atom Layer ###
-
-The **Atom Layer** provides the implementation of branch, join, serialize and trimming logic for the Transit Layer.  Bearing in mind our goal -- a **general purpose request context** -- the atom layer must support the logic of many different tracing applications. Those tracing applications can be quite varied -- for example, you might want to do a set-union of tags in census when two execution branches join, or take the greater of two values in pivot tracing.
+The **Atom Layer** provides a simple implementation of branch, join, serialize and trimming logic for the Transit Layer and is designed to support our principle goal: a **general purpose request context**.  That is, the atom layer must support the logic of many different tracing applications which can be quite varied -- for example, you might want to do a set-union of tags in census when two execution branches join, or take the greater of two values in pivot tracing.
 
 We absolutely want to **avoid** having to inspect and interpret baggage contents on a per-application basis, for example, it is insufficient for the Atom Layer to just call up to each tracing application.  This would *kill* our ability to easily deploy new tracing applications, because every time we deploy a new tracing application we would have to update **every** system component with new rules for handling the contexts.  By analogy, it would be like expecting every router on the internet to be able to understand the contents of every packet being routed for every protocol.  
 
 Instead, we want to be able to pass *any* contexts through our system and have them emerge in a coherent, consistent way.  This means no interpretation of the payload -- just a single representation and one set of rules for branching, joining, serialization, and trimming.
 
-The **Atom Layer** provides this **generic** solution -- an underlying context representation that supports all use cases.  It represents baggage as an **array of atoms** where an atom is **an array of bytes**.  Atoms can have arbitrary length.  The atom layer provides the bare minimum specification to satisfy the requirements thus far:
+The **Atom Layer** provides this generic solution -- an underlying context representation that supports all use cases.  It represents baggage as an **array of atoms** where an atom is **an array of bytes**.  Atoms can have arbitrary length.  The Atom Layer implements operations as follows:
 
 * Serialization and Deserialization: length prefix the bytes of each atom
 * Branch: each branch receives its a copy of the atoms with no modifications
@@ -88,8 +95,7 @@ Notice in this example that even though some atoms exist in both A and B, such a
 #### Atom Layer: Overflow ####
 
 
-### Baggage Layer ###
-
+## 2.3. Tracing Plane Internals: Baggage Layer ##
 
 * The *Baggage Layer*: a protocol that specifies data formats for atoms that enables composition of contexts -- that is, multiple people can propagate different things concurrently. The protocol supports a variety of data types (primitives, sets, maps, counters, clocks, etc.).  The protocol is robust to *overflow* -- that is, if the serialized representation is too large, we can simply chop it to the length we desire.  Finally, the system (e.g., the transit layer) doesn't need to be able to interpret 
 
