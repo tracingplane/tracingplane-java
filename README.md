@@ -1,4 +1,4 @@
-# <img src="doc/figures/baggage.png" width="50" style="margin-bottom: -7px; padding-right: 10px" />The Tracing Plane and Baggage
+# <img src="doc/figures/baggage.png" width="40"/> The Tracing Plane and Baggage
 
 The Tracing Plane is a layered design for context propagation in distributed systems.  The tracing plane enables interoperability between systems and tracing applications.  It is designed to provide a simple "narrow waist" for tracing, much like how TCP/IP provides a narrow waist for the internet.
 
@@ -12,21 +12,85 @@ This repository contains our Java reference implementation for the Tracing Plane
 * Getting started - downloading, prerequisites, and building TODO
 * Simple example - baggage buffers TODO
 * Tutorial - instrument your system TODO
+* Overview of APIs for each layer TODO
 * Project Status TODO
 
 ## The Tracing Plane ##
 
+The Tracing Plane has four layers, illustrated in green.  The text below describes each layer at a high level.  Later text describes the corresponding Java APIs for our Java implementations.
 
-<img src="doc/figures/narrowwaist.png" alt="Narrow Waist" style="width: 600px;"/>
+<img src="doc/figures/narrowwaist.png" alt="Narrow Waist" width="600"/>
+
+### Transit Layer ###
+
+The **Transit Layer** has just one purpose: abstract the task of system instrumentation so that it only has to be done once.  System instrumentation is the most laborious part of tracing.  You have to modify every system component to make sure request contexts are passed around -- for example, passed to new threads when they're created, included in continuations and thread pool queues, serialized to RPC headers, etc.
+
+Many systems *already have this kind of instrumentation* -- they already pass around request IDs, span contexts, tags, or other metadata.  However, in every case we have ever seen, the metadata passed around is tightly bound to the system, making it difficult or impossible to easily extend it to add new fields or change its behavior.  
+
+The Transit Layer is an **instrumentation abstraction** that makes no attempt to interpret the contents or meaning of the baggage being carried.  This lets you **reuse existing instrumentation** whenever you want to deploy a new tracing application.  Instrumentation reuse overcomes an *enormous* barrier to entry -- we cannot overstate how useful this is!
+
+To the transit layer, baggage is only ever an opaque object or byte array.  As a result, the transit layer must **delegate** logic for the following two tasks:
+
+  1. Dividing and combining contexts when executions branch and rejoin.  If baggage is just a cryptic array of bytes [ 0x08, 0xAF, ...], how are you supposed to take two different arrays and merge them into one?
+  2. Enforcing capacity restrictions on baggage.  Again, if baggage is just a cryptic array of bytes, how can you ditch some of the bytes if the array is too big?
+
+### Atom Layer ###
+
+The **Atom Layer** provides the implementation of branch, join, serialize and trimming logic for the Transit Layer.  Bearing in mind our goal -- a **general purpose request context** -- the atom layer must support the logic of many different tracing applications. Those tracing applications can be quite varied -- for example, you might want to do a set-union of tags in census when two execution branches join, or take the greater of two values in pivot tracing.
+
+We absolutely want to **avoid** having to inspect and interpret baggage contents on a per-application basis, for example, it is insufficient for the Atom Layer to just call up to each tracing application.  This would *kill* our ability to easily deploy new tracing applications, because every time we deploy a new tracing application we would have to update **every** system component with new rules for handling the contexts.  By analogy, it would be like expecting every router on the internet to be able to understand the contents of every packet being routed for every protocol.  
+
+Instead, we want to be able to pass *any* contexts through our system and have them emerge in a coherent, consistent way.  This means no interpretation of the payload -- just a single representation and one set of rules for branching, joining, serialization, and trimming.
+
+The **Atom Layer** provides this **generic** solution -- an underlying context representation that supports all use cases.  It represents baggage as an **array of atoms** where an atom is **an array of bytes**.  Atoms can have arbitrary length.  The atom layer provides the bare minimum specification to satisfy the requirements thus far:
+
+* Serialization and Deserialization: length prefix the bytes of each atom
+* Branch: each branch receives its a copy of the atoms with no modifications
+* Join: merge the two arrays of atoms using **lexicographic comparison** (more below)
+* Trim: drop atoms from the **end** of the array of atoms until size requirement is met; then append the **overflow marker** (more below)
+
+#### Atom Layer: Lexicographic Merge ####
+
+Lexicographic merge is the cornerstone of the atom layer.  Atom arrays are arbitrary -- they do not need to be sorted and there are no requirements on lengths.  It is important for the atom layer to maintain the atom ordering in arrays, however, especially when merging two arrays.  To merge two arrays, it traverses them performing atom-wise comparison.  To compare two atoms is done **lexicographically**: starting from the leftmost bit, the raw bits are compared until one is found to be less than the other.  The lesser atom is added to the output and its atom array is advanced.  If the two atoms are exactly the same then the atom is added to the output and *both* atom arrays advance.  If one atom is a prefix of the other atom, then the shorter atom is considered to be lesser.
+
+Lexicographic comparison is like doing an alphabetic comparison, but on bytes (e.g., `h` is less than `hell` is less than `hello`, just as `0` is less than `0001` is less than `00010`).  (Note: in reality, atoms are constrained to multiples of 1 byte, so a 5-bit atom is actually not allowed; we just use it here for simple examples).  The following examples demonstrate lexicographic merge:
+
+##### Example 1 #####
+
+* A = [ `0010`, `1100`, `0101` ]
+* B = [ `0`, `0001`, `1111` ]
+* merge(A, B) = [ `0`, `0001`, `0010`, `1100`, `0101`, `1111` ]
+
+##### Example 2 #####
+
+* A = [ `0010`, `1100`, `0101`, `1111` ]
+* B = [ `0`, `0001`, `110000`, `1111` ]
+* merge(A, B) = [ `0`, `0001`, `0010`, `1100`, `0101`, `110000`, `1111` ]
+
+##### Why Lexicographic Merge? #####
+
+If A and B are both sorted, then lexicographic merge produces a sorted array as output.  Additionally, if an element exists in both A and B, then it won't be duplicated in the output.  This scheme, in essence, gives us the primitive of a set, with set union as the merge behavior.
+
+* A = [ `0000`, `000111`, `1000`, `111` ]
+* B = [ `000111`, `001`, `1100`, `111` ]
+* merge(A, B) = [ `0000`, `000111`, `001`, `1000`, `1100`, `111` ]
+
+Taking this one step further, we could implement a rudimentary map by saying that the first byte of every atom is the map key and the subsequent bytes are the map value.  This would actually be a multimap, since you would be able to map several values to the same key.
+
+Going further still, remember that there is no requirement for the arrays to be sorted.  If small atoms follow large atoms, then we are guaranteed for them all to follow each other in the output.  For example:
+
+* A = [ `1010`, `0000`, `000111`, `0111` ]
+* B = [ `1011`, `000111`, `001`, `0111` ]
+* merge(A, B) = [ `1010`, `0000`, `000111`, `0111`, `1011`, `000111`, `001`, `0111` ]
+
+Notice in this example that even though some atoms exist in both A and B, such as `000111`, the output array contains `000111` twice.  Lexicographic merge only skips duplicates if they are directly compared.  In the example above, A's `000111` is never compared to B's `000111` so there is no opportunity for deduplication.  This is a **good** thing!  It enables the Baggage Layer later on to implement arbitrary tree-structured data.
+
+#### Atom Layer: Overflow ####
 
 
-### Transit Layer
+### Baggage Layer ###
 
 
-The Tracing Plane consists of **four layers**
-
-* The **Transit Layer**: a library for passing request contexts around your system (e.g., storing them in thread-local storage, serializing them, copying them for new threads, etc.)
-* The *Atom Layer*: the primitive binary representation of request contexts is as *atoms* -- an atom is an arbitrary-length byte array; a request context is an array of atoms.  The atom layer is the 'narrow waist' of context propagation.  It is a super simple specification with straightforward rules for how to branch and join contenxts.  The atom layer lets any system propagate any context it receives from the outside world without needing to know the meaning of the data in that context.  The atom layer also enables systems to impose *size constraints*.
 * The *Baggage Layer*: a protocol that specifies data formats for atoms that enables composition of contexts -- that is, multiple people can propagate different things concurrently. The protocol supports a variety of data types (primitives, sets, maps, counters, clocks, etc.).  The protocol is robust to *overflow* -- that is, if the serialized representation is too large, we can simply chop it to the length we desire.  Finally, the system (e.g., the transit layer) doesn't need to be able to interpret 
 
 === What problem are you trying to solve? ===
