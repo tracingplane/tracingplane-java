@@ -184,6 +184,10 @@ The atom layer implements trimming in a simple way -- to trim baggage to a speci
 
 Since the Overflow Marker is a zero-length atom, it is less than every other atom (similar to how the empty string is less than all other strings).  This means that the overflow marker 'retains' its position when arrays of atoms are merged.  We can always infer based on the position of the overflow marker which atoms could have been trimmed and which definitely were not.
 
+#### Further Reading ####
+
+The Atom Layer [Javadoc](https://jonathanmace.github.io/tracingplane/doc/javadoc/edu/brown/cs/systems/tracingplane/atom_layer/AtomLayer.html) has a decent level of commenting.
+
 ## 2.2.2 Baggage Layer ##
 
 The Baggage Layer specifies and implements the **Baggage Protocol**.  The Baggage Protocol specifies the data format and layout for atoms such that:
@@ -196,9 +200,28 @@ There are several important components to the Baggage Protocol outlined here.
 
 ### Atom Prefixes ###
 
-The first byte of all Baggage Protocol atoms is the atom's *prefix* (similar to an IP packet header).
+The first byte of all Baggage Protocol atoms is the atom's *prefix* (similar to an IP packet header).  The first bit of a prefix is the atom type: 0 is a data atom and 1 is a header atom.  The overflow atom is also supported.
+
+* **Data Atoms** Data atoms do not currently use the remaining bits of the prefix.  The subsequent bytes of a data atom are just an arbitrary payload that is not interpreted by the baggage layer.
+* **Header Atoms** Header atoms use the remaining bits of the prefix as described in the next section.  The subsequent bytes of a header atom are used as a *key*.
 
 ### Maps ###
+
+The very first bit of any data atom is a 0, therefore data atoms are **always** lexicographically less than header atoms.  This gives us the basis for implementing maps.  To create a mapping for a key to a value, simply create a header atom containing the key, then a data atom containing the value.  For example, suppose we want to map the key `01001000` to the value `11111111 11110001`.  We would create the following atoms:
+
+A = [`10000000 01001000`,`00000000 11111111 11110001`]
+
+These two atoms can be merged with any other atom list and the mapping will be preserved, for example, suppose B has a mapping of key `00010000` to value `00100100`:
+
+B = [`10000000 00010000`,`00000000 00100100`]
+
+Merged, we would get:
+
+merged(A, B) = [`10000000 00010000`,`00000000 00100100`,`10000000 01001000`,`00000000 11111111 11110001`]
+
+More generally, the **only** way our value can be separated from its key is if we merge with another baggage instance that also has a mapping for that key.  In which case, we successfully and correctly preserve both mappings for the key.
+
+### Bags ###
 
 ### Lexicographically Comparable Variable-Length Integers (LexVarInts) ###
 
@@ -208,7 +231,7 @@ The first byte of all Baggage Protocol atoms is the atom's *prefix* (similar to 
 
 ### Further ###
 
-Max, min, sum, avg, first, last, etc.  transient fields in baggagebuffers
+Max, min, sum, avg, first, last, etc.  transient fields in baggagebuffers.  Inline bags
 
 # 3. Building and Compiling #
 
