@@ -1,6 +1,6 @@
 # <img src="doc/figures/baggage.png" width="40"/> The Tracing Plane and Baggage #
 
-## 1. Introduction ##
+## 1 Introduction ##
 
 The Tracing Plane is a layered design for context propagation in distributed systems.  The tracing plane enables interoperability between systems and tracing applications.  It is designed to provide a simple "narrow waist" for tracing, much like how TCP/IP provides a narrow waist for the internet.
 
@@ -8,22 +8,33 @@ Baggage is our name for **general purpose request context** in distributed syste
 
 This repository contains our Java reference implementation for the Tracing Plane and Baggage.  This is an active research project at Brown University by [Jonathan Mace](http://cs.brown.edu/people/jcmace/) and [Prof. Rodrigo Fonseca](http://cs.brown.edu/~rfonseca/).  It is motivated by many years of collective experience in end-to-end tracing and numerous tracing-related research projects including [X-Trace](https://www.usenix.org/legacy/event/nsdi07/tech/full_papers/fonseca/fonseca.pdf), [Quanto](https://www.usenix.org/legacy/event/osdi08/tech/full_papers/fonseca/fonseca.pdf), [Retro](http://cs.brown.edu/people/jcmace/papers/mace15retro.pdf), [Pivot Tracing](http://cs.brown.edu/people/jcmace/papers/mace15pivot.pdf).  You can also check out our research group's [GitHub](http://brownsys.github.io/tracing-framework/).  Keep an eye out for our research paper on Baggage, which will appear later in 2017!
 
+### Useful Links ###
+
+Javadoc for this repository: [jonathanmace.github.io/tracingplane/doc/javadoc/index.html](https://jonathanmace.github.io/tracingplane/doc/javadoc/index.html)
+
 ### Table of Contents ###
 
-* [1. Introduction](#1-introduction)
-* [2. Overview of The Tracing Plane](#2-overview-of-the-tracing-plane)
-  * [2.1. Transit Layer (for System Developers)](#21-transit-layer-for-system-developers)
-  * [2.2. Baggage Buffers (for Tracing Applications)](#22-baggage-buffers-for-tracing-applications)
-  * [2.3. Tracing Plane Internals: Atom Layer](#23-tracing-plane-internals-atom-layer)
-    * [Atom Layer: Lexicographic Merge](#atom-layer-lexicographic-merge)
-       * [Example 1](#example-1)
-       * [Example 2](#example-2)
-       * [Why Lexicographic Merge?](#why-lexicographic-merge)
-    * [Atom Layer: Overflow](#atom-layer-overflow)
-* [2.4. Tracing Plane Internals: Baggage Layer](#24-tracing-plane-internals-baggage-layer)
+* [1 Introduction](#1-introduction)
+* [2 Overview of The Tracing Plane](#2-overview-of-the-tracing-plane)
+	* [2.1 Tracing Plane Outer Layers](#21-tracing-plane-outer-layers)
+		* [2.1.1 Transit Layer (for System Developers)](#211-transit-layer-for-system-developers)
+		* [2.1.2 Baggage Buffers (for Tracing Applications)](#212-baggage-buffers-for-tracing-applications)
+	* [2.2 Tracing Plane Inner Layers](#22-tracing-plane-inner-layers)
+		* [2.2.1 Atom Layer](#221-atom-layer)
+		    * [Lexicographic Merge](#atom-layer-lexicographic-merge)
+		    * [Overflow](#atom-layer-overflow)
+		* [2.2.2 Baggage Layer](#222-baggage-layer)
+		 * [Atom Prefixes](#atom-prefixes)
+		 * [Maps](#maps)
+		 * [Lexicographically Comparable Variable-Length Integers (LexVarInts)](#lexicographically-comparable-variable-length-integers-lexvarints)
+		 * [Trees](#trees)
+		 * [Overflow](#overflow)
+		 * [Further](#further)
+* [3. Building and Compiling](#3-building-and-compiling)
+* [Old notes and thoughts](#old-notes-and-thoughts)
 
+#### TODO ####
 
-      
 * I need more details TODO (FAQ for researchers, tracing application devs, system devs, and curious observers)
 * Getting started - downloading, prerequisites, and building TODO
 * Simple example - baggage buffers TODO
@@ -31,13 +42,32 @@ This repository contains our Java reference implementation for the Tracing Plane
 * Overview of APIs for each layer TODO
 * Project Status TODO
 
-## 2. Overview of The Tracing Plane ##
 
-The Tracing Plane has four layers, illustrated in green in the figure below.  Depending on who you are, your entry point to the Tracing Plane differs.  System developers use the Transit Layer APIs to instrument their system to pass baggage around.  Tracing application developers use the Baggage Buffers IDL to generate contexts and APIs for their tracing application.  In the middle, the Atom and Baggage layers provide generic interfaces that together enable a multitude of different kinds of tracing applications to coexist.
+## 2 Overview of The Tracing Plane ##
+
+The Tracing Plane has four layers, illustrated in green in the figure below.  Depending on who you are, your entry point to the Tracing Plane differs.  
+
+System developers use the Transit Layer APIs to instrument their system to pass baggage around.  
+
+Tracing application developers use the Baggage Buffers IDL to generate contexts and APIs for their tracing application.  
+
+In the middle, the Atom and Baggage layers provide generic interfaces that together enable a multitude of different kinds of tracing applications to coexist.
 
 <img src="doc/figures/narrowwaist.png" alt="Narrow Waist" width="600"/>
 
-## 2.1. Transit Layer (for System Developers) ##
+The above figure illustrates how the transit and atom layers are the minimum requirement for a system to be 'Tracing Plane enabled'.  The Atom Layer is a *very* simple, straightforward, and generic representation of context, with simple rules for how to propagate it.
+
+The Baggage Layer defines the Baggage Protocol, a way to lay out data for the atom layer.  The Baggage Buffers layer provides an IDL for defining custom contexts in an easy way, and automatically generates the correct Baggage Protocol representation of the custom context.
+
+## 2.1 Tracing Plane Outer Layers ##
+
+There are two target audiences for the Tracing Plane.
+
+First is the **System Developers** who write components of the distributed system and must instrument their system to pass contexts around.  The **Transit Layer** at the bottom of the stack is the entry point for this audience.
+
+Second is **Tracing Application Developers** who write tracing applications such as Zipkin, X-Trace, and many others.  These developers want to pass metadata through many system components, across application, process, and system boundaries.  The **Baggage Buffers** layer at the top of the stack is the entry point for this audience.
+
+## 2.1.1 Transit Layer (for System Developers) ##
 
 The **Transit Layer** has just one purpose: abstract the task of system instrumentation so that it only has to be done once.  System instrumentation is the most laborious part of tracing.  You have to modify every system component to make sure request contexts are passed around -- for example, passed to new threads when they're created, included in continuations and thread pool queues, serialized to RPC headers, etc.
 
@@ -47,14 +77,52 @@ The Transit Layer is an **instrumentation abstraction** that makes no attempt to
 
 To the transit layer, baggage is only ever an opaque object or byte array.  When system developers instrument their system, they only need to consider where requests go -- they do not need to think about how to manipulate and update request contexts while requests execute.
 
-## 2.2. Baggage Buffers (for Tracing Applications) ##
+The Transit Layer API is a set of static methods of the class `Baggage` ([Javadoc](https://jonathanmace.github.io/tracingplane/doc/javadoc/edu/brown/cs/systems/tracingplane/transit_layer/Baggage.html)).  These methods provide a simple means to set and remove Baggage in a thread-local variable, create copies, and serialize Baggage.
 
-Baggage Buffers is an [Interface Definition Language](https://en.wikipedia.org/wiki/Interface_description_language) for tracing contexts.  
+See the (not yet written sorry) Transit Layer Tutorial for examples and usage of Transit Layer APIs.
+
+## 2.1.2 Baggage Buffers (for Tracing Applications) ##
+
+Baggage Buffers is an [Interface Definition Language](https://en.wikipedia.org/wiki/Interface_description_language) for generating tracing context interfaces.  It makes it super easy to specify data that you want to be propagated in your system.  Baggage Buffers is similar to protocol buffers in terms of syntax and usage -- first, you write a baggage buffers definition, eg [`xtrace.bb`](https://github.com/JonathanMace/tracingplane/blob/master/baggage-buffers-examples/src/main/baggage/xtrace.bb):
+
+	package edu.brown.xtrace;
+	
+	bag XTraceMetadata {
+		fixed64 taskId = 1;
+		set<fixed64> parentEventIds = 2;
+	}
+
+The Baggage Buffers Compiler is a command line tool that generates source files
+
+	bbc --java_out="target/generated_sources" src/main/baggage/xtrace.bb
+	
+The compiler generates source files with interfaces for accessing Baggage, eg [`XTraceMetadata.java`](https://github.com/JonathanMace/tracingplane/blob/master/baggage-buffers-examples/target/generated-sources/edu/brown/xtrace/XTraceMetadata.java) ([Javadoc](https://jonathanmace.github.io/tracingplane/doc/javadoc/edu/brown/xtrace/XTraceMetadata.html))
+
+    public class XTraceMetadata implements Bag {
+        public Long taskId = null;
+        public Set<Long> parentEventIds = null;
+        ...
+        public static XTraceMetadata get();
+        public static void set(XTraceMetadata xTraceMetadata);
+        ...
+    }
+
+Within the generated source files are two important accessor methods.  These accessor methods interface with the baggage being carried in the current thread (controlled by the transit layer).  `get()` accesses the baggage set in the current Thread, finds, and returns the `XTraceMetadata` bag.  Similarly, `set(..)` sets the `XTraceMetadata` bag being carried in the current thread's Baggage.
+
+That's all you need to be able to start propagating `XTraceMetadata`!  A service in one part of a large, complicated system can toss some `XTraceMetadata` into a Baggage instance, and will faithfully receive it back (possibly merged with other XTraceMetadata instaces).
+
+See the (not yet written sorry) Baggage Buffers Tutorial and Language Guide for examples and usage of Baggage Buffers.  For now [`example.bb`](https://github.com/JonathanMace/tracingplane/blob/master/baggage-buffers-examples/src/main/baggage/example.bb) shows the supported fields and types (though numerous types are specified but not yet implemented eg counters, clocks, min, max, avg, sum, etc.... they will be by february)
+
+## 2.2 Tracing Plane Inner Layers ##
+
+Under the covers, Baggage Buffers interacts with the Baggage Layer, which defines a protocol for seamlessly composing potentially many contexts that may be present from different tracing applications.
+
+In order to do this and also make it extremely simple for systems to propagate contexts, the baggage layer builds on top of the atom layer.  The logic of the atom layer is extremely simple, but sufficient to support everything described so far.
 
 
-## 2.3. Tracing Plane Internals: Atom Layer ##
+## 2.2.1 Atom Layer ##
 
-As described in [Section 2.1](#21-transit-layer-for-system-developers), the Transit Layer abstracts the task of system instrumentation so that it only has to be done once.  To the transit layer, and to system developers using Transit Layer APIs, baggage is only ever an opaque object or byte array.  As a result, the transit layer **delegates** logic for the following two tasks:
+As described in [Section 2.1.1](#211-transit-layer-for-system-developers), the Transit Layer abstracts the task of system instrumentation so that it only has to be done once.  To the transit layer, and to system developers using Transit Layer APIs, baggage is only ever an opaque object or byte array.  As a result, the transit layer **delegates** logic for the following two tasks:
 
   1. Dividing and combining contexts when executions branch and rejoin.  If baggage is just a cryptic array of bytes [ 0x08, 0xAF, ...], how are you supposed to take two different arrays and merge them into one?
   2. Enforcing capacity restrictions on baggage.  Again, if baggage is just a cryptic array of bytes, how can you ditch some of the bytes if the array is too big?
@@ -110,16 +178,52 @@ Notice in this example that even though some atoms exist in both A and B, such a
 
 #### Atom Layer: Overflow ####
 
+Since baggage is generic and dynamic, it is possible for baggage to continue accumulating data until it is very large in size.  For example, tracing application developers might get liberal with the tags they add to the baggage, causing baggage size to continuously grow until it is too large.  This is a problem for systems that have strict limits on the baggage size they are willing to propagate.
 
-## 2.4. Tracing Plane Internals: Baggage Layer ##
+The atom layer implements trimming in a simple way -- to trim baggage to a specific size limit, atoms are dropped from the **end** of the baggage until eventually baggage is within the size limit.  Then the **Overflow Marker** is appended to the end of the baggage.  The Overflow Marker is a zero-length atom, used to indicate that Overflow occurred.  Overflow is the term we use for when Baggage must be trimmed because it is too large.
 
-* The *Baggage Layer*: a protocol that specifies data formats for atoms that enables composition of contexts -- that is, multiple people can propagate different things concurrently. The protocol supports a variety of data types (primitives, sets, maps, counters, clocks, etc.).  The protocol is robust to *overflow* -- that is, if the serialized representation is too large, we can simply chop it to the length we desire.  Finally, the system (e.g., the transit layer) doesn't need to be able to interpret 
+Since the Overflow Marker is a zero-length atom, it is less than every other atom (similar to how the empty string is less than all other strings).  This means that the overflow marker 'retains' its position when arrays of atoms are merged.  We can always infer based on the position of the overflow marker which atoms could have been trimmed and which definitely were not.
 
-=== What problem are you trying to solve? ===
+## 2.2.2 Baggage Layer ##
 
-Modern distributed and cloud systems comprise many different interconnected components, such as storage, queueing, co-ordination, batch and real-time processing, and front-end services.  Common auxiliary tasks -- such as logging, monitoring, auditing, and performance management -- are now *much* more difficult than in a standalone component, because multiple different machines and processes might need to participate.
+The Baggage Layer specifies and implements the **Baggage Protocol**.  The Baggage Protocol specifies the data format and layout for atoms such that:
 
-**Context propagation** is therefore a critical component of such systems.  This involves passing metadata between components, usually alongside a request as it executes.  For example, a front-end might assign each incoming request a unique *request ID*.  Then, the request ID is passed along with the request, through all of the components of the software stack, enabling us to tie together events from one component (e.g., when the request hits the database) to other components (e.g., which user initiated the request?)
+* Different tracing applications can put atoms in the baggage and get them back without interference from other tracing applications
+* Tracing applications can utilize a variety of data types including primitives, sets, maps, counters, clocks, and **any state-based conflict-free replicated datatype**.
+* If overflow occurs, we know exactly which tracing applications were affect and which were not.  This means we can also implement *inexact* datatypes such as approximate counters.
+
+There are several important components to the Baggage Protocol outlined here.
+
+### Atom Prefixes ###
+
+The first byte of all Baggage Protocol atoms is the atom's *prefix* (similar to an IP packet header).
+
+### Maps ###
+
+### Lexicographically Comparable Variable-Length Integers (LexVarInts) ###
+
+### Trees ###
+
+### Overflow ###
+
+### Further ###
+
+Max, min, sum, avg, first, last, etc.  transient fields in baggagebuffers
+
+# 3. Building and Compiling #
+
+Clone this repository and build with maven:
+
+	mvn clean package install
+	
+Currently, the project is set up to first build the Baggage Buffers Compiler, which requires Scala to build.
+
+After building, the `dist` folder will contain built jars and dependencies, which you can place on your classpath.
+
+Additionally, the Baggage Buffers Compiler will be built in `resources/bbc.jar`.  To run the compiler, invoke `java -jar resources/bbc.jar`
+
+
+## Old notes and thoughts ##
 
 === Why is this problem hard? ===
 
