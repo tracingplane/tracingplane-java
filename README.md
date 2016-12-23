@@ -53,7 +53,7 @@ Tracing application developers use the Baggage Buffers IDL to generate contexts 
 
 In the middle, the Atom and Baggage layers provide generic interfaces that together enable a multitude of different kinds of tracing applications to coexist.
 
-<img src="doc/figures/narrowwaist.png" alt="Narrow Waist" width="600"/>
+<img src="doc/figures/narrowwaist.png" alt="Narrow Waist" width="800"/>
 
 The above figure illustrates how the transit and atom layers are the minimum requirement for a system to be 'Tracing Plane enabled'.  The Atom Layer is a *very* simple, straightforward, and generic representation of context, with simple rules for how to propagate it.
 
