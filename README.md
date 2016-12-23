@@ -4,6 +4,8 @@
 
 The Tracing Plane is a layered design for context propagation in distributed systems.  The tracing plane enables interoperability between systems and tracing applications.  It is designed to provide a simple "narrow waist" for tracing, much like how TCP/IP provides a narrow waist for the internet.
 
+The Tracing Plane comprises a library for system instrumentation (Transit Layer) and a library for specifying and generating contexts (Baggage Buffers).  These libraries are outlined in more detail below.
+
 Baggage is our name for **general purpose request context** in distributed systems, and Baggage is implemented by the Tracing Plane.  Though many systems already have request contexts -- e.g., Go's [context package](https://golang.org/pkg/context/); Span contexts in [Zipkin](https://github.com/openzipkin/zipkin), [OpenTracing](http://opentracing.io/) and [Dapper](https://research.google.com/pubs/archive/36356.pdf); request tags in [Census](https://github.com/grpc/grpc/tree/master/src/core/ext/census); etc. -- none of them are *general purpose*.  What this means is that if I instrument my distributed system to pass around Zipkin span contents, then later wish to use Census,  I must **reinstrument everything** in order to pass around Census tags.  That *sucks*.
 
 This repository contains our Java reference implementation for the Tracing Plane and Baggage.  This is an active research project at Brown University by [Jonathan Mace](http://cs.brown.edu/people/jcmace/) and [Prof. Rodrigo Fonseca](http://cs.brown.edu/~rfonseca/).  It is motivated by many years of collective experience in end-to-end tracing and numerous tracing-related research projects including [X-Trace](https://www.usenix.org/legacy/event/nsdi07/tech/full_papers/fonseca/fonseca.pdf), [Quanto](https://www.usenix.org/legacy/event/osdi08/tech/full_papers/fonseca/fonseca.pdf), [Retro](http://cs.brown.edu/people/jcmace/papers/mace15retro.pdf), [Pivot Tracing](http://cs.brown.edu/people/jcmace/papers/mace15pivot.pdf).  You can also check out our research group's [GitHub](http://brownsys.github.io/tracing-framework/).  Keep an eye out for our research paper on Baggage, which will appear later in 2017!
@@ -127,66 +129,18 @@ As described in [Section 2.1.1](#211-transit-layer-for-system-developers), the T
   1. Dividing and combining contexts when executions branch and rejoin.  If baggage is just a cryptic array of bytes [ 0x08, 0xAF, ...], how are you supposed to take two different arrays and merge them into one?
   2. Enforcing capacity restrictions on baggage.  Again, if baggage is just a cryptic array of bytes, how can you ditch some of the bytes if the array is too big?
 
-The **Atom Layer** provides a simple implementation of branch, join, serialize and trimming logic for the Transit Layer and is designed to support our principle goal: a **general purpose request context**.  That is, the atom layer must support the logic of many different tracing applications which can be quite varied -- for example, you might want to do a set-union of tags in census when two execution branches join, or take the greater of two values in pivot tracing.
+The **Atom Layer** provides a simple implementation of branch, join, serialize and trimming logic for the Transit Layer and is designed to support our principle goal: a **general purpose request context**. 
 
-We absolutely want to **avoid** having to inspect and interpret baggage contents on a per-application basis, for example, it is insufficient for the Atom Layer to just call up to each tracing application.  This would *kill* our ability to easily deploy new tracing applications, because every time we deploy a new tracing application we would have to update **every** system component with new rules for handling the contexts.  By analogy, it would be like expecting every router on the internet to be able to understand the contents of every packet being routed for every protocol.  
-
-Instead, we want to be able to pass *any* contexts through our system and have them emerge in a coherent, consistent way.  This means no interpretation of the payload -- just a single representation and one set of rules for branching, joining, serialization, and trimming.
-
-The **Atom Layer** provides this generic solution -- an underlying context representation that supports all use cases.  It represents baggage as an **array of atoms** where an atom is **an array of bytes**.  Atoms can have arbitrary length.  The Atom Layer implements operations as follows:
+The Atom Layer represents baggage as an **array of atoms** where an atom is **an array of bytes**.  Atoms can have arbitrary length.  The Atom Layer implements operations as follows:
 
 * Serialization and Deserialization: length prefix the bytes of each atom
 * Branch: each branch receives its a copy of the atoms with no modifications
-* Join: merge the two arrays of atoms using **lexicographic comparison** (more below)
+* Join: merge the two arrays of atoms using **lexicographic comparison**
 * Trim: drop atoms from the **end** of the array of atoms until size requirement is met; then append the **overflow marker** (more below)
 
-#### Atom Layer: Lexicographic Merge ####
+A full description of the Atom Layer with examples can be found [here](doc/atom-layer.md).
 
-Lexicographic merge is the cornerstone of the atom layer.  Atom arrays are arbitrary -- they do not need to be sorted and there are no requirements on lengths.  It is important for the atom layer to maintain the atom ordering in arrays, however, especially when merging two arrays.  To merge two arrays, it traverses them performing atom-wise comparison.  To compare two atoms is done **lexicographically**: starting from the leftmost bit, the raw bits are compared until one is found to be less than the other.  The lesser atom is added to the output and its atom array is advanced.  If the two atoms are exactly the same then the atom is added to the output and *both* atom arrays advance.  If one atom is a prefix of the other atom, then the shorter atom is considered to be lesser.
-
-Lexicographic comparison is like doing an alphabetic comparison, but on bytes (e.g., `h` is less than `hell` is less than `hello`, just as `0` is less than `0001` is less than `00010`).  (Note: in reality, atoms are constrained to multiples of 1 byte, so a 5-bit atom is actually not allowed; we just use it here for simple examples).  The following examples demonstrate lexicographic merge:
-
-##### Example 1 #####
-
-* A = [ `0010`, `1100`, `0101` ]
-* B = [ `0`, `0001`, `1111` ]
-* merge(A, B) = [ `0`, `0001`, `0010`, `1100`, `0101`, `1111` ]
-
-##### Example 2 #####
-
-* A = [ `0010`, `1100`, `0101`, `1111` ]
-* B = [ `0`, `0001`, `110000`, `1111` ]
-* merge(A, B) = [ `0`, `0001`, `0010`, `1100`, `0101`, `110000`, `1111` ]
-
-##### Why Lexicographic Merge? #####
-
-If A and B are both sorted, then lexicographic merge produces a sorted array as output.  Additionally, if an element exists in both A and B, then it won't be duplicated in the output.  This scheme, in essence, gives us the primitive of a set, with set union as the merge behavior.
-
-* A = [ `0000`, `000111`, `1000`, `111` ]
-* B = [ `000111`, `001`, `1100`, `111` ]
-* merge(A, B) = [ `0000`, `000111`, `001`, `1000`, `1100`, `111` ]
-
-Taking this one step further, we could implement a rudimentary map by saying that the first byte of every atom is the map key and the subsequent bytes are the map value.  This would actually be a multimap, since you would be able to map several values to the same key.
-
-Going further still, remember that there is no requirement for the arrays to be sorted.  If small atoms follow large atoms, then we are guaranteed for them all to follow each other in the output.  For example:
-
-* A = [ `1010`, `0000`, `000111`, `0111` ]
-* B = [ `1011`, `000111`, `001`, `0111` ]
-* merge(A, B) = [ `1010`, `0000`, `000111`, `0111`, `1011`, `000111`, `001`, `0111` ]
-
-Notice in this example that even though some atoms exist in both A and B, such as `000111`, the output array contains `000111` twice.  Lexicographic merge only skips duplicates if they are directly compared.  In the example above, A's `000111` is never compared to B's `000111` so there is no opportunity for deduplication.  This is a **good** thing!  It enables the Baggage Layer later on to implement arbitrary tree-structured data.
-
-#### Atom Layer: Overflow ####
-
-Since baggage is generic and dynamic, it is possible for baggage to continue accumulating data until it is very large in size.  For example, tracing application developers might get liberal with the tags they add to the baggage, causing baggage size to continuously grow until it is too large.  This is a problem for systems that have strict limits on the baggage size they are willing to propagate.
-
-The atom layer implements trimming in a simple way -- to trim baggage to a specific size limit, atoms are dropped from the **end** of the baggage until eventually baggage is within the size limit.  Then the **Overflow Marker** is appended to the end of the baggage.  The Overflow Marker is a zero-length atom, used to indicate that Overflow occurred.  Overflow is the term we use for when Baggage must be trimmed because it is too large.
-
-Since the Overflow Marker is a zero-length atom, it is less than every other atom (similar to how the empty string is less than all other strings).  This means that the overflow marker 'retains' its position when arrays of atoms are merged.  We can always infer based on the position of the overflow marker which atoms could have been trimmed and which definitely were not.
-
-#### Further Reading ####
-
-The Atom Layer [Javadoc](https://jonathanmace.github.io/tracingplane/doc/javadoc/edu/brown/cs/systems/tracingplane/atom_layer/AtomLayer.html) has a decent level of commenting.
+The Atom Layer [Javadoc](https://jonathanmace.github.io/tracingplane/doc/javadoc/edu/brown/cs/systems/tracingplane/atom_layer/AtomLayer.html) also provides more information in comments.
 
 ## 2.2.2 Baggage Layer ##
 
@@ -196,42 +150,13 @@ The Baggage Layer specifies and implements the **Baggage Protocol**.  The Baggag
 * Tracing applications can utilize a variety of data types including primitives, sets, maps, counters, clocks, and **any state-based conflict-free replicated datatype**.
 * If overflow occurs, we know exactly which tracing applications were affect and which were not.  This means we can also implement *inexact* datatypes such as approximate counters.
 
-There are several important components to the Baggage Protocol outlined here.
+The full outline of the Baggage Protocol can be found [here](doc/baggage-layer.md).  A summary of what the Baggage Protocol offers is:
 
-### Atom Prefixes ###
+* Atom representations for tree-structured data, where each node in the tree can contain data and have children.
+* Consistent merging of atoms of tree-structured data, such that merge(A, B) contains all nodes from both A and B, but does not duplicate identicial nodes that occur in both.
+* As a result, if an execution repeatedly branches and joins again, merged baggage does not blow up with duplicate elements.
 
-The first byte of all Baggage Protocol atoms is the atom's *prefix* (similar to an IP packet header).  The first bit of a prefix is the atom type: 0 is a data atom and 1 is a header atom.  The overflow atom is also supported.
-
-* **Data Atoms** Data atoms do not currently use the remaining bits of the prefix.  The subsequent bytes of a data atom are just an arbitrary payload that is not interpreted by the baggage layer.
-* **Header Atoms** Header atoms use the remaining bits of the prefix as described in the next section.  The subsequent bytes of a header atom are used as a *key*.
-
-### Maps ###
-
-The very first bit of any data atom is a 0, therefore data atoms are **always** lexicographically less than header atoms.  This gives us the basis for implementing maps.  To create a mapping for a key to a value, simply create a header atom containing the key, then a data atom containing the value.  For example, suppose we want to map the key `01001000` to the value `11111111 11110001`.  We would create the following atoms:
-
-A = [`10000000 01001000`,`00000000 11111111 11110001`]
-
-These two atoms can be merged with any other atom list and the mapping will be preserved, for example, suppose B has a mapping of key `00010000` to value `00100100`:
-
-B = [`10000000 00010000`,`00000000 00100100`]
-
-Merged, we would get:
-
-merged(A, B) = [`10000000 00010000`,`00000000 00100100`,`10000000 01001000`,`00000000 11111111 11110001`]
-
-More generally, the **only** way our value can be separated from its key is if we merge with another baggage instance that also has a mapping for that key.  In which case, we successfully and correctly preserve both mappings for the key.
-
-### Bags ###
-
-### Lexicographically Comparable Variable-Length Integers (LexVarInts) ###
-
-### Trees ###
-
-### Overflow ###
-
-### Further ###
-
-Max, min, sum, avg, first, last, etc.  transient fields in baggagebuffers.  Inline bags
+The Baggage Layer Javadoc [1](https://jonathanmace.github.io/tracingplane/doc/javadoc/edu/brown/cs/systems/tracingplane/baggage_layer/BaggageLayer.html), [2](https://jonathanmace.github.io/tracingplane/doc/javadoc/edu/brown/cs/systems/tracingplane/baggage_layer/protocol/package-summary.html) also provides more information in comments.
 
 # 3. Building and Compiling #
 
