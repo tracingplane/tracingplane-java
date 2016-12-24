@@ -246,4 +246,35 @@ public class TestXSignedVarint64 {
             }
         }
     }
+
+    @Test
+    public void testReverseSignedVarint64Comparison() {
+        int numtests = 100;
+        for (int sizea = 1; sizea <= 9; sizea++) {
+            ByteBuffer bufa = ByteBuffer.allocate(sizea);
+            for (int sizeb = sizea; sizeb <= 9; sizeb++) {
+                ByteBuffer bufb = ByteBuffer.allocate(sizeb);
+                for (int i = 0; i < numtests; i++) {
+                    long valuea = generate(sizea);
+                    long valueb = generate(sizeb);
+
+                    for (long a : new long[] { valuea, -valuea - 1 }) {
+                        for (long b : new long[] { valueb, -valueb - 1 }) {
+
+                            bufa.rewind();
+                            assertEquals(sizea, SignedLexVarint.writeReverseLexVarInt64(bufa, a));
+
+                            bufb.rewind();
+                            assertEquals(sizeb, SignedLexVarint.writeReverseLexVarInt64(bufb, b));
+
+                            assertEquals(Long.compare(a, b) == 0,
+                                         Lexicographic.compare(bufa.array(), bufb.array()) == 0);
+                            assertEquals(Long.compare(a, b) > 0, Lexicographic.compare(bufa.array(), bufb.array()) < 0);
+                            assertEquals(Long.compare(b, a) > 0, Lexicographic.compare(bufb.array(), bufa.array()) < 0);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

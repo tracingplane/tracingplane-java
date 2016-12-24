@@ -267,7 +267,34 @@ public class TestXUnsignedVarint32 {
 
                     assertEquals(a == b, Lexicographic.compare(bufa.array(), bufb.array()) == 0);
                     assertEquals(a_smaller, Lexicographic.compare(bufa.array(), bufb.array()) < 0);
-                    assertEquals(!a_smaller, Lexicographic.compare(bufb.array(), bufa.array()) < 0);
+                    assertEquals(a_smaller, Lexicographic.compare(bufb.array(), bufa.array()) > 0);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testReverseUnsignedVarint32Comparison() {
+        int numtests = 100;
+        for (int sizea = 1; sizea <= 5; sizea++) {
+            ByteBuffer bufa = ByteBuffer.allocate(sizea);
+            for (int sizeb = sizea; sizeb <= 5; sizeb++) {
+                ByteBuffer bufb = ByteBuffer.allocate(sizeb);
+                for (int i = 0; i < numtests; i++) {
+                    int a = generate(sizea);
+                    int b = generate(sizeb);
+
+                    bufa.rewind();
+                    assertEquals(sizea, UnsignedLexVarint.writeReverseLexVarUInt32(bufa, a));
+
+                    bufb.rewind();
+                    assertEquals(sizeb, UnsignedLexVarint.writeReverseLexVarUInt32(bufb, b));
+
+                    boolean a_smaller = a >= 0 ? (b < 0 || a < b) : (b < 0 && a < b);
+
+                    assertEquals(a == b, Lexicographic.compare(bufa.array(), bufb.array()) == 0);
+                    assertEquals(a_smaller, Lexicographic.compare(bufa.array(), bufb.array()) > 0);
+                    assertEquals(a_smaller, Lexicographic.compare(bufb.array(), bufa.array()) < 0);
                 }
             }
         }

@@ -107,6 +107,15 @@ public class UnsignedLexVarint {
             return writeLexVarUInt64(buf, value);
         }
     }
+    
+    public static int writeReverseLexVarUInt32(ByteBuffer buf, int value) {
+        if (value < 0) {
+            // Make positive so that it encodes in only 5 bytes instead of 9
+            return writeReverseLexVarUInt64(buf, value + 4294967296L);
+        } else {
+            return writeReverseLexVarUInt64(buf, value);
+        }
+    }
 
     public static int writeLexVarUInt64(ByteBuffer buf, long value) {
         int size = encodedLength(value);
@@ -115,6 +124,17 @@ public class UnsignedLexVarint {
         buf.put((byte) (b0 | ((value >>> (8 * (size - 1))) & mask)));
         for (int i = size - 1; i > 0; i--) {
             buf.put((byte) (value >>> (8 * (i - 1))));
+        }
+        return size;
+    }
+    
+    public static int writeReverseLexVarUInt64(ByteBuffer buf, long value) {
+        int size = encodedLength(value);
+        byte b0 = (byte) (0xff << (9 - size));
+        byte mask = (byte) ~b0;
+        buf.put((byte) ~(b0 | ((value >>> (8 * (size - 1))) & mask)));
+        for (int i = size - 1; i > 0; i--) {
+            buf.put((byte) ~(value >>> (8 * (i - 1))));
         }
         return size;
     }
@@ -142,6 +162,19 @@ public class UnsignedLexVarint {
         return result;
     }
 
+    /** Reads a varint that is reverse lexicographically comparable with other varints and advance the buf's position */
+    public static long readReverseLexVarUInt64(ByteBuffer buf) throws AtomLayerException {
+        byte b0 = (byte) ~buf.get();
+        int size = interpretSize(b0);
+        if (size == 1) {
+            return b0;
+        }
+        long result = b0 & (0xff >>> size);
+        result <<= (8 * (size - 1));
+        result += readReverseUInt64(buf, (size - 1));
+        return result;
+    }
+
     /** Reads a varint that is lexicographically comparable with other varints without advancing the buf's position */
     public static long readLexVarUInt64(ByteBuffer buf, int position) throws AtomLayerException {
         byte b0 = buf.get(position++);
@@ -152,6 +185,19 @@ public class UnsignedLexVarint {
         long result = b0 & (0xff >>> size);
         result <<= (8 * (size - 1));
         result += readUInt64(buf, position, (size - 1));
+        return result;
+    }
+
+    /** Reads a varint that is reverse lexicographically comparable with other varints without advancing the buf's position */
+    public static long readReverseLexVarUInt64(ByteBuffer buf, int position) throws AtomLayerException {
+        byte b0 = (byte) ~buf.get(position++);
+        int size = interpretSize(b0);
+        if (size == 1) {
+            return b0;
+        }
+        long result = b0 & (0xff >>> size);
+        result <<= (8 * (size - 1));
+        result += readReverseUInt64(buf, position, (size - 1));
         return result;
     }
 
@@ -187,6 +233,14 @@ public class UnsignedLexVarint {
             result = (result << 8) + (buf.get(position++) & 0xff);
         }
         return result;
+    }
+    
+    static long readReverseUInt64(ByteBuffer buf, int numBytes) throws AtomLayerException {
+        return ~readUInt64(buf, numBytes);
+    }
+    
+    static long readReverseUInt64(ByteBuffer buf, int position, int numBytes) throws AtomLayerException {
+        return ~readUInt64(buf, position, numBytes);
     }
 
     /**
