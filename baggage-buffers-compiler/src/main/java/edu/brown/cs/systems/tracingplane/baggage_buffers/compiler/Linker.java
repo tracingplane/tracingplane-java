@@ -15,6 +15,7 @@ import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.PackageDec
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.ParameterizedType;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.PrimitiveType;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.UserDefinedType;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.BuiltInType;
 import fastparse.core.ParseError;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.BagDeclaration;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.compiler.Ast.BaggageBuffersDeclaration;
@@ -138,9 +139,7 @@ public class Linker {
     }
     
     public void resolveField(File inputFile, String bagName, FieldDeclaration fieldDecl, FieldType fieldType, List<BaggageBuffersDeclaration> searchPath) throws CompileException {
-        if (fieldType instanceof PrimitiveType) {
-            return;
-        } else if (fieldType instanceof UserDefinedType) {
+        if (fieldType instanceof UserDefinedType) {
             UserDefinedType userDefined = ((UserDefinedType) fieldType);
             BagDeclaration declaration = findBag(userDefined.name(), userDefined.packageName(), searchPath);
             if (declaration == null) {
@@ -152,6 +151,8 @@ public class Linker {
             for (FieldType parameterType : ((ParameterizedType) fieldType).getParameters()) {
                 resolveField(inputFile, bagName, fieldDecl, parameterType, searchPath);
             }
+        } else if (fieldType instanceof BuiltInType) {
+            return;
         } else {
             // Unexpected occurrence
             throw new RuntimeException("Encountered unexpected class for fieldType " + fieldType + ", " + fieldType.getClass().getName());

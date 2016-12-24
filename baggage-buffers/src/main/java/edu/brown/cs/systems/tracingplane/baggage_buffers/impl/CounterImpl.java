@@ -26,7 +26,7 @@ public class CounterImpl implements Counter {
 
     @Override
     public BaggageHandler<?> handler() {
-        return Handler._instance;
+        return Handler.instance;
     }
 
     private BagKey newComponentId() {
@@ -117,9 +117,9 @@ public class CounterImpl implements Counter {
         return b.toString();
     }
 
-    private static class Handler implements BaggageHandler<CounterImpl> {
+    public static class Handler implements BaggageHandler<CounterImpl> {
 
-        static final Handler _instance = new Handler();
+        public static final Handler instance = new Handler();
 
         @Override
         public CounterImpl parse(BaggageReader reader) {

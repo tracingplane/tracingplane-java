@@ -18,6 +18,8 @@ import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Brancher;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Joiner;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.BaggageHandler;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.impl.BBUtils;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.api.SpecialTypes.Counter;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.impl.CounterImpl;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.impl.ReaderHelpers;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.impl.WriterHelpers;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.impl.Parsers;

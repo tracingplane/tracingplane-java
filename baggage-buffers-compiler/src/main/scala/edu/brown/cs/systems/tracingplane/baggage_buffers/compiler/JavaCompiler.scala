@@ -65,6 +65,8 @@ class JavaCompiler extends Compiler {
     val Joiner = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.Joiner")
     val BaggageHandler = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.BaggageHandler")
     val BBUtils = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.impl.BBUtils")
+    val Counter = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.api.SpecialTypes.Counter")
+    val CounterImpl = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.impl.CounterImpl")
     
     // Baggage buffers helpers
     val ReaderHelpers = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_buffers.impl.ReaderHelpers")
@@ -95,17 +97,20 @@ class JavaCompiler extends Compiler {
         
         case BuiltInType.Set(of) => return s"$Set<${javaType(of)}>"
         case BuiltInType.Map(k, v) => return s"$Map<${javaType(k)}, ${javaType(v)}>"
+        case BuiltInType.Counter => return s"$Counter"
         
         case UserDefinedType(packageName, name) => return s"$packageName.${javaName(name)}"
       }
     }
     
     def handler(udt: UserDefinedType): String = s"${udt.packageName}.${udt.name}.Handler.instance"
+    val counterHandler: String = s"$CounterImpl.Handler.instance"
     
     def parser(fieldType: FieldType): String = {
       fieldType match {
         case prim: PrimitiveType => return s"$Parsers.${prim}Parser()"
         case udt: UserDefinedType => return handler(udt)
+        case BuiltInType.Counter => return counterHandler
         case BuiltInType.Set(of) => return s"$Parsers.setParser(${parser(of)})"
         case BuiltInType.Map(k, v) => return s"$Parsers.mapParser(${keyParser(k)}, ${parser(v)})"
       }
@@ -115,6 +120,7 @@ class JavaCompiler extends Compiler {
       fieldType match {
         case prim: PrimitiveType => return s"$Serializers.${prim}Serializer()"
         case udt: UserDefinedType => return handler(udt)
+        case BuiltInType.Counter => return counterHandler
         case BuiltInType.Set(of) => return s"$Serializers.setSerializer(${serializer(of)})"
         case BuiltInType.Map(k, v) => return s"$Serializers.mapSerializer(${keySerializer(k)}, ${serializer(v)})"
       }
@@ -124,6 +130,7 @@ class JavaCompiler extends Compiler {
       fieldType match {
         case prim: PrimitiveType => return s"$Joiners.<${javaType(fieldType)}>first()"
         case udt: UserDefinedType => return handler(udt)
+        case BuiltInType.Counter => return counterHandler
         case BuiltInType.Set(of) => return s"$Joiners.<${javaType(of)}>setUnion()"
         case BuiltInType.Map(k, v) => return s"$Joiners.<${javaType(k)}, ${javaType(v)}>mapMerge(${joiner(v)})"
       }
@@ -133,6 +140,7 @@ class JavaCompiler extends Compiler {
       fieldType match {
         case prim: PrimitiveType => return s"$Branchers.<${javaType(fieldType)}>noop()"
         case udt: UserDefinedType => return handler(udt)
+        case BuiltInType.Counter => return counterHandler
         case BuiltInType.Set(of) => return s"$Branchers.<${javaType(of)}>set()"
         case BuiltInType.Map(k, v) => return s"$Branchers.<${javaType(k)}, ${javaType(v)}>map(${brancher(v)})"
       }
@@ -204,6 +212,19 @@ class JavaCompiler extends Compiler {
           private static final $Joiner<$Type> $JoinerName = ${joiner(decl.fieldtype)};"""
     }
     
+    
+    
+    class CounterToCompile(decl: FieldDeclaration) extends FieldToCompile(decl) {
+      val HandlerName = s"_${Name}Handler"
+      val ParserName = HandlerName
+      val SerializerName = HandlerName
+      val BrancherName = HandlerName
+      val JoinerName = HandlerName
+      
+      val privateFieldsDeclaration: String = s"""
+          private static final $BaggageHandler<? extends $Type> $HandlerName = $counterHandler;"""
+    }
+    
     class UserDefinedFieldToCompile(decl: FieldDeclaration, userfield: UserDefinedType) extends FieldToCompile(decl) {
       val HandlerName = s"_${Name}Handler"
       val ParserName = HandlerName
@@ -223,6 +244,7 @@ class JavaCompiler extends Compiler {
       
       val fields = decl.fields.sortWith(_.index < _.index).map {
         x => x match {
+          case FieldDeclaration(BuiltInType.Counter, _, _) => new CounterToCompile(x)
           case FieldDeclaration(fieldtype: UserDefinedType, _, _) => new UserDefinedFieldToCompile(x, fieldtype)
           case _ => new BuiltInFieldToCompile(x) 
         }

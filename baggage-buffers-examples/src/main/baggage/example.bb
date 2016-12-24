@@ -39,4 +39,6 @@ bag ExampleBag {
 	
 	Map<string, SimpleBag2> bag_map = 20;
 	
+	counter c = 23;
+	
 }

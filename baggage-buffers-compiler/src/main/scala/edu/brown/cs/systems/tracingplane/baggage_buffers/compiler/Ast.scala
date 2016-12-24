@@ -64,8 +64,11 @@ object Ast {
     case object string extends PrimitiveType
     case object bytes extends PrimitiveType
     
+    case object Counter extends BuiltInType
+    
     case class Set(of: PrimitiveType) extends ParameterizedType(List[FieldType](of)) with BuiltInType
-    case class Map(keyType: PrimitiveType, valueType: FieldType) extends ParameterizedType(List[FieldType](keyType, valueType)) with BuiltInType 
+    case class Map(keyType: PrimitiveType, valueType: FieldType) extends ParameterizedType(List[FieldType](keyType, valueType)) with BuiltInType
+    
     
   }
   

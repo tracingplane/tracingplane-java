@@ -47,7 +47,10 @@ object Declarations {
   /** Matches built-in parameterized types */
   val parameterizedType: P[BuiltInType] = P(
       (("set<" | "Set<") ~ eatws ~/ primitiveType ~ eatws ~ ">").map(BuiltInType.Set(_)) |
-      (("map<" | "Map<") ~ eatws ~/ primitiveType ~ eatws ~ "," ~ eatws ~/ fieldtype ~ eatws ~ ">").map { case (k, v) => BuiltInType.Map(k, v) })
+      (("map<" | "Map<") ~ eatws ~/ primitiveType ~ eatws ~ "," ~ eatws ~/ fieldtype ~ eatws ~ ">").map { case (k, v) => BuiltInType.Map(k, v) } |
+      (("Counter" | "counter") ~ "<>".?).map(_ => BuiltInType.Counter))
+      
+      
 
   val fqUserDefinedType: P[UserDefinedType] = P( name.!.rep( min = 2, sep = "." ) ).map { 
     case components => UserDefinedType(components.dropRight(1).mkString("."), components.last) 
