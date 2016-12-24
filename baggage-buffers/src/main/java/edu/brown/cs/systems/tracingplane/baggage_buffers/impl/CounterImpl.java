@@ -1,10 +1,13 @@
 package edu.brown.cs.systems.tracingplane.baggage_buffers.impl;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.TreeMap;
+import org.apache.commons.lang3.StringUtils;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.UnsignedLexVarint;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Bag;
@@ -96,6 +99,22 @@ public class CounterImpl implements Counter {
         CounterImpl other = new CounterImpl();
         other.componentValues = new TreeMap<>(componentValues);
         return other;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append(getValue());
+        if (componentValues != null && componentValues.size() > 1) {
+            b.append(" (");
+            List<String> entries = new ArrayList<>();
+            componentValues.entrySet().forEach(e -> {
+                entries.add(e.getKey() + " = " + e.getValue());
+            });
+            b.append(StringUtils.join(entries, ", "));
+            b.append(")");
+        }
+        return b.toString();
     }
 
     private static class Handler implements BaggageHandler<CounterImpl> {

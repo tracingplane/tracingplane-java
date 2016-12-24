@@ -132,7 +132,7 @@ public abstract class BagKey implements Comparable<BagKey> {
 
         @Override
         public String toString() {
-            return "Bag" + index;
+            return "index" + index;
         }
         
     }
@@ -200,7 +200,7 @@ public abstract class BagKey implements Comparable<BagKey> {
             for (int i = 0; i < key.remaining(); i++) {
                 bytes.add(TypeUtils.toHexString(key.get(key.position() + i)));
             }
-            return String.format("Keyed %s %s", StringUtils.join(bytes, " "), options);
+            return String.format("0x%s", StringUtils.join(bytes, ""));
         }
 
     }
