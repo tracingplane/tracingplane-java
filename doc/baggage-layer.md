@@ -23,15 +23,15 @@ The very first bit of any data atom is a 0, therefore data atoms are **always** 
 	  "a": 77
 	}
 
-To do this we would take the binary representations of "a" (`01100001`) and 77 (`01001101`)
- and prefix them with a header atom (`10000000`) and a data atom (`00000000`) respectively:
+To do this we would take the binary representations of "a" (`0x61`) and 77 (`0x0000004D`)
+ and prefix them with a header atom (`0x80`) and a data atom (`0x00`) respectively:
 
-* header("a") =  `10000000 01100001`
-* data(77) = `00000000 01001101`
+* header("a") =  `80 61`
+* data(77) = `00 00 00 00 4D`
 
 The baggage atoms for this mapping are therefore:
 
-* A = [ header("a"), data(77) ] = [`10000000 01100001`,`00000000 01001101`]
+* A = [ header("a"), data(77) ] = [`80 61`,`00 00 00 00 4D`]
 
 Now suppose there exists some other baggage B that does not contain a mapping for a, but does contain a mapping of "b" to 30:
 
@@ -40,13 +40,13 @@ Now suppose there exists some other baggage B that does not contain a mapping fo
     }
 
 
-* header("b") = `10000000 01100010`
-* data(30) = `00000000 00011110`
-* B = [ header("b"), data(30) ] = [`10000000 01100010`,`00000000 00011110`]
+* header("b") = `80 62`
+* data(30) = `00 00 00 00 1E`
+* B = [ header("b"), data(30) ] = [`80 62`,`00 00 00 00 1E`]
 	
 The lexicographic merge of A and B's atoms are:
 
-* merge(A, B) = [`10000000 01100001`, `00000000 01001101`, `10000000 01100010`, `00000000 00011110`]
+* merge(A, B) = [`80 61`,`00 00 00 00 4D`,`80 62`,`00 00 00 00 1E`]
 * merge(A, B) = [ header("a"), data(77), header("b"), data(30) ]
 
 That is, the merged atoms represent the mappings of A and B:
@@ -62,13 +62,13 @@ Now suppose there exists some other baggage C that contains a *different* mappin
 	  "a": 20,
 	}
 
-* header("a") =  `10000000 01100001`
-* data(20) = `00000000 00010100`
-* C = [ header("a"), data(20) ] = [`10000000 01100001`, `00000000 00010100`]
+* header("a") =  `80 61`
+* data(20) = `00 00 00 00 14`
+* C = [ header("a"), data(20) ] = [`80 61`,`00 00 00 00 14`]
 
 The lexicographic merge of A and C's atoms are:
 
-* merge(A, C) = [`10000000 01100001`, `00000000 00010100`, `00000000 01001101`]
+* merge(A, C) = [`80 61`, `00 00 00 00 15`, `00 00 00 00 4D`]
 * merge(A, C) = [ header("a"), data(20), data(77) ]
 
 That is, they represent:
@@ -93,23 +93,23 @@ Finally, let's look at a slightly more complicated example, where D and E have s
 	  "d": 12
 	}
 
-* header("a") =  `10000000 01100001`
-* header("b") = `10000000 01100010`
-* header("c") = `10000000 01100011`
-* header("d") = `10000000 01100100`
-* data(12) = `00000000 00001100`
-* data(22) = `00000000 00010110`
-* data(30) = `00000000 00011110`
-* data(50) = `00000000 00110010`
-* data(80) = `00000000 01010000`
+* header("a") = `80 61`
+* header("b") = `80 62`
+* header("c") = `80 63`
+* header("d") = `80 64`
+* data(12) = `00 00 00 00 0C`
+* data(22) = `00 00 00 00 16`
+* data(30) = `00 00 00 00 1E`
+* data(50) = `00 00 00 00 32`
+* data(80) = `00 00 00 00 50`
 
 * D = [ header("a"), data(22), header("b"), data(30), data(50), header("d"), data(12) ]
-* D = [`10000000 01100010`, `00000000 00010110`, `10000000 01100010`, `00000000 00011110`, `00000000 00110010`, `10000000 01100100`, `00000000 00001100`]
+* D = [`80 61`, `00 00 00 00 16`, `80 62`, `00 00 00 00 1E`, `00 00 00 00 32`, `80 64`, `00 00 00 00 0C`]
 
 * E = [ header("b"), data(12), data(50), header("c"), data(80), header("d"), data(12) ]
-* E = [`10000000 01100010`, `00000000 00001100`, `00000000 00110010`, `10000000 01100011`, `00000000 01010000`, `10000000 01100100`, `00000000 00001100`]
+* E = [`80 62`, `00 00 00 00 0C`, `00 00 00 00 32`, `80 63`, `00 00 00 00 50`, `80 64`, `00 00 00 00 0C`]
 
-* merge(D, E) = [`10000000 01100010`, `00000000 00010110`, `10000000 01100010`, `00000000 00001100`, `00000000 00011110`, `00000000 00110010`, `10000000 01100011`, `00000000 01010000`, `10000000 01100100`, `00000000 00001100`]
+* merge(D, E) = [`80 61`, `00 00 00 00 16`, `80 62`, `00 00 00 00 0C`, `00 00 00 00 1E`, `00 00 00 00 32`, `80 63`, `00 00 00 00 50`, `80 64`, `00 00 00 00 0C`]
 * merge(D, E) = [ header("a"), data(22), header("b"), data(12), data(30), data(50), header("c"), data(80), header("d"), data(12) ]
 
 		merge(D, E) = {

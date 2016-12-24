@@ -74,6 +74,10 @@ public class SignedLexVarint {
     public static int writeLexVarInt32(ByteBuffer buf, int value) {
         return writeLexVarInt64(buf, value);
     }
+    
+    public static int writeReverseLexVarInt32(ByteBuffer buf, int value) {
+        return writeReverseLexVarInt64(buf, value);
+    }
 
     public static int writeLexVarInt64(ByteBuffer buf, long value) {
         boolean negate = value < 0;
@@ -111,6 +115,10 @@ public class SignedLexVarint {
 
         return size;
     }
+    
+    public static int writeReverseLexVarInt64(ByteBuffer buf, long value) {
+        return writeLexVarInt64(buf, -(value + 1));
+    }
 
     /**
      * Interprets the next bytes of {@code buf} as a lexicographically comparable signed 32-bit integer. Reads up to 5
@@ -123,6 +131,20 @@ public class SignedLexVarint {
      */
     public static int readLexVarInt32(ByteBuffer buf) throws AtomLayerException {
         return (int) readLexVarInt64(buf);
+    }
+
+    /**
+     * Interprets the next bytes of {@code buf} as a lexicographically comparable signed 32-bit integer. Reads up to 5
+     * bytes from {@code buf} to decode the value. Interprets them as a reverse int, eg, s.t. the lexicographical
+     * comparison is reversed
+     * 
+     * @param buf a buffer
+     * @return a signed integer read from buf
+     * @throws AtomLayerException if the next bytes are invalid when interpreted as a lexicographically comparable
+     *             varint
+     */
+    public static int readReverseLexVarInt32(ByteBuffer buf) throws AtomLayerException {
+        return -(readLexVarInt32(buf) + 1);
     }
 
     /**
@@ -168,6 +190,20 @@ public class SignedLexVarint {
         } else {
             return result;
         }
+    }
+
+    /**
+     * Interprets the next bytes of {@code buf} as a lexicographically comparable signed 64-bit integer. Reads up to 9
+     * bytes from {@code buf} to decode the value. Interprets them as a reverse int, eg, s.t. the lexicographical
+     * comparison is reversed
+     * 
+     * @param buf a buffer
+     * @return a signed long read from buf
+     * @throws AtomLayerException if the next bytes are invalid when interpreted as a lexicographically comparable
+     *             varint
+     */
+    public static long readReverseLexVarInt64(ByteBuffer buf) throws AtomLayerException {
+        return -(readReverseLexVarInt64(buf) + 1);
     }
 
     /**

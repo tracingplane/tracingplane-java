@@ -86,5 +86,21 @@ public class TypeUtils {
         return toHexString(ByteBuffer.wrap(serialize));
     }
     
+    public static String toHexString(String s) {
+        List<String> hexStrings = new ArrayList<>();
+        for (byte b : s.getBytes()) {
+            hexStrings.add("`" + toHexString(b) + "`");
+        }
+        return StringUtils.join(hexStrings, ",");
+    }
+    
+    public static void main(String[] args) {
+        int[] xs = {12, 22, 30, 50, 80 };
+        for (int x : xs) {
+            System.out.println(toHexString((byte) x));
+        }
+//        System.out.println(toHexString("a"));
+    }
+    
     
 }
