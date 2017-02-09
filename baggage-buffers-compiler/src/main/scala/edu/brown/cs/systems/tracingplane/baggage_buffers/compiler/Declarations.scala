@@ -62,7 +62,7 @@ object Declarations {
   val fieldindex: P[Int] = P(CharIn('0' to '9').rep).!.map(_.toInt)
 
   val fieldDeclaration: P[FieldDeclaration] = P(fieldtype ~ ws ~ name.! ~ eatws ~/ "=" ~ eatws ~/ fieldindex ~ eatws ~/ ";").map { case (a, b, c) => FieldDeclaration(a, b, c) }
-  val bagDeclaration: P[BagDeclaration] = P( "bag" ~ ws ~/ name.! ~ eatnl ~/ "{" ~ eatnl ~/ fieldDeclaration.rep(min=1, sep=eatnl) ~ eatnl ~/ "}" ).map { case (a, b) => BagDeclaration(a, b) }
+  val bagDeclaration: P[BagDeclaration] = P( "bag" ~ ws ~/ name.! ~ eatnl ~/ "{" ~ eatnl ~/ fieldDeclaration.rep(min=0, sep=eatnl) ~ eatnl ~/ "}" ).map { case (a, b) => BagDeclaration(a, b) }
 
   val importDeclaration: P[ImportDeclaration] = P( "import" ~ ws ~/ "\"" ~ CharsWhile(_ != '"').! ~ "\"" ~ eatws ~/ ";" ).map{ case a => ImportDeclaration(a) }
   

@@ -54,10 +54,6 @@ public class CompileException extends Exception {
         return new CompileException("%s: recursive import of %s", first, second);
     }
     
-    public static CompileException noFieldsDeclared(File inputFile, String bagName) {
-        return new CompileException("%s: bag %s declares no fields", inputFile, bagName);
-    }
-    
     public static CompileException duplicateDeclaration(File inputFile, String bagName) {
         return new CompileException("%s: duplicate declaration of bag %s", inputFile, bagName);
     }

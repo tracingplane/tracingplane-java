@@ -53,7 +53,6 @@ public class Linker {
     private void process(BaggageBuffersDeclaration decl) throws CompileException {
         fillPackageNames(decl);
         checkForDuplicateBagDeclarations(null, decl);
-        checkForEmptyBagDeclarations(null, decl);
         checkForDuplicateFieldDeclarations(null, decl);
         resolveFieldPackageNames(null, decl);
     }
@@ -66,7 +65,6 @@ public class Linker {
             BaggageBuffersDeclaration decl = inputs.get(inputFile);
 
             checkForDuplicateBagDeclarations(inputFile, decl);
-            checkForEmptyBagDeclarations(inputFile, decl);
             checkForDuplicateFieldDeclarations(inputFile, decl);
             resolveFieldPackageNames(inputFile, decl);
         }
@@ -83,15 +81,6 @@ public class Linker {
                 throw CompileException.duplicateDeclaration(inputFile, bagName);
             }
             bagsSeen.add(bagName);
-        }
-    }
-
-    public static void checkForEmptyBagDeclarations(File inputFile,
-                                                    BaggageBuffersDeclaration bbDecl) throws CompileException {
-        for (BagDeclaration bagDecl : bbDecl.getBagDeclarations()) {
-            if (bagDecl.getFieldDeclarations().isEmpty()) {
-                throw CompileException.noFieldsDeclared(inputFile, bagDecl.name());
-            }
         }
     }
 
