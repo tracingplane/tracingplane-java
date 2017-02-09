@@ -81,6 +81,7 @@ class JavaCompiler extends Compiler {
     
     def javaType(fieldType: FieldType): String = {
       fieldType match {
+        case BuiltInType.taint => return "Boolean"
         case BuiltInType.bool => return "Boolean"
         case BuiltInType.int32 => return "Integer"
         case BuiltInType.sint32 => return "Integer"
@@ -100,6 +101,13 @@ class JavaCompiler extends Compiler {
         case BuiltInType.Counter => return s"$Counter"
         
         case UserDefinedType(packageName, name) => return s"$packageName.${javaName(name)}"
+      }
+    }
+    
+    def defaultValue(fieldType: FieldType): String = {
+      fieldType match {
+        case BuiltInType.taint => return "false"
+        case _ => return "null"
       }
     }
     
@@ -128,6 +136,7 @@ class JavaCompiler extends Compiler {
     
     def joiner(fieldType: FieldType): String = {
       fieldType match {
+        case BuiltInType.taint => return s"$Joiners.or()"
         case prim: PrimitiveType => return s"$Joiners.<${javaType(fieldType)}>first()"
         case udt: UserDefinedType => return handler(udt)
         case BuiltInType.Counter => return counterHandler
@@ -166,7 +175,7 @@ class JavaCompiler extends Compiler {
       
       val Name: String = javaName(decl.name)
       val Type: String = javaType(decl.fieldtype)
-      val DefaultValue: String = "null"
+      val DefaultValue: String = defaultValue(decl.fieldtype)
       val fieldDeclaration = s"public $Type $Name = $DefaultValue;"
       
       val BagKeyName = s"_${Name}Key"

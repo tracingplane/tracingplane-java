@@ -49,6 +49,7 @@ object Ast {
     sealed trait Signed extends Numeric
     sealed trait Unsigned extends Numeric
 
+    case object taint extends Unsigned
     case object bool extends Unsigned
     case object int32 extends Unsigned
     case object int64 extends Unsigned

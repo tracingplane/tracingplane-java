@@ -30,7 +30,8 @@ object Declarations {
   
   /** Matches built-in primitive types */
   val primitiveType: P[PrimitiveType] = P(
-    "bool".!.map(_ => BuiltInType.bool) |
+    "taint".!.map(_ => BuiltInType.taint) |
+      "bool".!.map(_ => BuiltInType.bool) |
       "int32".!.map(_ => BuiltInType.int32) |
       "int64".!.map(_ => BuiltInType.int64) |
       "sint32".!.map(_ => BuiltInType.sint32) |

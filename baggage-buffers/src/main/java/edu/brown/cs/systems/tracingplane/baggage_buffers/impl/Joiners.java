@@ -10,6 +10,20 @@ import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Joiner;
 public class Joiners {
 
     private Joiners() {}
+    
+    public static Joiner<Boolean> or() {
+        return new Joiner<Boolean>() {
+            public Boolean join(Boolean a, Boolean b) {
+                if (a == null) {
+                    return b;
+                } else if (b == null) {
+                    return a;
+                } else {
+                    return a || b;
+                }
+            }
+        };
+    }
 
     public static <T> Joiner<T> first() {
         return new Joiner<T>() {

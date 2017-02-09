@@ -15,6 +15,8 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 
 /**
  * Tests a baggage containing a bag that contains a bag that contains ...
+ * 
+ * Checks that if an empty bag is added, then it isn't included in serialized form
  */
 public class TestBaggage06_Siblings extends BaggageTestCase {
 
@@ -102,9 +104,7 @@ public class TestBaggage06_Siblings extends BaggageTestCase {
         reader.exit();
         assertNull(reader.enter());
         reader.exit();
-        assertTrue(reader.enter(AB));
-        assertNull(reader.enter());
-        reader.exit();
+        assertFalse(reader.enter(AB)); // AB had no data and was ditched
         assertNull(reader.enter());
         reader.exit();
         assertTrue(reader.enter(B));
@@ -205,8 +205,7 @@ public class TestBaggage06_Siblings extends BaggageTestCase {
 
         assertTrue(reader.enter(A));
         assertFalse(reader.enter(indexed(AA.index + 1)));
-        assertTrue(reader.enter(AB));
-        reader.exit();
+        assertFalse(reader.enter(AB));
         reader.exit();
         assertFalse(reader.enter(indexed(A.index + 1)));
         assertTrue(reader.enter(B));

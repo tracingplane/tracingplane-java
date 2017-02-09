@@ -69,18 +69,35 @@ public class BaggageWriter implements ElementWriter {
 
     public BaggageWriter exit() {
         currentLevel--;
+        flush();
+        
+        // If the bag has no data, drop the bag
+        if (isHeader(atoms.get(atoms.size()-1))) {
+            atoms.remove(atoms.size() - 1);
+        }
+        
         currentBagBeginIndex = atoms.size();
         return this;
+    }
+    
+    private boolean isHeader(ByteBuffer atom) {
+        if (atom.remaining() > 0) {
+            return AtomPrefixes.get(atom.get(atom.position())).isHeader();
+        } else {
+            return false;
+        }
     }
 
     private void writeHeader(int level, BagKey.Indexed bagKey) {
         ByteBuffer buf = backing.newAtom(HeaderSerialization.serializedSize(bagKey));
         HeaderSerialization.writeAtom(buf, bagKey, level);
+        backing.finish();
     }
 
     private void writeHeader(int level, BagKey.Keyed bagKey) {
         ByteBuffer buf = backing.newAtom(HeaderSerialization.serializedSize(bagKey));
         HeaderSerialization.writeAtom(buf, bagKey, level);
+        backing.finish();
 
     }
 
@@ -120,7 +137,7 @@ public class BaggageWriter implements ElementWriter {
      * @return this BaggageWriter instance
      */
     public BaggageWriter writeBytes(ByteBuffer buf) {
-        backing.finish();
+        flush();
         if (buf.position() > 0 && buf.get(buf.position() - 1) == DataPrefix.prefix) {
             buf.position(buf.position() - 1);
             addAtom(buf);
@@ -132,6 +149,7 @@ public class BaggageWriter implements ElementWriter {
 
     /** Sort any data written between the start of the current bag and now */
     public void sortData() {
+        flush();
         Collections.sort(atoms.subList(currentBagBeginIndex, atoms.size()));
     }
 

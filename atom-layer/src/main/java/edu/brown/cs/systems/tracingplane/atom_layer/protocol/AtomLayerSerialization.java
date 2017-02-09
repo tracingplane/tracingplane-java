@@ -22,6 +22,8 @@ import edu.brown.cs.systems.tracingplane.atom_layer.types.ProtobufVarint.Malform
 public class AtomLayerSerialization {
 
     static final Logger log = LoggerFactory.getLogger(AtomLayerSerialization.class);
+    
+    static final byte[] EMPTY = new byte[0];
 
     private AtomLayerSerialization() {}
 
@@ -137,7 +139,7 @@ public class AtomLayerSerialization {
 
     public static byte[] serialize(List<ByteBuffer> atoms) {
         if (atoms == null || atoms.size() == 0) {
-            return null;
+            return EMPTY;
         }
         ByteBuffer buf = ByteBuffer.allocate(serializedSize(atoms));
         for (ByteBuffer atom : atoms) {
@@ -148,7 +150,7 @@ public class AtomLayerSerialization {
 
     public static byte[] serialize(List<ByteBuffer> atoms, int limit) {
         if (atoms == null || atoms.size() == 0) {
-            return null;
+            return EMPTY;
         }
         TrimExtent trim = AtomLayerOverflow.determineTrimExtent(atoms, limit);
         ByteBuffer buf = ByteBuffer.allocate(trim.serializedSize);

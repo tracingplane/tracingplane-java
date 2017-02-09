@@ -23,6 +23,10 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.ElementReader;
 public class Parsers {
 
     private Parsers() {}
+    
+    public static ElementParser<Boolean> taintParser() {
+        return combine(boolParser(), () -> false, (l, r) -> l || r);
+    }
 
     public static ElementParser<Boolean> boolParser() {
         return castNext(ReaderHelpers.to_bool);

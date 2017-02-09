@@ -26,6 +26,11 @@ public class WriterHelpers {
     public static final Function<Double, ByteBuffer> from_double = v -> Cast.from_double(v);
     public static final Function<String, ByteBuffer> from_string = v -> Cast.from_string(v);
     public static final Function<ByteBuffer, ByteBuffer> from_bytes = v -> Cast.from_bytes(v);
+    
+    /** Write an empty data atom */
+    public static void writeEmpty(ElementWriter writer) {
+        writer.newDataAtom(0);
+    }
 
     /** Write a boolean data atom */
     public static void writeBool(ElementWriter writer, boolean value) {

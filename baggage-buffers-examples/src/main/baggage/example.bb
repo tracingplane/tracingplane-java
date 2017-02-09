@@ -41,4 +41,7 @@ bag ExampleBag {
 	
 	counter c = 23;
 	
+	
+	taint sampled = 30;
+	
 }

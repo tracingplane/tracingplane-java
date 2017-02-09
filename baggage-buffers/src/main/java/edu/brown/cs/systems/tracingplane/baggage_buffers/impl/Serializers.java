@@ -19,6 +19,16 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.ElementWriter;
 public class Serializers {
 
     private Serializers() {}
+    
+    public static ElementSerializer<Boolean> taintSerializer() {
+        return new ElementSerializer<Boolean>() {
+            public void serialize(ElementWriter writer, Boolean instance) {
+                if (instance != null && instance == true) {
+                    WriterHelpers.writeBool(writer, true);
+                }
+            }
+        };
+    }
 
     public static ElementSerializer<Boolean> boolSerializer() {
         return new ElementSerializer<Boolean>() {

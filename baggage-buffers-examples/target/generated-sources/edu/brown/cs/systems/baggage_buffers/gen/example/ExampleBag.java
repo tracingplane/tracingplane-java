@@ -48,6 +48,7 @@ public class ExampleBag implements Bag {
     public Set<String> simpleBag2 = null;
     public Map<String, edu.brown.cs.systems.baggage_buffers.gen.example.SimpleBag2> bagMap = null;
     public Counter c = null;
+    public Boolean sampled = false;
 
     public boolean _overflow = false;
 
@@ -163,6 +164,7 @@ public class ExampleBag implements Bag {
             b.append(this.simpleBag2 == null ? "" : BBUtils.indent(String.format("simpleBag2 = %s\n", BBUtils.toString(this.simpleBag2))));
             b.append(this.bagMap == null ? "" : BBUtils.indent(String.format("bagMap = %s\n", BBUtils.toString(this.bagMap, _v -> String.valueOf(_v)))));
             b.append(this.c == null ? "" : BBUtils.indent(String.format("c = %s\n", String.valueOf(this.c))));
+            b.append(this.sampled == null ? "" : BBUtils.indent(String.format("sampled = %s\n", String.valueOf(this.sampled))));
             b.append("}");
         return b.toString();
     }
@@ -206,6 +208,7 @@ public class ExampleBag implements Bag {
         private static final BagKey _simpleBag2Key = BagKey.indexed(16);
         private static final BagKey _bagMapKey = BagKey.indexed(20);
         private static final BagKey _cKey = BagKey.indexed(23);
+        private static final BagKey _sampledKey = BagKey.indexed(30);
 
         private static final Parser<Boolean> _boolfieldParser = Parsers.boolParser();
         private static final Serializer<Boolean> _boolfieldSerializer = Serializers.boolSerializer();
@@ -285,6 +288,11 @@ public class ExampleBag implements Bag {
         private static final Joiner<Map<String, edu.brown.cs.systems.baggage_buffers.gen.example.SimpleBag2>> _bagMapJoiner = Joiners.<String, edu.brown.cs.systems.baggage_buffers.gen.example.SimpleBag2>mapMerge(edu.brown.cs.systems.baggage_buffers.gen.example.SimpleBag2.Handler.instance);
 
         private static final BaggageHandler<? extends Counter> _cHandler = CounterImpl.Handler.instance;
+
+        private static final Parser<Boolean> _sampledParser = Parsers.taintParser();
+        private static final Serializer<Boolean> _sampledSerializer = Serializers.taintSerializer();
+        private static final Brancher<Boolean> _sampledBrancher = Branchers.<Boolean>noop();
+        private static final Joiner<Boolean> _sampledJoiner = Joiners.or();
 
         @Override
         public boolean isInstance(Bag bag) {
@@ -377,6 +385,11 @@ public class ExampleBag implements Bag {
 
             if (reader.enter(_cKey)) {
                 instance.c = _cHandler.parse(reader);
+                reader.exit();
+            }
+
+            if (reader.enter(_sampledKey)) {
+                instance.sampled = _sampledParser.parse(reader);
                 reader.exit();
             }
             instance._overflow = reader.didOverflow();
@@ -493,6 +506,12 @@ public class ExampleBag implements Bag {
                 _cHandler.serialize(writer, instance.c);
                 writer.exit();
             }
+
+            if (instance.sampled != null) {
+                writer.enter(_sampledKey);
+                _sampledSerializer.serialize(writer, instance.sampled);
+                writer.exit();
+            }
         }
 
         @Override
@@ -519,6 +538,7 @@ public class ExampleBag implements Bag {
             newInstance.simpleBag2 = _simpleBag2Brancher.branch(instance.simpleBag2);
             newInstance.bagMap = _bagMapBrancher.branch(instance.bagMap);
             newInstance.c = _cHandler.branch(instance.c);
+            newInstance.sampled = _sampledBrancher.branch(instance.sampled);
             return newInstance;
         }
 
@@ -546,6 +566,7 @@ public class ExampleBag implements Bag {
                 left.simpleBag2 = _simpleBag2Joiner.join(left.simpleBag2, right.simpleBag2);
                 left.bagMap = _bagMapJoiner.join(left.bagMap, right.bagMap);
                 left.c = _cHandler.join(left.c, right.c);
+                left.sampled = _sampledJoiner.join(left.sampled, right.sampled);
                 return left;
             }
         }

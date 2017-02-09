@@ -1,18 +1,21 @@
 package edu.brown.cs.systems.tracingplane.atom_layer.protocol;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import org.junit.Test;
-import edu.brown.cs.systems.tracingplane.atom_layer.protocol.AtomLayerSerialization;
 
 public class TestSerialization {
 
     @Test
     public void testSerializeNulls() {
 
-        assertNull(AtomLayerSerialization.serialize(null));
-        assertNull(AtomLayerSerialization.serialize(new ArrayList<ByteBuffer>()));
+        assertNotNull(AtomLayerSerialization.serialize(null));
+        assertNotNull(AtomLayerSerialization.serialize(new ArrayList<ByteBuffer>()));
+        
+        assertEquals(0, AtomLayerSerialization.serialize(null).length);
+        assertEquals(0, AtomLayerSerialization.serialize(new ArrayList<ByteBuffer>()).length);
 
     }
 
