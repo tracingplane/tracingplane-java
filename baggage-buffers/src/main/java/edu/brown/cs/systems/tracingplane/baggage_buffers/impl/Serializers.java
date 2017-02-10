@@ -9,6 +9,8 @@ import java.util.function.Function;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.Lexicographic;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Serializer;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Serializer.ElementSerializer;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Struct;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Struct.StructHandler;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.ElementWriter;

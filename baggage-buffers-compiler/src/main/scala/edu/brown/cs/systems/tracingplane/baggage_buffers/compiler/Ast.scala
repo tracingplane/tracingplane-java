@@ -8,7 +8,9 @@ import scala.reflect.runtime.universe._
 
 object Ast {
 
-  sealed trait FieldType
+  sealed trait FieldType {
+    def isValid: Boolean = true
+  }
   
   sealed abstract class ParameterizedType(parameters: List[FieldType]) extends FieldType {
     def getParameters(): java.util.List[FieldType] = {
@@ -19,7 +21,10 @@ object Ast {
     }
   }
   
-  case class UserDefinedType(var packageName: String, name: String) extends FieldType {
+  case class UserDefinedType(var packageName: String, name: String, var structType: Boolean = false) extends FieldType {
+    def isStructType(): Boolean = {
+      return structType
+    }
     def hasPackageName(): Boolean = {
       return packageName != null && !packageName.equals("")
     }
@@ -41,7 +46,6 @@ object Ast {
 //      return this.getClass.getSimpleName // SI-2034
     }
   }
-  
   
   object BuiltInType {
     sealed trait Numeric extends PrimitiveType
@@ -67,7 +71,15 @@ object Ast {
     
     case object Counter extends BuiltInType
     
-    case class Set(of: PrimitiveType) extends ParameterizedType(List[FieldType](of)) with BuiltInType
+    case class Set(of: FieldType) extends ParameterizedType(List[FieldType](of)) with BuiltInType {
+      override def isValid(): Boolean = {
+        of match {
+          case t: PrimitiveType => return true
+          case UserDefinedType(_,_,isStructType) => return isStructType
+          case _ => return false
+        }
+      }
+    }
     case class Map(keyType: PrimitiveType, valueType: FieldType) extends ParameterizedType(List[FieldType](keyType, valueType)) with BuiltInType
     
     
@@ -80,11 +92,14 @@ object Ast {
     }
   }
   
-  case class BagDeclaration(name: String, fields: Seq[FieldDeclaration]) {
+  case class StructFieldDeclaration(fieldtype: FieldType, name: String) {
+    override def toString(): String = {
+      return s"$fieldtype $name"
+    }
+  }
+  
+  abstract class ObjectDeclaration(val name: String) {
     var packageName: String = ""; // Filled in later
-    
-    fields.sortWith(_.index < _.index)
-    
     def fullyQualifiedName(packageDeclaration: Option[PackageDeclaration]): String = {
       packageDeclaration match {
         case Some(decl) => return fullyQualifiedName(decl)
@@ -94,7 +109,18 @@ object Ast {
     def fullyQualifiedName(packageDeclaration: PackageDeclaration): String = {
       return packageDeclaration.getFullyQualifiedBagName(name)
     }
+  }
+  
+  case class BagDeclaration(override val name: String, fields: Seq[FieldDeclaration]) extends ObjectDeclaration(name) {
+    fields.sortWith(_.index < _.index)
+    
     def getFieldDeclarations(): java.util.List[FieldDeclaration] = {
+      return fields.asJava
+    }
+  }
+  
+  case class StructDeclaration(override val name: String, fields: Seq[StructFieldDeclaration]) extends ObjectDeclaration(name) {
+    def getFieldDeclarations(): java.util.List[StructFieldDeclaration] = {
       return fields.asJava
     }
   }
@@ -113,9 +139,17 @@ object Ast {
   
   case class ImportDeclaration(filename: String)
   
-  case class BaggageBuffersDeclaration(packageDeclaration: Option[PackageDeclaration], imports: Seq[ImportDeclaration], bagDeclarations: Seq[BagDeclaration]) {
+  case class BaggageBuffersDeclaration(packageDeclaration: Option[PackageDeclaration], imports: Seq[ImportDeclaration], objectDeclarations: Seq[ObjectDeclaration]) {
+    val bagDeclarations: Seq[BagDeclaration] = objectDeclarations.filter(_.isInstanceOf[BagDeclaration]).map(_.asInstanceOf[BagDeclaration])
+    val structDeclarations: Seq[StructDeclaration] = objectDeclarations.filter(_.isInstanceOf[StructDeclaration]).map(_.asInstanceOf[StructDeclaration])
+    def getObjectDeclarations(): java.util.List[ObjectDeclaration] = {
+      return objectDeclarations.asJava
+    }
     def getBagDeclarations(): java.util.List[BagDeclaration] = {
       return bagDeclarations.asJava
+    }
+    def getStructDeclarations(): java.util.List[StructDeclaration] = {
+      return structDeclarations.asJava
     }
     def getImportDeclarations(): java.util.List[ImportDeclaration] = {
       return imports.asJava
@@ -130,7 +164,7 @@ object Ast {
       }
     }
     def isEmpty(): Boolean = {
-      return packageDeclaration.isEmpty && imports.isEmpty && bagDeclarations.isEmpty
+      return packageDeclaration.isEmpty && imports.isEmpty && bagDeclarations.isEmpty && structDeclarations.isEmpty
     }
   }
   

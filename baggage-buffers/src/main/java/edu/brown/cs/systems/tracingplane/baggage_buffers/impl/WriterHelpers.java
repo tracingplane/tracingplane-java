@@ -1,6 +1,7 @@
 package edu.brown.cs.systems.tracingplane.baggage_buffers.impl;
 
 import java.nio.ByteBuffer;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.SignedLexVarint;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.UnsignedLexVarint;
@@ -26,6 +27,22 @@ public class WriterHelpers {
     public static final Function<Double, ByteBuffer> from_double = v -> Cast.from_double(v);
     public static final Function<String, ByteBuffer> from_string = v -> Cast.from_string(v);
     public static final Function<ByteBuffer, ByteBuffer> from_bytes = v -> Cast.from_bytes(v);
+    
+    
+    public static final BiConsumer<Boolean, ByteBuffer> write_bool = (v, buf) -> buf.put((byte) (v ? 1 : 0));
+    public static final BiConsumer<Integer, ByteBuffer> write_int32 = (v, buf) -> UnsignedLexVarint.writeLexVarUInt32(buf, v);
+    public static final BiConsumer<Integer, ByteBuffer> write_sint32 = (v, buf) -> SignedLexVarint.writeLexVarInt32(buf, v);
+    public static final BiConsumer<Integer, ByteBuffer> write_fixed32 = (v, buf) -> buf.putInt(v);
+    public static final BiConsumer<Long, ByteBuffer> write_int64 = (v, buf) -> UnsignedLexVarint.writeLexVarUInt64(buf, v);
+    public static final BiConsumer<Long, ByteBuffer> write_sint64 = (v, buf) -> SignedLexVarint.writeLexVarInt64(buf, v);
+    public static final BiConsumer<Long, ByteBuffer> write_fixed64 = (v, buf) -> buf.putLong(v);
+    public static final BiConsumer<Float, ByteBuffer> write_float = (v, buf) -> buf.putFloat(v);
+    public static final BiConsumer<Double, ByteBuffer> write_double = (v, buf) -> buf.putDouble(v);
+    public static final BiConsumer<String, ByteBuffer> write_string = (v, buf) -> buf.put(v.getBytes());
+    public static final BiConsumer<ByteBuffer, ByteBuffer> write_bytes = (v, buf) -> buf.put(v);
+    
+    
+    
     
     /** Write an empty data atom */
     public static void writeEmpty(ElementWriter writer) {

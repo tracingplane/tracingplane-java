@@ -37,5 +37,18 @@ public class BBUtils {
     public static String indent(String s) {
         return s.replaceAll("(?m)^", "  ");
     }
+    
+    /** Equality comparison, using the provided default value if a or b are null */
+    public static <T> boolean equals(T a, T b, T defaultValue) {
+        if (a == null && b == null) {
+            return true;
+        } else if (a == null) {
+            return b.equals(defaultValue);
+        } else if (b == null) {
+            return a.equals(defaultValue);
+        } else {
+            return a.equals(b);
+        }
+    }
 
 }

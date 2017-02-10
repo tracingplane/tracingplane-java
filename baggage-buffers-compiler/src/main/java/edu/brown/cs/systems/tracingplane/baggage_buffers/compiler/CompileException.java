@@ -54,11 +54,19 @@ public class CompileException extends Exception {
         return new CompileException("%s: recursive import of %s", first, second);
     }
     
-    public static CompileException duplicateDeclaration(File inputFile, String bagName) {
-        return new CompileException("%s: duplicate declaration of bag %s", inputFile, bagName);
+    public static CompileException duplicateDeclaration(File inputFile, String objectName) {
+        return new CompileException("%s: duplicate declaration of %s", inputFile, objectName);
+    }
+    
+    public static CompileException invalidStructFieldType(File inputFile, String structName, StructFieldDeclaration field) {
+        return new CompileException("%s: %s is not a valid field type for struct %s (%s)", inputFile, field.fieldtype(), structName, field); 
     }
     
     public static CompileException duplicateFieldDeclaration(File inputFile, String bagName, String fieldName, FieldDeclaration... fields) {
+        return new CompileException("%s: %s declares field named %s multiple times (%s)", inputFile, bagName, fieldName, StringUtils.join(fields, ", "));
+    }
+    
+    public static CompileException duplicateStructFieldDeclaration(File inputFile, String bagName, String fieldName, StructFieldDeclaration... fields) {
         return new CompileException("%s: %s declares field named %s multiple times (%s)", inputFile, bagName, fieldName, StringUtils.join(fields, ", "));
     }
     
@@ -68,6 +76,14 @@ public class CompileException extends Exception {
     
     public static CompileException unknownType(File inputFile, String bagName, FieldDeclaration declaration, UserDefinedType userDefined) {
         return new CompileException("%s: %s declares field with unknown type %s (%s)", inputFile, bagName, userDefined, declaration);
+    }
+    
+    public static CompileException unknownType(File inputFile, String structName, StructFieldDeclaration declaration, UserDefinedType userDefined) {
+        return new CompileException("%s: %s declares field with unknown type %s (%s)", inputFile, structName, userDefined, declaration);
+    }
+
+    public static CompileException fieldTypeNotValid(File inputFile, String bagName, FieldType fieldType) {
+        return new CompileException("%s: %s declares invalid field type %s", inputFile, bagName, fieldType);
     }
 
 }

@@ -1,16 +1,20 @@
 package edu.brown.cs.systems.baggage_buffers_examples;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Test;
 import edu.brown.cs.systems.baggage_buffers.gen.example.ExampleBag;
 import edu.brown.cs.systems.baggage_buffers.gen.example.SimpleBag2;
+import edu.brown.cs.systems.baggage_buffers.gen.example.SimpleStruct1;
+import edu.brown.cs.systems.baggage_buffers.gen.example.SimpleStruct1.Handler;
 import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.Registrations;
@@ -23,6 +27,46 @@ public class TestExampleBag {
         BasicConfigurator.configure();
 
         Registrations.register(BagKey.indexed(10), ExampleBag.Handler.instance);
+    }
+    
+    @Test
+    public void testStruct() throws Exception {
+        Handler handler = SimpleStruct1.Handler.instance;
+        
+        SimpleStruct1 struct = new SimpleStruct1();
+        assertEquals(2, handler.serializedSize(struct));
+        
+        struct.integerField = 1000;
+        assertEquals(3, handler.serializedSize(struct));
+        
+        struct.stringField = "hello";
+        assertEquals(8, handler.serializedSize(struct));
+        
+        ByteBuffer buf = ByteBuffer.allocate(8);
+        handler.writeTo(buf, struct);
+        buf.flip();
+        SimpleStruct1 struct2 = handler.readFrom(buf);
+        assertEquals(struct, struct2);
+        
+        SimpleStruct1 struct3 = new SimpleStruct1();
+        assertFalse(struct3.equals(struct));
+        
+        struct3.integerField = 100;
+        assertFalse(struct3.equals(struct));
+        
+        struct3.stringField = "hello";
+        assertFalse(struct3.equals(struct));
+        
+        struct3.integerField = 1000;
+        assertTrue(struct3.equals(struct));
+        
+        ExampleBag bag = new ExampleBag();
+        bag.structsetfield = new HashSet<>();
+        bag.structsetfield.add(struct);
+        bag.structsetfield.add(struct2);
+        bag.structsetfield.add(struct3);
+        
+        assertEquals(1, bag.structsetfield.size());
     }
 
     @Test

@@ -11,6 +11,18 @@ bag SimpleBag2 {
 	string second_field = 2;
 }
 
+struct SimpleStruct1 {
+
+   int32 integer_field;
+   string string_field;
+   
+}
+
+struct SimpleStruct2 {
+    int64 integer_field;
+    SimpleStruct1 nested_struct;
+}
+
 
 bag ExampleBag {
 
@@ -43,5 +55,9 @@ bag ExampleBag {
 	
 	
 	taint sampled = 30;
+	
+	SimpleStruct1 structfield = 33;
+	
+	set<SimpleStruct1> structsetfield = 34;
 	
 }

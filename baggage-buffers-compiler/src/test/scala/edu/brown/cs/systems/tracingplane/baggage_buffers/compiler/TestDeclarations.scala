@@ -376,7 +376,7 @@ bag MyBag3{bool fourth=4;}
     res.bagDeclarations(0) match {
       case BagDeclaration("MyBag1", fields) => {
         fields(0) match {
-          case FieldDeclaration(UserDefinedType("edu.brown", "something"), "first", 1) => {}
+          case FieldDeclaration(UserDefinedType("edu.brown", "something", false), "first", 1) => {}
           case _ => fail("Parsed unexpected FieldDeclaration " + fields(0))
         }
       }

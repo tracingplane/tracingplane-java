@@ -47,7 +47,7 @@ object Declarations {
 
   /** Matches built-in parameterized types */
   val parameterizedType: P[BuiltInType] = P(
-      (("set<" | "Set<") ~ eatws ~/ primitiveType ~ eatws ~ ">").map(BuiltInType.Set(_)) |
+      (("set<" | "Set<") ~ eatws ~/ fieldtype ~ eatws ~ ">").map(BuiltInType.Set(_)) |
       (("map<" | "Map<") ~ eatws ~/ primitiveType ~ eatws ~ "," ~ eatws ~/ fieldtype ~ eatws ~ ">").map { case (k, v) => BuiltInType.Map(k, v) } |
       (("Counter" | "counter") ~ "<>".?).map(_ => BuiltInType.Counter))
       
@@ -64,12 +64,18 @@ object Declarations {
   val fieldDeclaration: P[FieldDeclaration] = P(fieldtype ~ ws ~ name.! ~ eatws ~/ "=" ~ eatws ~/ fieldindex ~ eatws ~/ ";").map { case (a, b, c) => FieldDeclaration(a, b, c) }
   val bagDeclaration: P[BagDeclaration] = P( "bag" ~ ws ~/ name.! ~ eatnl ~/ "{" ~ eatnl ~/ fieldDeclaration.rep(min=0, sep=eatnl) ~ eatnl ~/ "}" ).map { case (a, b) => BagDeclaration(a, b) }
 
+  val structFieldtype: P[FieldType] = P( fqUserDefinedType | primitiveType | nonFqUserDefinedType )
+  val structFieldDeclaration: P[StructFieldDeclaration] = P(structFieldtype ~ ws ~ name.! ~ eatws ~/ ";").map { case (a, b) => StructFieldDeclaration(a, b) }
+  val structDeclaration: P[StructDeclaration] = P( "struct" ~ ws ~/ name.! ~ eatnl ~/ "{" ~ eatnl ~/ structFieldDeclaration.rep(min=0, sep=eatnl) ~ eatnl ~/ "}" ).map { case (a, b) => StructDeclaration(a, b) }
+  
   val importDeclaration: P[ImportDeclaration] = P( "import" ~ ws ~/ "\"" ~ CharsWhile(_ != '"').! ~ "\"" ~ eatws ~/ ";" ).map{ case a => ImportDeclaration(a) }
   
   val packagename: P[Seq[String]] = P( name.!.rep( min = 1, sep = "." ) )
   val packageDeclaration: P[PackageDeclaration] = P( "package" ~ ws ~/ packagename ~ eatws ~/ ";").map{ case a => PackageDeclaration(a) }
   
-  val bbDeclaration: P[BaggageBuffersDeclaration] = P( eatnl ~ (packageDeclaration ~ nl).? ~ (importDeclaration ~ nl).rep ~ bagDeclaration.rep(min=1, sep=nl) ~ eatnl ~ End ).map { case (a,b,c) => BaggageBuffersDeclaration(a,b,c) }
+  val objectDeclaration: P[ObjectDeclaration] = P ( bagDeclaration | structDeclaration )
+  
+  val bbDeclaration: P[BaggageBuffersDeclaration] = P( eatnl ~ (packageDeclaration ~ nl).? ~ (importDeclaration ~ nl).rep ~ objectDeclaration.rep(min=1, sep=nl) ~ eatnl ~ End ).map { case (a,b,c) => BaggageBuffersDeclaration(a,b,c) }
 
   
 }
