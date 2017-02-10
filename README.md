@@ -14,6 +14,8 @@ This repository contains our Java reference implementation for the Tracing Plane
 
 Javadoc for this repository: [jonathanmace.github.io/tracingplane/doc/javadoc/index.html](https://jonathanmace.github.io/tracingplane/doc/javadoc/index.html)
 
+Example Zipkin / OpenTracing Tracers that are backed by Baggage Buffers: [github.com/JonathanMace/tracingplane-opentracing](https://github.com/JonathanMace/tracingplane-opentracing)
+
 ### Table of Contents ###
 
 * [1 Introduction](#1-introduction)
