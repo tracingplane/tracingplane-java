@@ -1,6 +1,7 @@
 package edu.brown.cs.systems.tracingplane.baggage_buffers;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -69,6 +70,8 @@ public class BaggageBuffersContents implements BaggageContents {
     private List<ByteBuffer> overflowAtoms = null;
     private List<ByteBuffer> unprocessedAtoms = null;
 
+    private Map<Object, Object> attachments = null; // Additional process-local objects attached to the baggage
+
     /** Get the value mapped to a key, or null if no mapping */
     public Bag get(BagKey key) {
         return bags == null ? null : bags.get(key);
@@ -82,7 +85,7 @@ public class BaggageBuffersContents implements BaggageContents {
         return this;
     }
 
-    /** Set the value for a key.  Returns this object */
+    /** Set the value for a key. Returns this object */
     public BaggageBuffersContents put(BagKey key, Bag value) {
         if (value == null) {
             remove(key);
@@ -91,6 +94,37 @@ public class BaggageBuffersContents implements BaggageContents {
                 bags = new TreeMap<>();
             }
             bags.put(key, value);
+        }
+        return this;
+    }
+
+    public Object getAttachment(Object key) {
+        if (key != null && attachments != null) {
+            return attachments.get(key);
+        }
+        return null;
+    }
+
+    public BaggageBuffersContents detach(Object key) {
+        if (key != null) {
+            if (attachments != null) {
+                attachments.remove(key);
+            }
+        }
+        return this;
+    }
+
+    public BaggageBuffersContents attach(Object key, Object value) {
+        if (key != null) {
+            if (value == null) {
+                detach(key);
+            } else {
+                if (attachments == null) {
+                    attachments = new HashMap<>(); // this could be done in the style of Go's context.context package,
+                                                   // with a linked list
+                }
+                attachments.put(key, value);
+            }
         }
         return this;
     }
@@ -126,6 +160,7 @@ public class BaggageBuffersContents implements BaggageContents {
 
         overflowAtoms = AtomLayerOverflow.mergeOverflowAtoms(overflowAtoms, second.overflowAtoms);
         unprocessedAtoms = Lexicographic.merge(unprocessedAtoms, second.unprocessedAtoms);
+        // Ignore attachments of second
         return this;
     }
 
@@ -140,6 +175,11 @@ public class BaggageBuffersContents implements BaggageContents {
         }
         other.overflowAtoms = overflowAtoms;
         other.unprocessedAtoms = unprocessedAtoms;
+
+        if (attachments != null) {
+            other.attachments = new HashMap<>(attachments);
+        }
+
         return other;
     }
 
@@ -187,13 +227,22 @@ public class BaggageBuffersContents implements BaggageContents {
 
         return bbcontents;
     }
-    
+
     @Override
     public String toString() {
         List<String> lines = Lists.newArrayList();
-        for (BagKey key : bags.keySet()) {
-            Bag bag = bags.get(key);
-            lines.add(String.format("%s: %s", key, bag));
+        if (bags != null) {
+            for (BagKey key : bags.keySet()) {
+                Bag bag = bags.get(key);
+                lines.add(String.format("%s: %s", key, bag));
+            }
+        }
+        if (attachments != null) {
+            for (Object key : attachments.keySet()) {
+                Object value = attachments.get(key);
+                lines.add(String.format("attachment %s of %s", key.getClass().getSimpleName(),
+                                        value.getClass().getSimpleName()));
+            }
         }
         return StringUtils.join(lines, "\n");
     }
