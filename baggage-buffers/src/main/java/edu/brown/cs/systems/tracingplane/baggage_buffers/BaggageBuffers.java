@@ -57,6 +57,9 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
 
     private static BaggageBuffersContents joinImpl(BaggageBuffersContents left, BaggageBuffersContents right) {
         if (left == null) {
+            if (right instanceof BaggageBuffersContents) {
+                ((BaggageBuffersContents) right).clearAttachments();
+            }
             return right;
         } else if (right == null) {
             return left;

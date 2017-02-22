@@ -129,6 +129,10 @@ public class BaggageBuffersContents implements BaggageContents {
         return this;
     }
 
+    public void clearAttachments() {
+        attachments = null;
+    }
+
     BaggageWriter serialize() {
         BaggageWriter writer = BaggageWriter.createAndMergeWith(overflowAtoms, unprocessedAtoms);
 
@@ -240,8 +244,8 @@ public class BaggageBuffersContents implements BaggageContents {
         if (attachments != null) {
             for (Object key : attachments.keySet()) {
                 Object value = attachments.get(key);
-                lines.add(String.format("attachment %s of %s", key.getClass().getSimpleName(),
-                                        value.getClass().getSimpleName()));
+                lines.add(String.format("attachment %s(%s) = %s(%s)", key.getClass().getSimpleName(), key,
+                                        value.getClass().getSimpleName(), value));
             }
         }
         return StringUtils.join(lines, "\n");
