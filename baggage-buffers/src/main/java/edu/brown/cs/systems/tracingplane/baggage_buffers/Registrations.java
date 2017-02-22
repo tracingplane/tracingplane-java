@@ -10,14 +10,13 @@ import edu.brown.cs.systems.tracingplane.baggage_buffers.api.BaggageHandler;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 
 /**
- * Global registration of baggage handlers to keys. Not currently implemented to support adding new handlers at runtime
+ * Global registration of baggage handlers to keys.
  */
 public class Registrations {
-    
+
     private static final Logger log = LoggerFactory.getLogger(Registrations.class);
 
     static Registrations instance = Registrations.create();
-
 
     /* Implementation notes: Could be volatile or atomic reference, but not trying to optimize for adding handlers at
      * runtime (only at init). Could be treemap if the performance different is fine */

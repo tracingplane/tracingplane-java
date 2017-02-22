@@ -159,7 +159,7 @@ public class TransitLayerCallbacks {
          * @param handler a handler to be invoked whenever any transit layer operation occurs
          * @return a {@link Closeable} that will remove the registration when {@link Closeable#close()} is called.
          */
-        synchronized Closeable add(TransitHandler handler) {
+        public synchronized Closeable add(TransitHandler handler) {
             RegisteredTransitHandler registration = new RegisteredTransitHandler(handler);
             registration.next = head;
             head = registration;
