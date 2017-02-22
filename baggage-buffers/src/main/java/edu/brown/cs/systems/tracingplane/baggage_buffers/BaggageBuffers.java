@@ -1,11 +1,14 @@
 package edu.brown.cs.systems.tracingplane.baggage_buffers;
 
+import java.io.Closeable;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Bag;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayer;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
+import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayerCallbacks.TransitHandler;
+import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayerCallbacks.TransitLayerCallbackRegistry;
 
 /**
  * <p>
@@ -14,6 +17,16 @@ import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
  * </p>
  */
 public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
+
+    private static final TransitLayerCallbackRegistry<BaggageBuffersContents> callbacks =
+            new TransitLayerCallbackRegistry<>(BaggageBuffers::branchImpl, BaggageBuffers::joinImpl);
+
+    /**
+     * Register a callback handler that will be invoked when branching and joining
+     */
+    public Closeable registerCallbackHandler(TransitHandler transitHandler) {
+        return callbacks.add(transitHandler);
+    }
 
     @Override
     public boolean isInstance(Baggage baggage) {
@@ -30,11 +43,19 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
 
     @Override
     public BaggageBuffersContents branch(BaggageBuffersContents from) {
+        return callbacks.branch(from);
+    }
+
+    private static BaggageBuffersContents branchImpl(BaggageBuffersContents from) {
         return from == null ? null : from.branch();
     }
 
     @Override
     public BaggageBuffersContents join(BaggageBuffersContents left, BaggageBuffersContents right) {
+        return callbacks.join(left, right);
+    }
+
+    private static BaggageBuffersContents joinImpl(BaggageBuffersContents left, BaggageBuffersContents right) {
         if (left == null) {
             return right;
         } else if (right == null) {
