@@ -24,7 +24,7 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
     /**
      * Register a callback handler that will be invoked when branching and joining
      */
-    public Closeable registerCallbackHandler(TransitHandler transitHandler) {
+    public static Closeable registerCallbackHandler(TransitHandler transitHandler) {
         return callbacks.add(transitHandler);
     }
 
