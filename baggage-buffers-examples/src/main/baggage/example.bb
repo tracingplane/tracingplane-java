@@ -60,4 +60,6 @@ bag ExampleBag {
 	
 	set<SimpleStruct1> structsetfield = 34;
 	
+	map<string, counter> countermap = 35;
+	
 }

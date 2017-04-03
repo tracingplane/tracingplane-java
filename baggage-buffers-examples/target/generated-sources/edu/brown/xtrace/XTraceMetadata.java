@@ -163,8 +163,8 @@ public class XTraceMetadata implements Bag {
         private static final Brancher<Long> _taskIdBrancher = Branchers.<Long>noop();
         private static final Joiner<Long> _taskIdJoiner = Joiners.<Long>first();
 
-        private static final Parser<Set<Long>> _parentEventIdsParser = Parsers.setParser(Parsers.fixed64Parser());
-        private static final Serializer<Set<Long>> _parentEventIdsSerializer = Serializers.setSerializer(Serializers.fixed64Serializer());
+        private static final Parser<Set<Long>> _parentEventIdsParser = Parsers.<Long>setParser(Parsers.fixed64Parser());
+        private static final Serializer<Set<Long>> _parentEventIdsSerializer = Serializers.<Long>setSerializer(Serializers.fixed64Serializer());
         private static final Brancher<Set<Long>> _parentEventIdsBrancher = Branchers.<Long>set();
         private static final Joiner<Set<Long>> _parentEventIdsJoiner = Joiners.<Long>setUnion();
 

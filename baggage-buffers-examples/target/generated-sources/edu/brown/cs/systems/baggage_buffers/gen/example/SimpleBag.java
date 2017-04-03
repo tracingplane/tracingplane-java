@@ -155,8 +155,8 @@ public class SimpleBag implements Bag {
 
         private static final BagKey _idsKey = BagKey.indexed(1);
 
-        private static final Parser<Set<Long>> _idsParser = Parsers.setParser(Parsers.fixed64Parser());
-        private static final Serializer<Set<Long>> _idsSerializer = Serializers.setSerializer(Serializers.fixed64Serializer());
+        private static final Parser<Set<Long>> _idsParser = Parsers.<Long>setParser(Parsers.fixed64Parser());
+        private static final Serializer<Set<Long>> _idsSerializer = Serializers.<Long>setSerializer(Serializers.fixed64Serializer());
         private static final Brancher<Set<Long>> _idsBrancher = Branchers.<Long>set();
         private static final Joiner<Set<Long>> _idsJoiner = Joiners.<Long>setUnion();
 

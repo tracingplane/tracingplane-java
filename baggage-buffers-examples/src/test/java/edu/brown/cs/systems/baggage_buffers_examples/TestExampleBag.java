@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.TreeMap;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Test;
 import edu.brown.cs.systems.baggage_buffers.gen.example.ExampleBag;
@@ -18,6 +19,7 @@ import edu.brown.cs.systems.baggage_buffers.gen.example.SimpleStruct1.Handler;
 import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.Registrations;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.api.SpecialTypes.Counter;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
 
@@ -143,6 +145,38 @@ public class TestExampleBag {
         
         ExampleBag ebj = ExampleBag.getFrom(bj);
         assertTrue(ebj.sampled);
+    }
+    
+    @Test
+    public void testCounterMap() {
+
+        Counter c1 = Counter.newInstance();
+        for (int i = 0; i < 3; i++) c1.increment();
+        
+        Counter c2a = Counter.newInstance();
+        for (int i = 0; i < 5; i++) c2a.increment();
+        
+        Counter c2b = Counter.newInstance();
+        for (int i = 0; i < 7; i++) c2b.increment();
+
+        ExampleBag eb1 = new ExampleBag();
+        eb1.countermap = new TreeMap<>();
+        eb1.countermap.put("c1", c1);
+        eb1.countermap.put("c2", c2a);
+
+        ExampleBag eb2 = new ExampleBag();
+        eb2.countermap = new TreeMap<>();
+        eb2.countermap.put("c1", c1);
+        eb2.countermap.put("c2", c2b);
+
+        Baggage b1 = ExampleBag.setIn(null, eb1);
+        Baggage b2 = ExampleBag.setIn(null, eb2);
+        
+        Baggage b3 = Baggage.branch(b1);
+        Baggage b4 = Baggage.join(b1, b2);
+        
+        System.out.println("B4 is: " + b4);
+        
     }
 
 }

@@ -121,9 +121,9 @@ class JavaCompiler extends Compiler {
       fieldType match {
         case prim: PrimitiveType => return s"$Parsers.${prim}Parser()"
         case udt: UserDefinedType => return handler(udt)
-        case BuiltInType.Counter => return counterHandler
-        case BuiltInType.Set(of) => return s"$Parsers.setParser(${parser(of)})"
-        case BuiltInType.Map(k, v) => return s"$Parsers.mapParser(${keyParser(k)}, ${parser(v)})"
+        case BuiltInType.Counter => return s"($Parser)$counterHandler"
+        case BuiltInType.Set(of) => return s"$Parsers.<${javaType(of)}>setParser(${parser(of)})"
+        case BuiltInType.Map(k, v) => return s"$Parsers.<${javaType(k)},${javaType(v)}>mapParser(${keyParser(k)}, ${parser(v)})"
       }
     }
 
@@ -131,9 +131,9 @@ class JavaCompiler extends Compiler {
       fieldType match {
         case prim: PrimitiveType => return s"$Serializers.${prim}Serializer()"
         case udt: UserDefinedType => return handler(udt)
-        case BuiltInType.Counter => return counterHandler
-        case BuiltInType.Set(of) => return s"$Serializers.setSerializer(${serializer(of)})"
-        case BuiltInType.Map(k, v) => return s"$Serializers.mapSerializer(${keySerializer(k)}, ${serializer(v)})"
+        case BuiltInType.Counter => return s"($Serializer)$counterHandler"
+        case BuiltInType.Set(of) => return s"$Serializers.<${javaType(of)}>setSerializer(${serializer(of)})"
+        case BuiltInType.Map(k, v) => return s"$Serializers.<${javaType(k)},${javaType(v)}>mapSerializer(${keySerializer(k)}, ${serializer(v)})"
       }
     }
 
@@ -147,7 +147,7 @@ class JavaCompiler extends Compiler {
             case false => return handler(udt)
           }
         }
-        case BuiltInType.Counter => return counterHandler
+        case BuiltInType.Counter => return s"($Joiner)$counterHandler"
         case BuiltInType.Set(of) => return s"$Joiners.<${javaType(of)}>setUnion()"
         case BuiltInType.Map(k, v) => return s"$Joiners.<${javaType(k)}, ${javaType(v)}>mapMerge(${joiner(v)})"
       }
@@ -162,7 +162,7 @@ class JavaCompiler extends Compiler {
             case false => return handler(udt)
           }
         }
-        case BuiltInType.Counter => return counterHandler
+        case BuiltInType.Counter => return s"($Brancher)$counterHandler"
         case BuiltInType.Set(of) => return s"$Branchers.<${javaType(of)}>set()"
         case BuiltInType.Map(k, v) => return s"$Branchers.<${javaType(k)}, ${javaType(v)}>map(${brancher(v)})"
       }

@@ -13,9 +13,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Parser;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Parser.ElementParser;
-import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Struct;
-import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Struct.StructHandler;
-import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Struct.StructReader;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.ElementReader;
@@ -91,7 +88,7 @@ public class Parsers {
         return collect(elementParser, () -> new ArrayList<T>());
     }
 
-    public static <K, V> Parser<Map<K, V>> mapParser(Function<ByteBuffer, K> keyCast, Parser<V> valueParser) {
+    public static <K, V> Parser<Map<K, V>> mapParser(Function<ByteBuffer, K> keyCast, Parser<? extends V> valueParser) {
         return new Parser<Map<K, V>>() {
             public Map<K, V> parse(BaggageReader reader) {
                 BagKey currentKey = null;

@@ -56,6 +56,7 @@ public class ExampleBag implements Bag {
     public Boolean sampled = false;
     public SimpleStruct1 structfield = null;
     public Set<SimpleStruct1> structsetfield = null;
+    public Map<String, Counter> countermap = null;
 
     public boolean _overflow = false;
 
@@ -174,6 +175,7 @@ public class ExampleBag implements Bag {
             b.append(this.sampled == null ? "" : BBUtils.indent(String.format("sampled = %s\n", String.valueOf(this.sampled))));
             b.append(this.structfield == null ? "" : BBUtils.indent(String.format("structfield = %s\n", String.valueOf(this.structfield))));
             b.append(this.structsetfield == null ? "" : BBUtils.indent(String.format("structsetfield = %s\n", BBUtils.toString(this.structsetfield))));
+            b.append(this.countermap == null ? "" : BBUtils.indent(String.format("countermap = %s\n", BBUtils.toString(this.countermap, _v0 -> String.valueOf(_v0)))));
             b.append("}");
         return b.toString();
     }
@@ -220,6 +222,7 @@ public class ExampleBag implements Bag {
         private static final BagKey _sampledKey = BagKey.indexed(30);
         private static final BagKey _structfieldKey = BagKey.indexed(33);
         private static final BagKey _structsetfieldKey = BagKey.indexed(34);
+        private static final BagKey _countermapKey = BagKey.indexed(35);
 
         private static final Parser<Boolean> _boolfieldParser = Parsers.boolParser();
         private static final Serializer<Boolean> _boolfieldSerializer = Serializers.boolSerializer();
@@ -276,25 +279,25 @@ public class ExampleBag implements Bag {
         private static final Brancher<java.nio.ByteBuffer> _bytesfieldBrancher = Branchers.<java.nio.ByteBuffer>noop();
         private static final Joiner<java.nio.ByteBuffer> _bytesfieldJoiner = Joiners.<java.nio.ByteBuffer>first();
 
-        private static final Parser<Set<Integer>> _int32setParser = Parsers.setParser(Parsers.int32Parser());
-        private static final Serializer<Set<Integer>> _int32setSerializer = Serializers.setSerializer(Serializers.int32Serializer());
+        private static final Parser<Set<Integer>> _int32setParser = Parsers.<Integer>setParser(Parsers.int32Parser());
+        private static final Serializer<Set<Integer>> _int32setSerializer = Serializers.<Integer>setSerializer(Serializers.int32Serializer());
         private static final Brancher<Set<Integer>> _int32setBrancher = Branchers.<Integer>set();
         private static final Joiner<Set<Integer>> _int32setJoiner = Joiners.<Integer>setUnion();
 
-        private static final Parser<Set<String>> _stringsetParser = Parsers.setParser(Parsers.stringParser());
-        private static final Serializer<Set<String>> _stringsetSerializer = Serializers.setSerializer(Serializers.stringSerializer());
+        private static final Parser<Set<String>> _stringsetParser = Parsers.<String>setParser(Parsers.stringParser());
+        private static final Serializer<Set<String>> _stringsetSerializer = Serializers.<String>setSerializer(Serializers.stringSerializer());
         private static final Brancher<Set<String>> _stringsetBrancher = Branchers.<String>set();
         private static final Joiner<Set<String>> _stringsetJoiner = Joiners.<String>setUnion();
 
         private static final BaggageHandler<SimpleBag> _simpleBagHandler = SimpleBag.Handler.instance;
 
-        private static final Parser<Set<String>> _simpleBag2Parser = Parsers.setParser(Parsers.stringParser());
-        private static final Serializer<Set<String>> _simpleBag2Serializer = Serializers.setSerializer(Serializers.stringSerializer());
+        private static final Parser<Set<String>> _simpleBag2Parser = Parsers.<String>setParser(Parsers.stringParser());
+        private static final Serializer<Set<String>> _simpleBag2Serializer = Serializers.<String>setSerializer(Serializers.stringSerializer());
         private static final Brancher<Set<String>> _simpleBag2Brancher = Branchers.<String>set();
         private static final Joiner<Set<String>> _simpleBag2Joiner = Joiners.<String>setUnion();
 
-        private static final Parser<Map<String, SimpleBag2>> _bagMapParser = Parsers.mapParser(ReaderHelpers.to_string, SimpleBag2.Handler.instance);
-        private static final Serializer<Map<String, SimpleBag2>> _bagMapSerializer = Serializers.mapSerializer(WriterHelpers.from_string, SimpleBag2.Handler.instance);
+        private static final Parser<Map<String, SimpleBag2>> _bagMapParser = Parsers.<String,SimpleBag2>mapParser(ReaderHelpers.to_string, SimpleBag2.Handler.instance);
+        private static final Serializer<Map<String, SimpleBag2>> _bagMapSerializer = Serializers.<String,SimpleBag2>mapSerializer(WriterHelpers.from_string, SimpleBag2.Handler.instance);
         private static final Brancher<Map<String, SimpleBag2>> _bagMapBrancher = Branchers.<String, SimpleBag2>map(SimpleBag2.Handler.instance);
         private static final Joiner<Map<String, SimpleBag2>> _bagMapJoiner = Joiners.<String, SimpleBag2>mapMerge(SimpleBag2.Handler.instance);
 
@@ -309,10 +312,15 @@ public class ExampleBag implements Bag {
         private static final Brancher<SimpleStruct1> _structfieldBrancher = Branchers.<SimpleStruct1>noop();
         private static final Joiner<SimpleStruct1> _structfieldJoiner = Joiners.<SimpleStruct1>first();
 
-        private static final Parser<Set<SimpleStruct1>> _structsetfieldParser = Parsers.setParser(SimpleStruct1.Handler.instance);
-        private static final Serializer<Set<SimpleStruct1>> _structsetfieldSerializer = Serializers.setSerializer(SimpleStruct1.Handler.instance);
+        private static final Parser<Set<SimpleStruct1>> _structsetfieldParser = Parsers.<SimpleStruct1>setParser(SimpleStruct1.Handler.instance);
+        private static final Serializer<Set<SimpleStruct1>> _structsetfieldSerializer = Serializers.<SimpleStruct1>setSerializer(SimpleStruct1.Handler.instance);
         private static final Brancher<Set<SimpleStruct1>> _structsetfieldBrancher = Branchers.<SimpleStruct1>set();
         private static final Joiner<Set<SimpleStruct1>> _structsetfieldJoiner = Joiners.<SimpleStruct1>setUnion();
+
+        private static final Parser<Map<String, Counter>> _countermapParser = Parsers.<String,Counter>mapParser(ReaderHelpers.to_string, (Parser)CounterImpl.Handler.instance);
+        private static final Serializer<Map<String, Counter>> _countermapSerializer = Serializers.<String,Counter>mapSerializer(WriterHelpers.from_string, (Serializer)CounterImpl.Handler.instance);
+        private static final Brancher<Map<String, Counter>> _countermapBrancher = Branchers.<String, Counter>map((Brancher)CounterImpl.Handler.instance);
+        private static final Joiner<Map<String, Counter>> _countermapJoiner = Joiners.<String, Counter>mapMerge((Joiner)CounterImpl.Handler.instance);
 
         @Override
         public boolean isInstance(Bag bag) {
@@ -420,6 +428,11 @@ public class ExampleBag implements Bag {
 
             if (reader.enter(_structsetfieldKey)) {
                 instance.structsetfield = _structsetfieldParser.parse(reader);
+                reader.exit();
+            }
+
+            if (reader.enter(_countermapKey)) {
+                instance.countermap = _countermapParser.parse(reader);
                 reader.exit();
             }
             instance._overflow = reader.didOverflow();
@@ -554,6 +567,12 @@ public class ExampleBag implements Bag {
                 _structsetfieldSerializer.serialize(writer, instance.structsetfield);
                 writer.exit();
             }
+
+            if (instance.countermap != null) {
+                writer.enter(_countermapKey);
+                _countermapSerializer.serialize(writer, instance.countermap);
+                writer.exit();
+            }
         }
 
         @Override
@@ -583,6 +602,7 @@ public class ExampleBag implements Bag {
             newInstance.sampled = _sampledBrancher.branch(instance.sampled);
             newInstance.structfield = _structfieldBrancher.branch(instance.structfield);
             newInstance.structsetfield = _structsetfieldBrancher.branch(instance.structsetfield);
+            newInstance.countermap = _countermapBrancher.branch(instance.countermap);
             return newInstance;
         }
 
@@ -613,6 +633,7 @@ public class ExampleBag implements Bag {
                 left.sampled = _sampledJoiner.join(left.sampled, right.sampled);
                 left.structfield = _structfieldJoiner.join(left.structfield, right.structfield);
                 left.structsetfield = _structsetfieldJoiner.join(left.structsetfield, right.structsetfield);
+                left.countermap = _countermapJoiner.join(left.countermap, right.countermap);
                 return left;
             }
         }
