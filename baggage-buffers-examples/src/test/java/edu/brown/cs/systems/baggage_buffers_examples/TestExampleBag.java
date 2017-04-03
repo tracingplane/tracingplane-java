@@ -128,6 +128,22 @@ public class TestExampleBag {
         assertEquals(9, byteRepr.length);
         
     }
+    
+    @Test
+    public void testCounter() {
+        ExampleBag eb1 = new ExampleBag();
+        eb1.c = Counter.newInstance();
+        eb1.c.increment(174);
+        
+        Baggage sourceBaggage = ExampleBag.setIn(null, eb1);
+        byte[] bytes = Baggage.serialize(sourceBaggage);
+        Baggage b = Baggage.deserialize(bytes);
+        System.out.println(b);
+        
+        assertEquals(174, ExampleBag.getFrom(b).c.getValue());
+        
+        
+    }
 
     @Test
     public void testTaint3() {

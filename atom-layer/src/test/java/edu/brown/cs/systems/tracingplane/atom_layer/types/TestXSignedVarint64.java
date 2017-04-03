@@ -277,4 +277,15 @@ public class TestXSignedVarint64 {
             }
         }
     }
+
+    
+    @Test
+    public void testReverseSignedVarint64() throws AtomLayerException {
+        ByteBuffer buf = ByteBuffer.allocate(9);
+        SignedLexVarint.writeReverseLexVarInt64(buf, 174);
+        buf.flip();
+        long readValue = SignedLexVarint.readReverseLexVarInt64(buf);
+        assertEquals(174, readValue);
+    }
+    
 }

@@ -203,7 +203,7 @@ public class SignedLexVarint {
      *             varint
      */
     public static long readReverseLexVarInt64(ByteBuffer buf) throws AtomLayerException {
-        return -(readReverseLexVarInt64(buf) + 1);
+        return -(readLexVarInt64(buf) + 1);
     }
 
     /**

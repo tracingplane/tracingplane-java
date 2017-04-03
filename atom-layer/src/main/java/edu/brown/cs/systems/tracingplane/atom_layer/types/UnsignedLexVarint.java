@@ -236,11 +236,25 @@ public class UnsignedLexVarint {
     }
     
     static long readReverseUInt64(ByteBuffer buf, int numBytes) throws AtomLayerException {
-        return ~readUInt64(buf, numBytes);
+        if (numBytes > 8 || numBytes <= 0) {
+            throw new AtomLayerException("Invalid UInt64 with " + numBytes + " bytes");
+        }
+        long result = 0;
+        for (int i = 0; i < numBytes; i++) {
+            result = (result << 8) + (~buf.get() & 0xff);
+        }
+        return result;
     }
     
     static long readReverseUInt64(ByteBuffer buf, int position, int numBytes) throws AtomLayerException {
-        return ~readUInt64(buf, position, numBytes);
+        if (numBytes > 8 || numBytes <= 0) {
+            throw new AtomLayerException("Invalid UInt64 with " + numBytes + " bytes");
+        }
+        long result = 0;
+        for (int i = 0; i < numBytes; i++) {
+            result = (result << 8) + (~buf.get(position++) & 0xff);
+        }
+        return result;
     }
 
     /**
