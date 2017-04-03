@@ -11,6 +11,8 @@ public class SpecialTypes {
         }
 
         public void increment();
+        
+        public void increment(long quantity);
 
         public long getValue();
 

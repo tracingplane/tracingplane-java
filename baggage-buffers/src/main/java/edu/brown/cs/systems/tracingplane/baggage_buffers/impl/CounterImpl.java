@@ -42,13 +42,18 @@ public class CounterImpl implements Counter {
 
     @Override
     public void increment() {
+        increment(1);
+    }
+
+    @Override
+    public void increment(long quantity) {
         if (componentValues == null) {
             componentValues = new TreeMap<>();
         }
         if (componentId == null) {
-            componentValues.put(componentId = newComponentId(), 1L);
+            componentValues.put(componentId = newComponentId(), quantity);
         } else {
-            componentValues.put(componentId, componentValues.get(componentId) + 1);
+            componentValues.put(componentId, componentValues.get(componentId) + quantity);
         }
     }
 
