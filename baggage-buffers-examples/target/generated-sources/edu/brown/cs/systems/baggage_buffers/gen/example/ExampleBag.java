@@ -169,7 +169,7 @@ public class ExampleBag implements Bag {
             b.append(this.stringset == null ? "" : BBUtils.indent(String.format("stringset = %s\n", BBUtils.toString(this.stringset))));
             b.append(this.simpleBag == null ? "" : BBUtils.indent(String.format("simpleBag = %s\n", String.valueOf(this.simpleBag))));
             b.append(this.simpleBag2 == null ? "" : BBUtils.indent(String.format("simpleBag2 = %s\n", BBUtils.toString(this.simpleBag2))));
-            b.append(this.bagMap == null ? "" : BBUtils.indent(String.format("bagMap = %s\n", BBUtils.toString(this.bagMap, _v -> String.valueOf(_v)))));
+            b.append(this.bagMap == null ? "" : BBUtils.indent(String.format("bagMap = %s\n", BBUtils.toString(this.bagMap, _v0 -> String.valueOf(_v0)))));
             b.append(this.c == null ? "" : BBUtils.indent(String.format("c = %s\n", String.valueOf(this.c))));
             b.append(this.sampled == null ? "" : BBUtils.indent(String.format("sampled = %s\n", String.valueOf(this.sampled))));
             b.append(this.structfield == null ? "" : BBUtils.indent(String.format("structfield = %s\n", String.valueOf(this.structfield))));

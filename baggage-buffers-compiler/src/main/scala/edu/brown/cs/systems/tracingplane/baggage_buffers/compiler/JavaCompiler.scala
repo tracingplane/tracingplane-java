@@ -168,10 +168,13 @@ class JavaCompiler extends Compiler {
       }
     }
 
-    def toStringStatement(fieldtype: FieldType, instance: String): String = {
+    def toStringStatement(fieldtype: FieldType, instance: String): String = toStringStatement(fieldtype, instance, 0)
+
+    def toStringStatement(fieldtype: FieldType, instance: String, recurseCount: Integer): String = {
+      val lambdaVarname = s"_v$recurseCount"
       fieldtype match {
         case set: BuiltInType.Set => s"$BBUtils.toString($instance)"
-        case BuiltInType.Map(k, v) => s"$BBUtils.toString($instance, _v -> ${toStringStatement(v, "_v")})"
+        case BuiltInType.Map(k, v) => s"$BBUtils.toString($instance, $lambdaVarname -> ${toStringStatement(v, lambdaVarname, recurseCount+1)})"
         case _ => s"String.valueOf($instance)"
       }
     }
