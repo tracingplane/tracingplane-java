@@ -33,6 +33,7 @@ public class StructHelpers {
         if (buf.hasArray()) {
             array = buf.array();
             offset = buf.arrayOffset() + buf.position();
+            buf.position(buf.position() + length);
         } else {
             array = new byte[length];
             buf.get(array);
