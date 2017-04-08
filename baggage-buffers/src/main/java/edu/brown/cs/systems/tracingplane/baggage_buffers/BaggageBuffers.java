@@ -1,6 +1,7 @@
 package edu.brown.cs.systems.tracingplane.baggage_buffers;
 
 import java.io.Closeable;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.BaggageBuffersUtils.BaggageAccessListener;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Bag;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BaggageLayer;
@@ -77,6 +78,8 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
     public BaggageWriter write(BaggageBuffersContents instance) {
         return instance == null ? null : instance.serialize();
     }
+    
+    private static BaggageAccessListener accessListener = new BaggageBuffersConfig().getBaggageAccessListenerInstance();
 
     /**
      * Access the current thread's baggage and retrieve the object stored in the specified bag
@@ -98,6 +101,7 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
      *         mapped to the specified key; else null
      */
     public static Bag get(Baggage baggage, BagKey key) {
+        accessListener.get(baggage, key);
         if (baggage instanceof BaggageBuffersContents) {
             return ((BaggageBuffersContents) baggage).get(key);
         }
@@ -130,6 +134,7 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
      */
     public static Baggage set(Baggage baggage, BagKey key, Bag value) {
         if (key != null) {
+            accessListener.set(baggage, key);
             if (baggage instanceof BaggageBuffersContents) {
                 return ((BaggageBuffersContents) baggage).put(key, value);
             } else {

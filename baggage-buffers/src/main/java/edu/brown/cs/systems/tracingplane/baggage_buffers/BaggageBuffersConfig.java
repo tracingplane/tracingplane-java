@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValue;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.BaggageBuffersUtils.BaggageAccessListener;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.BaggageBuffersUtils.NullBaggageListener;
 
 public class BaggageBuffersConfig {
 
@@ -17,9 +19,12 @@ public class BaggageBuffersConfig {
 
     public String baggageLayerFactory;
     public final Map<Integer, String> registeredBags = new HashMap<>();
+    private final String baggageAccessListenerClassName;
 
     public BaggageBuffersConfig() {
         Config conf = ConfigFactory.load();
+        
+        baggageAccessListenerClassName = conf.getString("baggage-buffers.access-listener");
 
         for (Entry<String, ConfigValue> x : conf.getConfig(BAGS_KEY).entrySet()) {
             String bagClassName = x.getValue().unwrapped().toString();
@@ -43,6 +48,19 @@ public class BaggageBuffersConfig {
                       "\" due to unparsable unsigned integer " + key);
         }
         return null;
+    }
+    
+    BaggageAccessListener getBaggageAccessListenerInstance() {
+        try {
+            return (BaggageAccessListener) Class.forName(baggageAccessListenerClassName).newInstance();
+        } catch (InstantiationException e) {
+            log.error("Cannot instantiate baggage listener class " + baggageAccessListenerClassName, e);
+        } catch (IllegalAccessException e) {
+            log.error("Cannot instantiate baggage listener class " + baggageAccessListenerClassName, e);
+        } catch (ClassNotFoundException e) {
+            log.error("Unknown baggage listener class " + baggageAccessListenerClassName);
+        }
+        return new NullBaggageListener();
     }
 
 }
