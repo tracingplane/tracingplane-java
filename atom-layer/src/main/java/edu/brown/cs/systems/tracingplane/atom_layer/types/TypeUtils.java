@@ -59,7 +59,7 @@ public class TypeUtils {
         for (int i = atom.position(); i < atom.limit(); i++) {
             hexStrings.add(toHexString(atom.get(i)));
         }
-        return String.format("[%s]", StringUtils.join(hexStrings, ", "));
+        return String.format("%s", StringUtils.join(hexStrings, ""));
     }
     
     public static String toBinaryString(Iterable<ByteBuffer> atoms) {
@@ -79,7 +79,7 @@ public class TypeUtils {
         for (ByteBuffer atom : atoms) {
             hexStrings.add(toHexString(atom));
         }
-        return String.format("[%s]", StringUtils.join(hexStrings, atomSeparator));
+        return String.format("%s", StringUtils.join(hexStrings, atomSeparator));
     }
 
     public static String toHexString(byte[] serialize) {

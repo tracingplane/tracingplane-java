@@ -66,9 +66,9 @@ public class BaggageBuffersContents implements BaggageContents {
      * rather than the whole baggage.
      * 
      */
-    private Map<BagKey, Bag> bags = null;
-    private List<ByteBuffer> overflowAtoms = null;
-    private List<ByteBuffer> unprocessedAtoms = null;
+    Map<BagKey, Bag> bags = null;
+    List<ByteBuffer> overflowAtoms = null;
+    List<ByteBuffer> unprocessedAtoms = null;
 
     private Map<Object, Object> attachments = null; // Additional process-local objects attached to the baggage
 
