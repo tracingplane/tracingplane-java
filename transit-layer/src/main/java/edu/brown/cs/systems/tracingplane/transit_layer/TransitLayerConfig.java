@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayerUtils.NullTransitListener;
+import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayerUtils.TransitAccessListener;
 import edu.brown.cs.systems.tracingplane.transit_layer.impl.NullTransitLayerFactory;
 
 public class TransitLayerConfig {
@@ -13,9 +15,12 @@ public class TransitLayerConfig {
     private static final String TRANSIT_LAYER_IMPLEMENTATION_KEY = "tracingplane.transit-layer.factory";
 
     public String transitLayerFactory;
+    public final String transitAccessListenerClassName;
 
     public TransitLayerConfig() {
         Config config = ConfigFactory.load();
+        
+        transitAccessListenerClassName = config.getString("transit-layer.access-listener");
 
         transitLayerFactory = config.getString(TRANSIT_LAYER_IMPLEMENTATION_KEY);
         try {
@@ -45,6 +50,19 @@ public class TransitLayerConfig {
             }
         }
         return defaultTransitLayer;
+    }
+    
+    public TransitAccessListener getTransitAccessListener() {
+        try {
+            return (TransitAccessListener) Class.forName(transitAccessListenerClassName).newInstance();
+        } catch (InstantiationException e) {
+            log.error("Cannot instantiate transit listener class " + transitAccessListenerClassName, e);
+        } catch (IllegalAccessException e) {
+            log.error("Cannot instantiate transit listener class " + transitAccessListenerClassName, e);
+        } catch (ClassNotFoundException e) {
+            log.error("Unknown transit listener class " + transitAccessListenerClassName);
+        }
+        return new NullTransitListener();
     }
 
 }

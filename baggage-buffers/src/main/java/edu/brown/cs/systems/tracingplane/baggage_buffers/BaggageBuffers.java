@@ -89,7 +89,14 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
      *         object mapped to the specified key; else null
      */
     public static Bag get(BagKey key) {
-        return get(Baggage.get(), key);
+        boolean enteredListener = accessListener.enter();
+        Baggage baggage = Baggage.get();
+        Bag bag = get(baggage, key);
+        if (enteredListener) {
+            accessListener.get(key);
+            accessListener.exit();
+        }
+        return bag;
     }
 
     /**
@@ -101,11 +108,16 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
      *         mapped to the specified key; else null
      */
     public static Bag get(Baggage baggage, BagKey key) {
-        accessListener.get(baggage, key);
-        if (baggage instanceof BaggageBuffersContents) {
-            return ((BaggageBuffersContents) baggage).get(key);
+        if (!(baggage instanceof BaggageBuffersContents)) {
+            return null;
         }
-        return null;
+        boolean enteredListener = accessListener.enter();
+        Bag bag = ((BaggageBuffersContents) baggage).get(key);
+        if (enteredListener) {
+            accessListener.get(key);
+            accessListener.exit();
+        }
+        return bag;
     }
 
     /**
@@ -116,10 +128,15 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
      */
     public static void set(BagKey key, Bag value) {
         if (key != null) {
+            boolean enteredListener = accessListener.enter();
             Baggage original = Baggage.get();
             Baggage updated = set(original, key, value);
             if (original != updated) {
                 Baggage.set(updated);
+            }
+            if (enteredListener) {
+                accessListener.set(key);
+                accessListener.exit();
             }
         }
     }
@@ -134,12 +151,14 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
      */
     public static Baggage set(Baggage baggage, BagKey key, Bag value) {
         if (key != null) {
-            accessListener.set(baggage, key);
+            BaggageBuffersContents contents;
             if (baggage instanceof BaggageBuffersContents) {
-                return ((BaggageBuffersContents) baggage).put(key, value);
+                contents = (BaggageBuffersContents) baggage;
             } else {
-                return new BaggageBuffersContents().put(key, value);
+                contents = new BaggageBuffersContents();
             }
+            contents.put(key, value);
+            return contents;
         } else {
             return baggage;
         }

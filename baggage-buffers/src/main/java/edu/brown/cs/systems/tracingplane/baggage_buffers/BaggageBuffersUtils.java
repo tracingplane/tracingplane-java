@@ -95,13 +95,17 @@ public class BaggageBuffersUtils {
     
     /** Utility for seeing who accesses baggage and where */
     public static interface BaggageAccessListener {
-        public void get(Baggage instance, BagKey bagKey);
-        public void set(Baggage instance, BagKey bagKey);
+        public boolean enter();
+        public void get(BagKey bagKey);
+        public void set(BagKey bagKey);
+        public void exit();
     }
     
     public static class NullBaggageListener implements BaggageAccessListener {
-        public void get(Baggage instance, BagKey bagKey) {}
-        public void set(Baggage instance, BagKey bagKey) {}
+        public boolean enter() { return false; }
+        public void get(BagKey bagKey) {}
+        public void set(BagKey bagKey) {}
+        public void exit() {}
     }
 
 }

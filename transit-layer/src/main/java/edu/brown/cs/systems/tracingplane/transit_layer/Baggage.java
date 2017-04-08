@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
+import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayerUtils.TransitAccessListener;
 
 /**
  * <p>
@@ -49,6 +50,8 @@ public interface Baggage {
      * The {@link TransitLayer} implementation installed in the process.
      */
     public static final TransitLayer<?> transit = TransitLayerConfig.defaultTransitLayer();
+    
+    static final TransitAccessListener listener = new TransitLayerConfig().getTransitAccessListener();
 
     /**
      * <p>
@@ -93,7 +96,13 @@ public interface Baggage {
      * @return a Baggage instance, possibly null
      */
     public static Baggage get() {
-        return ThreadLocalBaggage.get();
+        boolean entered = listener.enter();
+        Baggage baggage = ThreadLocalBaggage.get();
+        if (entered) {
+            listener.get();
+            listener.exit();
+        }
+        return baggage;
     }
 
     /**
@@ -109,7 +118,15 @@ public interface Baggage {
      * @return a Baggage instance, possibly null.
      */
     public static Baggage take() {
-        return ThreadLocalBaggage.take();
+        boolean entered = listener.enter();
+        if (entered) {
+            listener.take();
+        }
+        Baggage baggage = ThreadLocalBaggage.take();
+        if (entered) {
+            listener.exit();
+        }
+        return baggage;
     }
 
     /**
@@ -125,7 +142,12 @@ public interface Baggage {
      * @param baggage a Baggage instance, possibly null
      */
     public static void set(Baggage baggage) {
+        boolean entered = listener.enter();
         ThreadLocalBaggage.set(baggage);
+        if (entered) {
+            listener.set();
+            listener.exit();
+        }
     }
 
     /**
@@ -150,7 +172,14 @@ public interface Baggage {
      * </p>
      */
     public static void discard() {
+        boolean entered = listener.enter();
+        if (entered) {
+            listener.discard();
+        }
         ThreadLocalBaggage.discard();
+        if (entered) {
+            listener.exit();
+        }
     }
 
     /**
@@ -247,7 +276,15 @@ public interface Baggage {
      *         thread's baggage is empty).
      */
     public static Baggage branch() {
-        return TransitLayerCompatibility.branch(transit, ThreadLocalBaggage.get());
+        boolean entered = listener.enter();
+        if (entered) {
+            listener.branch();
+        }
+        Baggage branched = TransitLayerCompatibility.branch(transit, ThreadLocalBaggage.get());
+        if (entered) {
+            listener.exit();
+        }
+        return branched;
     }
 
     /**
@@ -402,7 +439,12 @@ public interface Baggage {
      *            <code>other</code> may be null. After this call, <code>other</code> should not be used.
      */
     public static void join(Baggage other) {
+        boolean entered = listener.enter();
         ThreadLocalBaggage.set(TransitLayerCompatibility.join(transit, ThreadLocalBaggage.take(), other));
+        if (entered) {
+            listener.join();
+            listener.exit();
+        }
     }
 
     /**
@@ -573,7 +615,35 @@ public interface Baggage {
      *         empty byte array, both of which are valid and can be used to indicate the empty Baggage.
      */
     public static byte[] serialize() {
-        return TransitLayerCompatibility.serialize(transit, ThreadLocalBaggage.get());
+        boolean entered = listener.enter();
+        if (entered) {
+            listener.serialize();
+        }
+        byte[] serialized = TransitLayerCompatibility.serialize(transit, ThreadLocalBaggage.get());
+        if (entered) {
+            listener.exit();
+        }
+        return serialized;
+    }
+
+    /**
+     * <p>
+     * Serialize the baggage that is set for the current thread.
+     * </p>
+     * 
+     * @return the serialized representation of the current thread's Baggage. The returned bytes might be null or the
+     *         empty byte array, both of which are valid and can be used to indicate the empty Baggage.
+     */
+    public static byte[] serialize(int maxLength) {
+        boolean entered = listener.enter();
+        if (entered) {
+            listener.serialize(maxLength);
+        }
+        byte[] serialized = TransitLayerCompatibility.serialize(transit, ThreadLocalBaggage.get(), maxLength);
+        if (entered) {
+            listener.exit();
+        }
+        return serialized;
     }
 
     /**
