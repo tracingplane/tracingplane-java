@@ -67,6 +67,17 @@ class TransitLayerCompatibility {
     }
 
     @SuppressWarnings("unchecked")
+    public static <B extends Baggage> byte[] serialize(TransitLayer<B> transit, Baggage baggage, int maxLength) {
+        if (transit.isInstance(baggage)) {
+            return transit.serialize((B) baggage, maxLength);
+        } else {
+            log.warn("discarding incompatible baggage to {}.serialize; baggage class is {}",
+                     transit.getClass().getName(), baggage.getClass().getName());
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
     public static <B extends Baggage> void writeTo(TransitLayer<B> transit, OutputStream out,
                                                    Baggage baggage) throws IOException {
         if (transit.isInstance(baggage)) {

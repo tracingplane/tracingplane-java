@@ -595,6 +595,23 @@ public interface Baggage {
 
     /**
      * <p>
+     * Serialize a baggage instance to its byte representation.
+     * </p>
+     * 
+     * <p>
+     * After calling serialize, <code>baggage</code> <b>can</b> continue to be used. <code>serialize</code> implicitly
+     * branches the baggage before serializing.
+     * </p>
+     * 
+     * @param baggage a baggage instance to serialize, possibly null
+     * @return the serialized byte representation of the baggage
+     */
+    public static byte[] serialize(Baggage baggage, int maxLength) {
+        return TransitLayerCompatibility.serialize(transit, baggage, maxLength);
+    }
+
+    /**
+     * <p>
      * Write a baggage instance to an {@link OutputStream}. The {@link TransitLayer} will write the length of the
      * serialized representation then write the bytes.
      * </p>
