@@ -14,6 +14,7 @@ public interface TransitLayerUtils {
         public void serialize();
         public void serialize(int maxLength);
         public void exit();
+        public void deserialized(Baggage baggage, int length);
     }
     
     public static class NullTransitListener implements TransitAccessListener {
@@ -27,6 +28,7 @@ public interface TransitLayerUtils {
         public void serialize() {}
         public void serialize(int maxLength){}
         public void exit() {}
+        public void deserialized(Baggage baggage, int length) {}
     }
     
     

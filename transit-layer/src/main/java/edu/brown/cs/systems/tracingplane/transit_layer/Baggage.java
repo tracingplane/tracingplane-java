@@ -575,7 +575,13 @@ public interface Baggage {
      * @return the deserialized Baggage instance, possibly null
      */
     public static Baggage deserialize(byte[] serialized, int offset, int length) {
-        return TransitLayerCompatibility.deserialize(transit, serialized, offset, length);
+        boolean entered = listener.enter();
+        Baggage baggage = TransitLayerCompatibility.deserialize(transit, serialized, offset, length);
+        if (entered) {
+            listener.deserialized(baggage, length);
+            listener.exit();
+        }
+        return baggage;
     }
 
     /**
