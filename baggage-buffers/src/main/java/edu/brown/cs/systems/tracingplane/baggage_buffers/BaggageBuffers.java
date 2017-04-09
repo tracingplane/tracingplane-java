@@ -163,5 +163,34 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
             return baggage;
         }
     }
+    
+    private static final boolean isCompactionEnabled = BaggageBuffersConfig.isCompactionEnabled();
+    
+    /**
+     * Optional operation.  Compacts datatypes in the current thread's baggage based on per-datatype compaction semantics.
+     * For most data types this does nothing; for CRDTs it collapses known instance states into a single instance.
+     */
+    public static void compact() {
+        boolean enteredListener = accessListener.enter();
+        Baggage.set(compact(Baggage.get()));
+        if (enteredListener) {
+            accessListener.compact();
+            accessListener.exit();
+        }
+    }
+
+    
+    /**
+     * Optional operation.  Compacts datatypes in the current thread's baggage based on per-datatype compaction semantics.
+     * For most data types this does nothing; for CRDTs it collapses known instance states into a single instance.
+     */
+    public static Baggage compact(Baggage baggage) {
+        // TODO: provide implementation of compact.  Possibly push compact to transit layer.  Unsure yet.
+        if (isCompactionEnabled) {
+            return baggage;
+        } else {
+            return baggage;
+        }
+    }
 
 }

@@ -98,6 +98,7 @@ public class BaggageBuffersUtils {
         public boolean enter();
         public void get(BagKey bagKey);
         public void set(BagKey bagKey);
+        public void compact();
         public void exit();
     }
     
@@ -105,6 +106,7 @@ public class BaggageBuffersUtils {
         public boolean enter() { return false; }
         public void get(BagKey bagKey) {}
         public void set(BagKey bagKey) {}
+        public void compact() {}
         public void exit() {}
     }
 

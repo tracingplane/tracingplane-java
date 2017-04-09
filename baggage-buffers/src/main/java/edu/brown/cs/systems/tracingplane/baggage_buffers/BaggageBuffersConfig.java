@@ -20,11 +20,13 @@ public class BaggageBuffersConfig {
     public String baggageLayerFactory;
     public final Map<Integer, String> registeredBags = new HashMap<>();
     private final String baggageAccessListenerClassName;
+    private final boolean compactionEnabled;
 
     public BaggageBuffersConfig() {
         Config conf = ConfigFactory.load();
         
         baggageAccessListenerClassName = conf.getString("baggage-buffers.access-listener");
+        compactionEnabled = conf.getBoolean("baggage-buffers.compaction_enabled");
 
         for (Entry<String, ConfigValue> x : conf.getConfig(BAGS_KEY).entrySet()) {
             String bagClassName = x.getValue().unwrapped().toString();
@@ -35,6 +37,10 @@ public class BaggageBuffersConfig {
             }
 
         }
+    }
+    
+    public static boolean isCompactionEnabled() {
+        return new BaggageBuffersConfig().compactionEnabled;
     }
 
     private Integer parseBagKey(String key, String className) {
