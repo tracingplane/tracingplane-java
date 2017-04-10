@@ -188,7 +188,10 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
     public static Baggage compact(Baggage original, Baggage current) {
         // TODO: provide implementation of compact.  Possibly push compact to transit layer.  Unsure yet.
         if (isCompactionEnabled) {
-            return Baggage.join(original, current);
+            BaggageBuffersUtils.is_compaction.set(true);
+            Baggage joined = Baggage.join(original, current);
+            BaggageBuffersUtils.is_compaction.set(false);
+            return joined;
         } else {
             return Baggage.join(original, current);
         }

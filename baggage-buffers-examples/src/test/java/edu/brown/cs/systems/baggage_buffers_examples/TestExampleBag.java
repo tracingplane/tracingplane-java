@@ -18,6 +18,7 @@ import edu.brown.cs.systems.baggage_buffers.gen.example.SimpleStruct1;
 import edu.brown.cs.systems.baggage_buffers.gen.example.SimpleStruct1.Handler;
 import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.BaggageBuffers;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.Registrations;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.SpecialTypes.Counter;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
@@ -193,6 +194,104 @@ public class TestExampleBag {
         
         System.out.println("B4 is: " + b4);
         
+    }
+    
+    @Test
+    public void testCounterCompact1a() {
+        Counter c1 = Counter.newInstance();
+        for (int i = 0; i < 3; i++) c1.increment();
+        
+        ExampleBag eb1 = new ExampleBag();
+        eb1.countermap = new TreeMap<>();
+        eb1.countermap.put("c1", c1);
+        
+        Baggage b1 = ExampleBag.setIn(null, eb1);
+        
+        Baggage b2 = Baggage.branch(b1);
+        ExampleBag.getFrom(b2).countermap.get("c1").increment(5);
+        
+        Baggage bjoined = Baggage.join(b1, b2);
+        
+        assertEquals(28, Baggage.serialize(bjoined).length);
+        assertEquals(8, ExampleBag.getFrom(bjoined).countermap.get("c1").getValue());
+    }
+    
+    @Test
+    public void testCounterCompact1b() {
+        Counter c1 = Counter.newInstance();
+        for (int i = 0; i < 3; i++) c1.increment();
+        
+        ExampleBag eb1 = new ExampleBag();
+        eb1.countermap = new TreeMap<>();
+        eb1.countermap.put("c1", c1);
+        
+        Baggage b1 = ExampleBag.setIn(null, eb1);
+        
+        Baggage b2 = Baggage.branch(b1);
+        ExampleBag.getFrom(b2).countermap.get("c1").increment(5);
+        
+        Baggage bjoined = BaggageBuffers.compact(b1, b2);
+        
+        assertEquals(19, Baggage.serialize(bjoined).length);
+        assertEquals(8, ExampleBag.getFrom(bjoined).countermap.get("c1").getValue());
+    }
+    
+    @Test
+    public void testCounterCompact2a() {
+        Counter c1 = Counter.newInstance();
+        for (int i = 0; i < 3; i++) c1.increment();
+        
+        ExampleBag eb1 = new ExampleBag();
+        eb1.countermap = new TreeMap<>();
+        eb1.countermap.put("c1", c1);
+        
+        Baggage b1 = ExampleBag.setIn(null, eb1);
+        
+        Baggage b2 = Baggage.branch(b1);
+        ExampleBag.getFrom(b2).countermap.get("c1").increment(5);
+        
+        Baggage b3 = Baggage.branch(b2);
+        ExampleBag.getFrom(b3).countermap.get("c1").increment(100);
+        
+        Baggage b2joined = Baggage.join(b2, b3);
+        assertEquals(37, Baggage.serialize(b2joined).length);
+        assertEquals(108, ExampleBag.getFrom(b2joined).countermap.get("c1").getValue());
+        
+        ExampleBag.getFrom(b2joined).countermap.get("c1").increment(7);
+        
+        
+        Baggage bjoined = Baggage.join(b1, b2joined);
+        assertEquals(37, Baggage.serialize(bjoined).length);
+        assertEquals(115, ExampleBag.getFrom(bjoined).countermap.get("c1").getValue());
+    }
+    
+    @Test
+    public void testCounterCompact2b() {
+        Counter c1 = Counter.newInstance();
+        for (int i = 0; i < 3; i++) c1.increment();
+        
+        ExampleBag eb1 = new ExampleBag();
+        eb1.countermap = new TreeMap<>();
+        eb1.countermap.put("c1", c1);
+        
+        Baggage b1 = ExampleBag.setIn(null, eb1);
+        
+        Baggage b2 = Baggage.branch(b1);
+        ExampleBag.getFrom(b2).countermap.get("c1").increment(5);
+        
+        Baggage b3 = Baggage.branch(b2);
+        ExampleBag.getFrom(b3).countermap.get("c1").increment(100);
+        
+        Baggage b2joined = Baggage.join(b2, b3);
+        assertEquals(37, Baggage.serialize(b2joined).length);
+        assertEquals(108, ExampleBag.getFrom(b2joined).countermap.get("c1").getValue());
+        
+        ExampleBag.getFrom(b2joined).countermap.get("c1").increment(7);
+        
+        
+        Baggage bjoined = BaggageBuffers.compact(b1, b2joined);
+        assertEquals(19, Baggage.serialize(bjoined).length);
+        assertEquals(115, ExampleBag.getFrom(bjoined).countermap.get("c1").getValue());
     }
 
 }

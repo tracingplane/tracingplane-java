@@ -109,5 +109,13 @@ public class BaggageBuffersUtils {
         public void compact() {}
         public void exit() {}
     }
+    
+    // This is a hack to add 'compaction' joins without deploying them to all the interfaces.
+    // At this point in time it's still a question of whether compact joins are useful
+    public static final ThreadLocal<Boolean> is_compaction = new ThreadLocal<Boolean>() {
+        @Override public Boolean initialValue() {
+            return false;
+        }
+    };
 
 }

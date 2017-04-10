@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.AtomLayerException;
 import edu.brown.cs.systems.tracingplane.atom_layer.types.UnsignedLexVarint;
+import edu.brown.cs.systems.tracingplane.baggage_buffers.BaggageBuffersUtils;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Bag;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.BaggageHandler;
 import edu.brown.cs.systems.tracingplane.baggage_buffers.api.SpecialTypes.Counter;
@@ -88,11 +89,26 @@ public class CounterImpl implements Counter {
         if (other == null || other.componentValues == null) {
             return this;
         }
-
-        for (Entry<BagKey, Long> entry : other.componentValues.entrySet()) {
-            Long existingValue = componentValues.get(entry.getKey());
-            Long newValue = existingValue == null ? entry.getValue() : Math.max(entry.getValue(), existingValue);
-            componentValues.put(entry.getKey(), newValue);
+        
+        boolean is_compaction = BaggageBuffersUtils.is_compaction.get();
+        
+        if (is_compaction) {
+            for (Entry<BagKey, Long> entry : other.componentValues.entrySet()) {
+                Long existingValue = componentValues.get(entry.getKey());
+                if (existingValue == null) {
+                    // We can compact the new value into our own component ID
+                    increment(entry.getValue()); 
+                } else {
+                    // We already knew about this component ID so we can't compact it
+                    componentValues.put(entry.getKey(), Math.max(entry.getValue(), existingValue));
+                }
+            }
+        } else {
+            for (Entry<BagKey, Long> entry : other.componentValues.entrySet()) {
+                Long existingValue = componentValues.get(entry.getKey());
+                Long newValue = existingValue == null ? entry.getValue() : Math.max(entry.getValue(), existingValue);
+                componentValues.put(entry.getKey(), newValue);
+            }
         }
         return this;
     }
