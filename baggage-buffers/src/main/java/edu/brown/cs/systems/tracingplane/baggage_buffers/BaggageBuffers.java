@@ -165,14 +165,15 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
     }
     
     private static final boolean isCompactionEnabled = BaggageBuffersConfig.isCompactionEnabled();
+
     
     /**
      * Optional operation.  Compacts datatypes in the current thread's baggage based on per-datatype compaction semantics.
      * For most data types this does nothing; for CRDTs it collapses known instance states into a single instance.
      */
-    public static void compact() {
+    public static void compact(Baggage baggage) {
         boolean enteredListener = accessListener.enter();
-        Baggage.set(compact(Baggage.get()));
+        Baggage.set(compact(Baggage.get(), baggage));
         if (enteredListener) {
             accessListener.compact();
             accessListener.exit();
@@ -184,26 +185,12 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
      * Optional operation.  Compacts datatypes in the current thread's baggage based on per-datatype compaction semantics.
      * For most data types this does nothing; for CRDTs it collapses known instance states into a single instance.
      */
-    public static Baggage compact(Baggage baggage) {
-        // TODO: provide implementation of compact.  Possibly push compact to transit layer.  Unsure yet.
-        if (isCompactionEnabled) {
-            return baggage;
-        } else {
-            return baggage;
-        }
-    }
-
-    
-    /**
-     * Optional operation.  Compacts datatypes in the current thread's baggage based on per-datatype compaction semantics.
-     * For most data types this does nothing; for CRDTs it collapses known instance states into a single instance.
-     */
     public static Baggage compact(Baggage original, Baggage current) {
         // TODO: provide implementation of compact.  Possibly push compact to transit layer.  Unsure yet.
         if (isCompactionEnabled) {
-            return current;
+            return Baggage.join(original, current);
         } else {
-            return current;
+            return Baggage.join(original, current);
         }
     }
 
