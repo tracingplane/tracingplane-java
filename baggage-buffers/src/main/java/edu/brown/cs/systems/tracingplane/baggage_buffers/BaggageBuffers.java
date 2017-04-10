@@ -193,4 +193,18 @@ public class BaggageBuffers implements BaggageLayer<BaggageBuffersContents> {
         }
     }
 
+    
+    /**
+     * Optional operation.  Compacts datatypes in the current thread's baggage based on per-datatype compaction semantics.
+     * For most data types this does nothing; for CRDTs it collapses known instance states into a single instance.
+     */
+    public static Baggage compact(Baggage original, Baggage current) {
+        // TODO: provide implementation of compact.  Possibly push compact to transit layer.  Unsure yet.
+        if (isCompactionEnabled) {
+            return current;
+        } else {
+            return current;
+        }
+    }
+
 }
