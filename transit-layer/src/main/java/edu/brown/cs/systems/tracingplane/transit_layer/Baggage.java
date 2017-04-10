@@ -611,6 +611,8 @@ public interface Baggage {
     public static Baggage readFrom(InputStream in) throws IOException {
         return TransitLayerCompatibility.readFrom(transit, in);
     }
+    
+    static final int defaultTrimLength = new TransitLayerConfig().defaultTrim;
 
     /**
      * <p>
@@ -621,6 +623,9 @@ public interface Baggage {
      *         empty byte array, both of which are valid and can be used to indicate the empty Baggage.
      */
     public static byte[] serialize() {
+        if (defaultTrimLength > 0) {
+            return serialize(defaultTrimLength);
+        }
         boolean entered = listener.enter();
         if (entered) {
             listener.serialize();

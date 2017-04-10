@@ -16,11 +16,13 @@ public class TransitLayerConfig {
 
     public String transitLayerFactory;
     public final String transitAccessListenerClassName;
+    public final int defaultTrim;
 
     public TransitLayerConfig() {
         Config config = ConfigFactory.load();
-        
+
         transitAccessListenerClassName = config.getString("transit-layer.access-listener");
+        defaultTrim = config.getInt("transit-layer.default-trim");
 
         transitLayerFactory = config.getString(TRANSIT_LAYER_IMPLEMENTATION_KEY);
         try {
