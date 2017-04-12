@@ -11,8 +11,7 @@ public interface TransitLayerUtils {
         public void discard();
         public void branch();
         public void join();
-        public void serialize();
-        public void serialize(int maxLength);
+        public void serialize(Baggage baggage, int maxLength);
         public void exit();
         public void deserialized(Baggage baggage, int length);
     }
@@ -25,8 +24,7 @@ public interface TransitLayerUtils {
         public void discard() {}
         public void branch() {}
         public void join() {}
-        public void serialize() {}
-        public void serialize(int maxLength){}
+        public void serialize(Baggage baggage, int maxLength){}
         public void exit() {}
         public void deserialized(Baggage baggage, int length) {}
     }

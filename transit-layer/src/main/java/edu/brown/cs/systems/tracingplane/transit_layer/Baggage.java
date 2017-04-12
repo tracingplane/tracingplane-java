@@ -627,10 +627,11 @@ public interface Baggage {
             return serialize(defaultTrimLength);
         }
         boolean entered = listener.enter();
+        Baggage baggage = ThreadLocalBaggage.get();
         if (entered) {
-            listener.serialize();
+            listener.serialize(baggage, defaultTrimLength);
         }
-        byte[] serialized = TransitLayerCompatibility.serialize(transit, ThreadLocalBaggage.get());
+        byte[] serialized = TransitLayerCompatibility.serialize(transit, baggage);
         if (entered) {
             listener.exit();
         }
@@ -647,10 +648,11 @@ public interface Baggage {
      */
     public static byte[] serialize(int maxLength) {
         boolean entered = listener.enter();
+        Baggage baggage = ThreadLocalBaggage.get();
         if (entered) {
-            listener.serialize(maxLength);
+            listener.serialize(baggage, maxLength);
         }
-        byte[] serialized = TransitLayerCompatibility.serialize(transit, ThreadLocalBaggage.get(), maxLength);
+        byte[] serialized = TransitLayerCompatibility.serialize(transit, baggage, maxLength);
         if (entered) {
             listener.exit();
         }
@@ -671,7 +673,18 @@ public interface Baggage {
      * @return the serialized byte representation of the baggage
      */
     public static byte[] serialize(Baggage baggage) {
-        return TransitLayerCompatibility.serialize(transit, baggage);
+        if (defaultTrimLength > 0) {
+            return serialize(baggage, defaultTrimLength);
+        }
+        boolean entered = listener.enter();
+        if (entered) {
+            listener.serialize(baggage, defaultTrimLength);
+        }
+        byte[] serialized = TransitLayerCompatibility.serialize(transit, baggage);
+        if (entered) {
+            listener.exit();
+        }
+        return serialized;
     }
 
     /**
@@ -688,7 +701,15 @@ public interface Baggage {
      * @return the serialized byte representation of the baggage
      */
     public static byte[] serialize(Baggage baggage, int maxLength) {
-        return TransitLayerCompatibility.serialize(transit, baggage, maxLength);
+        boolean entered = listener.enter();
+        if (entered) {
+            listener.serialize(baggage, maxLength);
+        }
+        byte[] serialized = TransitLayerCompatibility.serialize(transit, baggage, maxLength);
+        if (entered) {
+            listener.exit();
+        }
+        return serialized;
     }
 
     /**
