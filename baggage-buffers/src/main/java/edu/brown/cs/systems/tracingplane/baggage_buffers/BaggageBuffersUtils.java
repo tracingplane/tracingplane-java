@@ -9,6 +9,7 @@ import edu.brown.cs.systems.tracingplane.baggage_buffers.api.Bag;
 import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
 import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter;
 import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
+import edu.brown.cs.systems.tracingplane.transit_layer.TransitLayer;
 
 public class BaggageBuffersUtils {
     
@@ -21,8 +22,16 @@ public class BaggageBuffersUtils {
         if (instance == null) {
             return 0;
         }
-        byte[] serialized = Baggage.serialize(instance);
-        return serialized == null ? 0 : serialized.length;
+        return calculateSerializedSize(Baggage.transit, instance);
+    }
+    
+    private static <B extends Baggage> int calculateSerializedSize(TransitLayer<B> transit, Baggage baggage) {
+        if (transit.isInstance(baggage)) {
+            byte[] serialized = transit.serialize((B) baggage);
+            return serialized == null ? 0 : serialized.length;
+        } else {
+            return 0;
+        }
     }
 
     /**
