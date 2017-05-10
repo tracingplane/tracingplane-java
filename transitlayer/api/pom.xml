@@ -2,14 +2,14 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>brown.tracingplane</groupId>
-    <artifactId>atomlayer-baggagecontext</artifactId>
+    <artifactId>transitlayer-api</artifactId>
     <packaging>jar</packaging>
 
-    <name>Atom Layer - BaggageContext Impl</name>
+    <name>Transit Layer - API</name>
 
     <parent>
         <groupId>brown.tracingplane</groupId>
-        <artifactId>atomlayer</artifactId>
+        <artifactId>transitlayer</artifactId>
         <version>1.0</version>
     </parent>
 
@@ -17,11 +17,6 @@
         <dependency>
             <groupId>brown.tracingplane</groupId>
             <artifactId>baggagecontext-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>brown.tracingplane</groupId>
-            <artifactId>atomlayer-core</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

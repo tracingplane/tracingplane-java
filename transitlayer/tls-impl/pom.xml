@@ -16,7 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>brown.tracingplane</groupId>
-            <artifactId>transitlayer-core</artifactId>
+            <artifactId>transitlayer-api</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

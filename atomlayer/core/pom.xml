@@ -16,7 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>brown.tracingplane</groupId>
-            <artifactId>tracingplane-core</artifactId>
+            <artifactId>baggagecontext-api</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

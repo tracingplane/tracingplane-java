@@ -9,8 +9,7 @@
 	<name>Tracing Plane</name>
 
 	<modules>
-		<module>core</module>
-		<module>staticapi</module>
+		<module>baggagecontext</module>
 		<module>transitlayer</module>
 		<module>atomlayer</module>
 		<module>baggageprotocol</module>

@@ -2,14 +2,14 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>brown.tracingplane</groupId>
-    <artifactId>tracingplane-core</artifactId>
+    <artifactId>baggagecontext-api</artifactId>
     <packaging>jar</packaging>
 
-    <name>Tracing Plane - Core</name>
+    <name>Baggage Context - API</name>
 
     <parent>
         <groupId>brown.tracingplane</groupId>
-        <artifactId>tracingplane-project</artifactId>
+        <artifactId>baggagecontext</artifactId>
         <version>1.0</version>
     </parent>
 
