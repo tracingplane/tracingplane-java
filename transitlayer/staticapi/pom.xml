@@ -26,6 +26,11 @@
         </dependency>
         <dependency>
             <groupId>brown.tracingplane</groupId>
+            <artifactId>transitlayer-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>brown.tracingplane</groupId>
             <artifactId>baggagecontext-staticapi</artifactId>
             <version>${project.version}</version>
         </dependency>

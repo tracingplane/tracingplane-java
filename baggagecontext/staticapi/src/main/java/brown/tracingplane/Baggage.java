@@ -25,7 +25,7 @@ public class Baggage {
     /**
      * @return a new instance of {@link B}, which may be null to indicate an empty baggage
      */
-    public BaggageContext newInstance() {
+    public static BaggageContext newInstance() {
         return provider.newInstance();
     }
 
@@ -36,7 +36,7 @@ public class Baggage {
      * 
      * @param baggage a baggage context
      */
-    public void discard(BaggageContext baggage) {
+    public static void discard(BaggageContext baggage) {
         provider.discard(baggage);
     }
 
@@ -48,7 +48,7 @@ public class Baggage {
      * @param from a baggage instance, possibly null
      * @return a baggage instance branched from <code>from</code>, possibly null
      */
-    public BaggageContext branch(BaggageContext from) {
+    public static BaggageContext branch(BaggageContext from) {
         return provider.branch(from);
     }
 
@@ -60,7 +60,7 @@ public class Baggage {
      * @param right a baggage instance, possibly null
      * @return a baggage instance with merged contents from <code>left</code> and <code>right</code>
      */
-    public BaggageContext join(BaggageContext left, BaggageContext right) {
+    public static BaggageContext join(BaggageContext left, BaggageContext right) {
         return provider.join(left, right);
     }
 
@@ -72,7 +72,7 @@ public class Baggage {
      * @param length lenft of the baggage bytes
      * @return a deserialized baggage instance, possibly null
      */
-    public BaggageContext deserialize(byte[] serialized, int offset, int length) {
+    public static BaggageContext deserialize(byte[] serialized, int offset, int length) {
         return provider.deserialize(serialized, offset, length);
     }
 
@@ -82,7 +82,7 @@ public class Baggage {
      * @param buf a serialized baggage
      * @return a deserialized baggage instance, possibly null
      */
-    public BaggageContext deserialize(ByteBuffer buf) {
+    public static BaggageContext deserialize(ByteBuffer buf) {
         return provider.deserialize(buf);
     }
 
@@ -93,7 +93,7 @@ public class Baggage {
      * @param baggage a baggage instance to serialize, possibly null
      * @return the serialized representation of <code>baggage</code>, which might be null or an empty byte array
      */
-    public byte[] serialize(BaggageContext baggage) {
+    public static byte[] serialize(BaggageContext baggage) {
         return provider.serialize(baggage);
     }
 
@@ -106,7 +106,7 @@ public class Baggage {
      * @param maximumSerializedSize the maximum size in bytes of the serialized baggage.
      * @return the serialized representation of <code>baggage</code>, which might be null or an empty byte array
      */
-    public byte[] serialize(BaggageContext baggage, int maximumSerializedSize) {
+    public static byte[] serialize(BaggageContext baggage, int maximumSerializedSize) {
         return provider.serialize(baggage, maximumSerializedSize);
     }
 

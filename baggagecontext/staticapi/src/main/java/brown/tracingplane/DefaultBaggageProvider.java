@@ -44,6 +44,7 @@ public class DefaultBaggageProvider {
             if (instance == null) {
                 instance = new NoOpBaggageContextProvider();
             }
+            log.info("Baggage provider initialied to " + instance.getClass().getName());
         }
     }
 
