@@ -10,6 +10,11 @@ import brown.tracingplane.BaggageProvider;
 public class NoOpBaggageContextProvider implements BaggageProvider<BaggageContext> {
 
     @Override
+    public boolean isValid(BaggageContext baggage) {
+        return baggage == null;
+    }
+
+    @Override
     public BaggageContext newInstance() {
         return null;
     }

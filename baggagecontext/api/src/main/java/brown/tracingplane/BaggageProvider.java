@@ -11,6 +11,12 @@ import java.nio.ByteBuffer;
 public interface BaggageProvider<B extends BaggageContext> {
 
     /**
+     * @param baggage a BaggageContext to test
+     * @return true if <code>baggage</code> is an instance of {@link B} or if baggage is null.
+     */
+    boolean isValid(BaggageContext baggage);
+
+    /**
      * @return a new instance of {@link B}, which may be null to indicate an empty baggage
      */
     public B newInstance();
