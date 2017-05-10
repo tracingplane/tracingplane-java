@@ -1,0 +1,33 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>brown.tracingplane</groupId>
+    <artifactId>transitlayer-baggagecontext</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Transit Layer - BaggageContext Impl</name>
+
+    <parent>
+        <groupId>brown.tracingplane</groupId>
+        <artifactId>transitlayer</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>brown.tracingplane</groupId>
+            <artifactId>tracingplane-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>brown.tracingplane</groupId>
+            <artifactId>transitlayer-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+        </plugins>
+    </build>
+</project>
