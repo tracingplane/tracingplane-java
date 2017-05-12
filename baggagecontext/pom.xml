@@ -10,6 +10,7 @@
     <modules>
         <module>api</module>
         <module>staticapi</module>
+        <module>transitlayer</module>
     </modules>
 
     <parent>

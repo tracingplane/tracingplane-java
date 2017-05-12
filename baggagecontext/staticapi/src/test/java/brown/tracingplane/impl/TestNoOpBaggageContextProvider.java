@@ -1,12 +1,13 @@
-package brown.tracingplane;
+package brown.tracingplane.impl;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import brown.tracingplane.impl.NoOpBaggageContextProvider;
-import brown.tracingplane.impl.NoOpBaggageContextProviderFactory;
+import brown.tracingplane.BaggageContext;
+import brown.tracingplane.BaggageProvider;
+import brown.tracingplane.BaggageProviderFactory;
 
 public class TestNoOpBaggageContextProvider {
     

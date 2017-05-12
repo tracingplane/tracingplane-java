@@ -18,6 +18,13 @@ public class TestStaticAPI {
     }
 
     @Test
+    public void testNoOpBaggageProviderIsNotWrapped() {
+        BaggageProvider<?> provider = DefaultBaggageProvider.getWrapped();
+        assertNotNull(provider);
+        assertTrue(provider instanceof NoOpBaggageContextProvider);
+    }
+
+    @Test
     public void testStaticAPICallsInvokeDefaultProvider() {
         assertEquals(DefaultBaggageProvider.get(), Baggage.provider);
 
@@ -97,7 +104,7 @@ public class TestStaticAPI {
             serialize2++;
             return null;
         }
-        
+
         public void reset() {
             isValid = 0;
             newInstance = 0;
@@ -109,8 +116,9 @@ public class TestStaticAPI {
             serialize1 = 0;
             serialize2 = 0;
         }
-        
-        public void expect(int isValid, int newInstance, int discard, int branch, int join, int d1, int d2, int s1, int s2) {
+
+        public void expect(int isValid, int newInstance, int discard, int branch, int join, int d1, int d2, int s1,
+                           int s2) {
             assertEquals(isValid, this.isValid);
             assertEquals(newInstance, this.newInstance);
             assertEquals(discard, this.discard);
@@ -132,23 +140,23 @@ public class TestStaticAPI {
         Baggage.provider = BaggageProviderProxy.wrap(providerForTest);
 
         try {
-            providerForTest.expect(0,0,0,0,0,0,0,0,0);
+            providerForTest.expect(0, 0, 0, 0, 0, 0, 0, 0, 0);
             Baggage.newInstance();
-            providerForTest.expect(0,1,0,0,0,0,0,0,0);
+            providerForTest.expect(0, 1, 0, 0, 0, 0, 0, 0, 0);
             Baggage.branch(null);
-            providerForTest.expect(1,0,0,1,0,0,0,0,0);
+            providerForTest.expect(1, 0, 0, 1, 0, 0, 0, 0, 0);
             Baggage.join(null, null);
-            providerForTest.expect(2,0,0,0,1,0,0,0,0);
+            providerForTest.expect(2, 0, 0, 0, 1, 0, 0, 0, 0);
             Baggage.discard(null);
-            providerForTest.expect(1,0,1,0,0,0,0,0,0);
+            providerForTest.expect(1, 0, 1, 0, 0, 0, 0, 0, 0);
             Baggage.serialize(null);
-            providerForTest.expect(1,0,0,0,0,0,0,1,0);
+            providerForTest.expect(1, 0, 0, 0, 0, 0, 0, 1, 0);
             Baggage.serialize(null, 10);
-            providerForTest.expect(1,0,0,0,0,0,0,0,1);
+            providerForTest.expect(1, 0, 0, 0, 0, 0, 0, 0, 1);
             Baggage.deserialize(null);
-            providerForTest.expect(0,0,0,0,0,0,1,0,0);
-            Baggage.deserialize(null,0,0);
-            providerForTest.expect(0,0,0,0,0,1,0,0,0);
+            providerForTest.expect(0, 0, 0, 0, 0, 0, 1, 0, 0);
+            Baggage.deserialize(null, 0, 0);
+            providerForTest.expect(0, 0, 0, 0, 0, 1, 0, 0, 0);
         } finally {
             Baggage.provider = originalProvider;
         }

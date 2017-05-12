@@ -4,14 +4,15 @@ import java.nio.ByteBuffer;
 
 /**
  * <p>
- * The static methods on the {@link Baggage} class mirror the methods implemented by {@link BaggageProvider}. Calling
- * any of these static methods will simply invoke the corresponding method on the current process's registered
- * {@link BaggageProvider}.
- * </p>
+ * The static methods in the {@link Baggage} class are the main entry point for manipulating {@link BaggageContext}
+ * instances.  The methods here mirror those provided by the {@link BaggageProvider} interface.
+ * <p>
  * 
  * <p>
- * To register a {@link BaggageProvider}, you must set the <code>baggage.provider</code> property to the appropriate
- * class name.
+ * Use of the {@link Baggage} API depends on a {@link BaggageProvider} being configured. Typically, this is done
+ * automatically by the Tracing Plane distribution that you use. However, if this is not the case, or if you wish to
+ * override the {@link BaggageProvider} implementation in use, then set the <code>baggage.provider</code> property to
+ * the {@link BaggageProviderFactory} of your choice.
  * </p>
  *
  */

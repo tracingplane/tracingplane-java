@@ -10,7 +10,6 @@
 
 	<modules>
 		<module>baggagecontext</module>
-		<module>transitlayer</module>
 		<module>atomlayer</module>
 		<module>baggageprotocol</module>
 		<module>bdl</module>
