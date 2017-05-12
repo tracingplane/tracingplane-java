@@ -10,7 +10,6 @@
     <modules>
         <module>api</module>
         <module>staticapi</module>
-        <module>noop-impl</module>
     </modules>
 
     <parent>

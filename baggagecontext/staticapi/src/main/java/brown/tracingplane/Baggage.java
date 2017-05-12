@@ -17,7 +17,7 @@ import java.nio.ByteBuffer;
  */
 public class Baggage {
 
-    private static final BaggageProvider<BaggageContext> provider = DefaultBaggageProvider.getWrapped();
+    static BaggageProvider<BaggageContext> provider = DefaultBaggageProvider.getWrapped();
 
     /** Not instantiable */
     private Baggage() {}
