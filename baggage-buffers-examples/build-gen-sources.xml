@@ -1,0 +1,12 @@
+<project>
+    <target name="generate-sources">
+        <mkdir dir="build/generated-sources" />
+        <exec executable="java">
+            <arg value="-jar" />
+            <arg value="../resources/bbc.jar" />
+            <arg value="--java_out=build/generated-sources" />
+            <arg value="src/main/baggage/example.bb" />
+            <arg value="src/main/baggage/xtrace.bb" />
+        </exec>
+    </target>
+</project>

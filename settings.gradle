@@ -1,0 +1,16 @@
+rootProject.name = 'tracingplane-project'
+include ':transit-layer'
+include ':atom-layer'
+include ':baggage-layer'
+include ':baggage-buffers-compiler'
+include ':baggage-buffers'
+include ':baggage-buffers-examples'
+include ':tracingplane-project-dist'
+
+project(':transit-layer').projectDir = "$rootDir/transit-layer" as File
+project(':atom-layer').projectDir = "$rootDir/atom-layer" as File
+project(':baggage-layer').projectDir = "$rootDir/baggage-layer" as File
+project(':baggage-buffers-compiler').projectDir = "$rootDir/baggage-buffers-compiler" as File
+project(':baggage-buffers').projectDir = "$rootDir/baggage-buffers" as File
+project(':baggage-buffers-examples').projectDir = "$rootDir/baggage-buffers-examples" as File
+project(':tracingplane-project-dist').projectDir = "$rootDir/dist" as File

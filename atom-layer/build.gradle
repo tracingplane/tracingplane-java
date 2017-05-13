@@ -1,0 +1,11 @@
+group = 'edu.brown.cs.systems.tracingplane'
+description = 'Tracing Plane - Atom Layer'
+dependencies {
+  compile project(':transit-layer')
+    compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.10'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version:'1.7.10'
+    compile group: 'com.typesafe', name: 'config', version:'1.2.1'
+    compile group: 'com.google.guava', name: 'guava', version:'19.0'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.4'
+    testCompile group: 'junit', name: 'junit', version:'4.12'
+}
