@@ -19,8 +19,6 @@ subprojects {
     
     maven { url "http://repo.maven.apache.org/maven2" }
   }
-
   
-  
-  
+    task allDeps(type: DependencyReportTask) {}
 }
