@@ -146,5 +146,31 @@ public class TestAtomContext {
         assertEquals(1, ctx2.atoms.count);
         assertEquals(ctx1.atoms.object, ctx2.atoms.object);
     }
+    
+    @Test
+    public void testExclusive() {
+        AtomContext ctx1 = new AtomContext(genAtoms(3, 10));
+        
+        AtomContext ctx2 = provider.branch(ctx1);
+
+        RefCount<List<ByteBuffer>> atoms1 = ctx1.atoms;
+        RefCount<List<ByteBuffer>> atoms2 = ctx2.atoms;
+        List<ByteBuffer> atomsCtx1 = ctx1.atoms.object;
+        List<ByteBuffer> atomsCtx2 = ctx2.atoms.object;
+
+        assertSame(atoms1, atoms2);
+        assertSame(atomsCtx1, atomsCtx2);
+        assertEquals(2, ctx1.atoms.count);
+        assertEquals(2, ctx2.atoms.count);
+        
+        ctx1.toExclusive();
+        
+        assertNotSame(atoms1, ctx1.atoms);
+        assertNotSame(atomsCtx1, ctx1.atoms.object);
+        assertEquals(atomsCtx1, ctx1.atoms.object);
+        assertEquals(1, ctx1.atoms.count);
+        assertEquals(1, ctx2.atoms.count);
+        
+    }
 
 }

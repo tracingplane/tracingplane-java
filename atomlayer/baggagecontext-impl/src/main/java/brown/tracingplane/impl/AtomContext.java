@@ -1,6 +1,8 @@
 package brown.tracingplane.impl;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import brown.tracingplane.BaggageContext;
@@ -62,11 +64,11 @@ public class AtomContext implements BaggageContext {
         atoms = null;
     }
 
-    AtomContext branch() {
+    public AtomContext branch() {
         return new AtomContext(atoms);
     }
 
-    AtomContext merge(AtomContext other) {
+    public AtomContext merge(AtomContext other) {
         if (other == null || other.atoms == null || other.atoms.object == null) {
             return this;
         }
@@ -93,12 +95,50 @@ public class AtomContext implements BaggageContext {
         return this;
     }
 
-    int serializedSize() {
+    /**
+     * If others hold references to our atoms, duplicates the atoms.
+     */
+    void toExclusive() {
+        if (atoms != null && atoms.object != null && !atoms.exclusive()) {
+            RefCount<List<ByteBuffer>> newAtoms = new RefCount<>(new ArrayList<>(atoms.object));
+            atoms.deref();
+            newAtoms.ref();
+            atoms = newAtoms;
+        }
+    }
+
+    public int serializedSize() {
         int size = 0;
         for (ByteBuffer atom : atoms.object) {
             size += atom.remaining() + ProtobufVarint.sizeOf(atom.remaining());
         }
         return size;
+    }
+
+    /**
+     * <p>
+     * Returns the {@link List} that backs this {@link AtomContext} object. This method is only for observing the atoms,
+     * not for updating them.
+     * </p>
+     * 
+     * @return the atoms of this {@link AtomContext}
+     */
+    public List<ByteBuffer> getUnmodifiableAtoms() {
+        return atoms == null ? null : atoms.object == null ? null : Collections.unmodifiableList(atoms.object);
+    }
+
+    /**
+     * <p>
+     * Returns the {@link List} that backs this {@link AtomContext} object, so modifications to the list will be
+     * reflected by this context and vice versa. {@link AtomContext} uses reference counting as an optimization, so a
+     * call to this method might result in duplicating atoms if others currently hold a reference to them.
+     * </p>
+     * 
+     * @return the atoms of this {@link AtomContext}
+     */
+    public List<ByteBuffer> getModifiableAtoms() {
+        toExclusive();
+        return atoms();
     }
 
     List<ByteBuffer> atoms() {

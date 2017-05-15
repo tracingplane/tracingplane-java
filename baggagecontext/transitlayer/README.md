@@ -1,4 +1,12 @@
-# Tracing Plane - Transit Layer
+# TracingPlane:BaggageContext/TransitLayer
+
+This package provides the following:
+
+* The core interfaces for the Tracing Plane's `TransitLayer` -- to enhance the existing `BaggageContext` and `Baggage` interfaces that exist in `BaggageContext/API` and `BaggageContext/StaticAPI`.
+* The out-of-the-box `TransitLayer` implementation, which is a NoOp and does nothing -- method calls are essentially ignored
+* A `TransitLayer` implementation based on thread-local variables.  This is the recommended context propagation library to use with the tracing plane.  It is the default `TransitLayer` implementation in the Tracing Plane distribution jars.
+
+## Transit Layer
 
 The Tracing Plane provides an out-of-the-box context propagation library called the "Transit Layer".  The Transit Layer uses thread-local storage to store `BaggageContext` instances for threads, and provides a static API in `brown.tracingplane.ActiveBaggage` that invokes transit layer methods.  `ActiveBaggage` provides methods as follows:
 
