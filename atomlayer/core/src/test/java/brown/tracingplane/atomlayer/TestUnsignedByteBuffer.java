@@ -1,14 +1,11 @@
-package brown.tracingplane.lexicographic;
+package brown.tracingplane.atomlayer;
 
 import static org.junit.Assert.assertTrue;
 import java.nio.ByteBuffer;
 import java.util.Comparator;
 import org.junit.Test;
-import brown.tracingplane.lexicographic.TypeUtils;
-import brown.tracingplane.lexicographic.UnsignedByteBuffer;
-import brown.tracingplane.lexicographic.UnsignedByteBuffer.LexicographicalComparatorHolder;
-import brown.tracingplane.lexicographic.UnsignedByteBuffer.LexicographicalComparatorHolder.PureJavaComparator;
-import brown.tracingplane.lexicographic.UnsignedByteBuffer.LexicographicalComparatorHolder.UnsafeComparator;
+import brown.tracingplane.atomlayer.TypeUtils;
+import brown.tracingplane.atomlayer.UnsignedByteBuffer;
 
 public class TestUnsignedByteBuffer {
 

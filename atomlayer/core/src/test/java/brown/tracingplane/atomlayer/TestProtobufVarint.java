@@ -1,11 +1,12 @@
-package brown.tracingplane.lexicographic;
+package brown.tracingplane.atomlayer;
 
 import static org.junit.Assert.assertEquals;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 import org.junit.Test;
-import brown.tracingplane.lexicographic.ProtobufVarint.MalformedVarintException;
+import brown.tracingplane.atomlayer.ProtobufVarint;
+import brown.tracingplane.atomlayer.ProtobufVarint.MalformedVarintException;
 
 public class TestProtobufVarint {
 

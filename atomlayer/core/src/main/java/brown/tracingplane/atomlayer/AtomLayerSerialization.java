@@ -10,9 +10,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import brown.tracingplane.atomlayer.AtomLayerOverflow.TrimExtent;
-import brown.tracingplane.lexicographic.ProtobufVarint;
-import brown.tracingplane.lexicographic.ProtobufVarint.EndOfStreamException;
-import brown.tracingplane.lexicographic.ProtobufVarint.MalformedVarintException;
+import brown.tracingplane.atomlayer.ProtobufVarint.EndOfStreamException;
+import brown.tracingplane.atomlayer.ProtobufVarint.MalformedVarintException;
 
 /**
  * <p>

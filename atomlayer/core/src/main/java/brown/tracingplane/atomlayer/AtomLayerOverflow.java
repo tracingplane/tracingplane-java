@@ -3,7 +3,6 @@ package brown.tracingplane.atomlayer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import brown.tracingplane.lexicographic.Lexicographic;
 
 /**
  * Contains static methods for trimming baggage atoms to size extents.

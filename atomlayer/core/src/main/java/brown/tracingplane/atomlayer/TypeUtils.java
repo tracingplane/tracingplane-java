@@ -1,4 +1,4 @@
-package brown.tracingplane.lexicographic;
+package brown.tracingplane.atomlayer;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class TypeUtils {
         for (int i = atom.position(); i < atom.limit(); i++) {
             binaryStrings.add(toBinaryString(atom.get(i)));
         }
-        return String.format("[%s]", join(binaryStrings, ", "));
+        return String.format("[%s]", StringUtils.join(binaryStrings, ", "));
     }
 
     public static String toHexString(ByteBuffer atom) {
@@ -58,7 +58,7 @@ public class TypeUtils {
         for (int i = atom.position(); i < atom.limit(); i++) {
             hexStrings.add(toHexString(atom.get(i)));
         }
-        return String.format("%s", join(hexStrings, ""));
+        return String.format("%s", StringUtils.join(hexStrings, ""));
     }
 
     public static String toBinaryString(Iterable<ByteBuffer> atoms) {
@@ -66,7 +66,7 @@ public class TypeUtils {
         for (ByteBuffer atom : atoms) {
             binaryStrings.add(toBinaryString(atom));
         }
-        return String.format("[%s]", join(binaryStrings, ", "));
+        return String.format("[%s]", StringUtils.join(binaryStrings, ", "));
     }
 
     public static String toHexString(Iterable<ByteBuffer> atoms) {
@@ -78,7 +78,7 @@ public class TypeUtils {
         for (ByteBuffer atom : atoms) {
             hexStrings.add(toHexString(atom));
         }
-        return String.format("%s", join(hexStrings, atomSeparator));
+        return String.format("%s", StringUtils.join(hexStrings, atomSeparator));
     }
 
     public static String toHexString(byte[] serialize) {
@@ -90,7 +90,7 @@ public class TypeUtils {
         for (byte b : s.getBytes()) {
             hexStrings.add("`" + toHexString(b) + "`");
         }
-        return join(hexStrings, ",");
+        return StringUtils.join(hexStrings, ",");
     }
 
     public static void main(String[] args) {
@@ -99,21 +99,6 @@ public class TypeUtils {
             System.out.println(toHexString((byte) x));
         }
         // System.out.println(toHexString("a"));
-    }
-
-    private static String join(List<?> objects, String separator) {
-        if (objects == null) return "";
-        StringBuilder b = new StringBuilder();
-        boolean first = true;
-        for (Object s : objects) {
-            if (!first) {
-                b.append(separator);
-            } else {
-                first = false;
-            }
-            b.append(String.valueOf(s));
-        }
-        return b.toString();
     }
 
 }

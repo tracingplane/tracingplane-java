@@ -1,4 +1,4 @@
-package brown.tracingplane.lexicographic;
+package brown.tracingplane.atomlayer;
 
 import java.util.ArrayList;
 import java.util.Comparator;

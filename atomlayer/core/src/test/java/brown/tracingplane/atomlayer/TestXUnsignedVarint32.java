@@ -1,4 +1,4 @@
-package brown.tracingplane.lexicographic;
+package brown.tracingplane.atomlayer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -7,10 +7,10 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 import org.junit.Test;
-import brown.tracingplane.lexicographic.AtomLayerException;
-import brown.tracingplane.lexicographic.Lexicographic;
-import brown.tracingplane.lexicographic.TypeUtils;
-import brown.tracingplane.lexicographic.UnsignedLexVarint;
+import brown.tracingplane.atomlayer.AtomLayerException;
+import brown.tracingplane.atomlayer.Lexicographic;
+import brown.tracingplane.atomlayer.TypeUtils;
+import brown.tracingplane.atomlayer.UnsignedLexVarint;
 
 public class TestXUnsignedVarint32 {
 

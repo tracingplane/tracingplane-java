@@ -1,10 +1,10 @@
-package brown.tracingplane.lexicographic;
+package brown.tracingplane.atomlayer;
 
 import static org.junit.Assert.assertEquals;
 import java.nio.ByteBuffer;
 import org.junit.Test;
-import brown.tracingplane.lexicographic.SignedLexVarint;
-import brown.tracingplane.lexicographic.UnsignedLexVarint;
+import brown.tracingplane.atomlayer.SignedLexVarint;
+import brown.tracingplane.atomlayer.UnsignedLexVarint;
 
 public class TestSerializedSize {
 

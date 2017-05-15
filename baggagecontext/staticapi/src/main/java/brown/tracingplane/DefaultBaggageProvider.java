@@ -22,7 +22,6 @@ public class DefaultBaggageProvider {
     private final BaggageProvider<? extends BaggageContext> provider;
     private final BaggageProvider<BaggageContext> wrappedProvider;
 
-    @SuppressWarnings("unchecked")
     private DefaultBaggageProvider() {
         Config config = ConfigFactory.load();
 

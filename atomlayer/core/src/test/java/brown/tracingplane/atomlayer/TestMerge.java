@@ -1,12 +1,12 @@
-package brown.tracingplane.lexicographic;
+package brown.tracingplane.atomlayer;
 
 import static org.junit.Assert.assertTrue;
 import java.nio.ByteBuffer;
 import java.util.List;
 import org.junit.Test;
 import com.google.common.collect.Lists;
-import brown.tracingplane.lexicographic.Lexicographic;
-import brown.tracingplane.lexicographic.TypeUtils;
+import brown.tracingplane.atomlayer.Lexicographic;
+import brown.tracingplane.atomlayer.TypeUtils;
 
 public class TestMerge {
 

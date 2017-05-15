@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import brown.tracingplane.BaggageContext;
-import brown.tracingplane.lexicographic.Lexicographic;
-import brown.tracingplane.lexicographic.ProtobufVarint;
+import brown.tracingplane.atomlayer.Lexicographic;
+import brown.tracingplane.atomlayer.ProtobufVarint;
 
 /**
  * <p>

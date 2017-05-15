@@ -1,4 +1,4 @@
-package brown.tracingplane.lexicographic;
+package brown.tracingplane.atomlayer;
 
 import static org.junit.Assert.assertEquals;
 import java.nio.BufferOverflowException;
@@ -7,6 +7,7 @@ import java.util.Random;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import brown.tracingplane.atomlayer.ByteBuffers;
 
 public class TestByteBuffers {
     

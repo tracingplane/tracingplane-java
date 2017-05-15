@@ -1,4 +1,4 @@
-package brown.tracingplane.lexicographic;
+package brown.tracingplane.atomlayer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Random;
 import org.junit.Test;
 import com.google.common.collect.Lists;
-import brown.tracingplane.lexicographic.MergeIterator;
 
 public class TestMergeIterator {
 

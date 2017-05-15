@@ -1,4 +1,4 @@
-package brown.tracingplane;
+package brown.tracingplane.atomlayer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
