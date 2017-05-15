@@ -11,6 +11,7 @@
         <module>compiler</module>
         <module>core</module>
         <module>baggagecontext-impl</module>
+        <module>examples</module>
     </modules>
 
     <parent>

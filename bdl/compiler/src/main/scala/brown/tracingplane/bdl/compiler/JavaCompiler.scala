@@ -3,7 +3,6 @@ package brown.tracingplane.bdl.compiler
 import scala.collection.mutable.Set
 import scala.collection.mutable.LinkedHashSet
 import scala.collection.mutable.LinkedHashMap
-import brown.tracingplane.bdl.compiler.JavaCompilerUtils;
 import brown.tracingplane.bdl.compiler.Ast._
 import brown.tracingplane.bdl.compiler.Ast.BuiltInType._
 
@@ -54,39 +53,39 @@ class JavaCompiler extends Compiler {
     def LoggerFactory = importIfPossible("org.slf4j.LoggerFactory")
 
     // Transit layer api
-    def Baggage = importIfPossible("edu.brown.cs.systems.tracingplane.transit_layer.Baggage")
+    def Baggage = importIfPossible("brown.tracingplane.BaggageContext")
 
     // Baggage layer api
-    def BagKey = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_layer.BagKey")
-    def BaggageReader = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageReader")
-    def BaggageWriter = importIfPossible("edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter")
+    def BagKey = importIfPossible("brown.tracingplane.baggageprotocol.BagKey")
+    def BaggageReader = importIfPossible("brown.tracingplane.baggageprotocol.BaggageReader")
+    def BaggageWriter = importIfPossible("brown.tracingplane.baggageprotocol.BaggageWriter")
 
     // Baggage buffers api
     def BaggageBuffers = importIfPossible("brown.tracingplane.bdl.BaggageBuffers")
     def Registrations = importIfPossible("brown.tracingplane.bdl.Registrations")
-    def Bag = importIfPossible("brown.tracingplane.bdl.api.Bag")
-    def Struct = importIfPossible("brown.tracingplane.bdl.api.Struct")
-    def Parser = importIfPossible("brown.tracingplane.bdl.api.Parser")
-    def Serializer = importIfPossible("brown.tracingplane.bdl.api.Serializer")
-    def Brancher = importIfPossible("brown.tracingplane.bdl.api.Brancher")
-    def Joiner = importIfPossible("brown.tracingplane.bdl.api.Joiner")
-    def BaggageHandler = importIfPossible("brown.tracingplane.bdl.api.BaggageHandler")
-    def BBUtils = importIfPossible("brown.tracingplane.bdl.impl.BBUtils")
-    def Counter = importIfPossible("brown.tracingplane.bdl.api.SpecialTypes.Counter")
-    def CounterImpl = importIfPossible("brown.tracingplane.bdl.impl.CounterImpl")
-    def StructReader = s"${importIfPossible("brown.tracingplane.bdl.api.Struct")}.StructReader"
-    def StructSizer = s"${importIfPossible("brown.tracingplane.bdl.api.Struct")}.StructSizer"
-    def StructWriter = s"${importIfPossible("brown.tracingplane.bdl.api.Struct")}.StructWriter"
-    def StructHandler = s"${importIfPossible("brown.tracingplane.bdl.api.Struct")}.StructHandler"
+    def Bag = importIfPossible("brown.tracingplane.bdl.Bag")
+    def Struct = importIfPossible("brown.tracingplane.bdl.Struct")
+    def Parser = importIfPossible("brown.tracingplane.bdl.Parser")
+    def Serializer = importIfPossible("brown.tracingplane.bdl.Serializer")
+    def Brancher = importIfPossible("brown.tracingplane.bdl.Brancher")
+    def Joiner = importIfPossible("brown.tracingplane.bdl.Joiner")
+    def BaggageHandler = importIfPossible("brown.tracingplane.bdl.BaggageHandler")
+    def BBUtils = importIfPossible("brown.tracingplane.bdl.BBUtils")
+    def Counter = importIfPossible("brown.tracingplane.bdl.SpecialTypes.Counter")
+    def CounterImpl = importIfPossible("brown.tracingplane.bdl.CounterImpl")
+    def StructReader = s"${importIfPossible("brown.tracingplane.bdl.Struct")}.StructReader"
+    def StructSizer = s"${importIfPossible("brown.tracingplane.bdl.Struct")}.StructSizer"
+    def StructWriter = s"${importIfPossible("brown.tracingplane.bdl.Struct")}.StructWriter"
+    def StructHandler = s"${importIfPossible("brown.tracingplane.bdl.Struct")}.StructHandler"
 
     // Baggage buffers helpers
-    def ReaderHelpers = importIfPossible("brown.tracingplane.bdl.impl.ReaderHelpers")
-    def WriterHelpers = importIfPossible("brown.tracingplane.bdl.impl.WriterHelpers")
-    def Parsers = importIfPossible("brown.tracingplane.bdl.impl.Parsers")
-    def Serializers = importIfPossible("brown.tracingplane.bdl.impl.Serializers")
-    def Branchers = importIfPossible("brown.tracingplane.bdl.impl.Branchers")
-    def Joiners = importIfPossible("brown.tracingplane.bdl.impl.Joiners")
-    def StructHelpers = importIfPossible("brown.tracingplane.bdl.impl.StructHelpers")
+    def ReaderHelpers = importIfPossible("brown.tracingplane.bdl.ReaderHelpers")
+    def WriterHelpers = importIfPossible("brown.tracingplane.bdl.WriterHelpers")
+    def Parsers = importIfPossible("brown.tracingplane.bdl.Parsers")
+    def Serializers = importIfPossible("brown.tracingplane.bdl.Serializers")
+    def Branchers = importIfPossible("brown.tracingplane.bdl.Branchers")
+    def Joiners = importIfPossible("brown.tracingplane.bdl.Joiners")
+    def StructHelpers = importIfPossible("brown.tracingplane.bdl.StructHelpers")
 
     def javaName(name: String): String = JavaCompilerUtils.formatCamelCase(name)
 
@@ -682,7 +681,7 @@ class JavaCompiler extends Compiler {
         }"""
 
       val declaration = s"""/** Generated by BaggageBuffersCompiler */
-        package brown.tracingplane.bdl.compiler{decl.packageName};
+        package ${decl.packageName};
 
         ${toImport.sortWith(_ < _).map(x => s"import $x;").mkString("\n")}
         

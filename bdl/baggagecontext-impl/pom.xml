@@ -19,6 +19,14 @@
             <artifactId>bdl-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.typesafe</groupId>
+			<artifactId>config</artifactId>
+		</dependency>
     </dependencies>
 
     <build>
