@@ -85,7 +85,9 @@ public class ActiveBaggage {
     /**
      * Deserializes the provided context and merges it into the currently active context.
      * 
-     * @param serializedContext a serialized baggage context, possibly null
+     * @param serialized a serialized baggage context, possibly null
+     * @param offset offset into byte array
+     * @param length length of bytes to use
      */
     public static void join(byte[] serialized, int offset, int length) {
         transit.join(serialized, offset, length);

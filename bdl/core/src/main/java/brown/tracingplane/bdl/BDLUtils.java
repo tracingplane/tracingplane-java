@@ -37,7 +37,13 @@ public class BDLUtils {
         return s.replaceAll("(?m)^", "  ");
     }
     
-    /** Equality comparison, using the provided default value if a or b are null */
+    /**
+     * Equality comparison, using the provided default value if a or b are null
+     * @param a an object instance, possibly null
+     * @param b an object instance, possibly null
+     * @param defaultValue the default value to use for a or b if they happen to be null
+     * @return true if <code>a</code> and <code>b</code> are equal
+     */
     public static <T> boolean equals(T a, T b, T defaultValue) {
         if (a == null && b == null) {
             return true;
