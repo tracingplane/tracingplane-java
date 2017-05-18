@@ -1,12 +1,18 @@
 /**
  * 
  * <p>
- * <code>brown.tracingplane.atomlayer</code> contains some of the core atom-based functions of the Tracing Plane,
- * including implementations of lexicographic comparison and lexicographic merge.
+ * Provides the Tracing Plane's core underlying data representation for {@link BaggageContext} based on <i>atoms</i> and
+ * <i>lexicographic merge</i>.
  * </p>
  * 
  * <p>
- * In general, this code uses {@link ByteBuffer}s to represent atoms.
+ * The key primitives provided by the Atom Layer are an intermediary data format for {@link BaggageContext}s based on
+ * <i>atoms</i>, along with the default atom-based comparison and merge functions based on the lexicographic ordering of
+ * atoms.
+ * </p>
+ * 
+ * <p>
+ * The Atom Layer represents atoms using {@link ByteBuffer}s.
  * </p>
  * 
  * <p>
