@@ -2,16 +2,16 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>brown.tracingplane</groupId>
-    <artifactId>bdl-compiler</artifactId>
-    <packaging>jar</packaging>
+	<artifactId>bdl-compiler</artifactId>
+	<packaging>jar</packaging>
 
-    <name>Baggage Definition Language - Compiler</name>
+	<name>Baggage Definition Language - Compiler</name>
 
-    <parent>
-        <groupId>brown.tracingplane</groupId>
-        <artifactId>bdl</artifactId>
-        <version>1.0</version>
-    </parent>
+	<parent>
+		<groupId>brown.tracingplane</groupId>
+		<artifactId>bdl</artifactId>
+		<version>1.0</version>
+	</parent>
 
 	<dependencies>
 		<dependency>
@@ -91,20 +91,21 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<configuration>
 					<downloadSources>true</downloadSources>
 					<downloadJavadocs>true</downloadJavadocs>
 					<projectnatures>
-						<projectnature>org.scala-ide.sdt.core.scalanature</projectnature>
 						<projectnature>org.eclipse.jdt.core.javanature</projectnature>
+						<projectnature>org.scala-ide.sdt.core.scalanature</projectnature>
 					</projectnatures>
 					<buildcommands>
 						<buildcommand>org.scala-ide.sdt.core.scalabuilder</buildcommand>
 					</buildcommands>
 					<classpathContainers>
 						<classpathContainer>org.scala-ide.sdt.launching.SCALA_CONTAINER</classpathContainer>
-						<classpathContainer>org.eclipse.jdt.launching.JRE_CONTAINER</classpathContainer>
+						<classpathContainer>org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8</classpathContainer>
 					</classpathContainers>
 					<excludes>
 						<!-- in Eclipse, use scala-library, scala-compiler from the SCALA_CONTAINER 
@@ -191,6 +192,16 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<complianceLevel>1.8</complianceLevel>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
