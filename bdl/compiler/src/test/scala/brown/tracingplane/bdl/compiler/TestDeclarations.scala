@@ -6,7 +6,6 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import brown.tracingplane.bdl.compiler.Declarations._
 import fastparse.all._
-import brown.tracingplane.bdl.compiler.Parser;
 import brown.tracingplane.bdl.compiler.Ast._
 
 @RunWith(classOf[JUnitRunner])
