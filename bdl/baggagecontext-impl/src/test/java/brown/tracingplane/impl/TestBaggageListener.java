@@ -1,16 +1,10 @@
-package brown.tracingplane;
+package brown.tracingplane.impl;
 
 import static org.junit.Assert.assertEquals;
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import org.junit.Test;
-import brown.tracingplane.impl.BDLContext;
-import brown.tracingplane.impl.BDLContextProvider;
-import brown.tracingplane.impl.BaggageListener.BranchListener;
-import brown.tracingplane.impl.BaggageListener.JoinListener;
+import brown.tracingplane.BaggageListener.BranchListener;
+import brown.tracingplane.BaggageListener.JoinListener;
 
 public class TestBaggageListener {
 

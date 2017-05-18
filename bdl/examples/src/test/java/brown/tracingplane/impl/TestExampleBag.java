@@ -1,4 +1,4 @@
-package edu.brown.cs.systems.baggage_buffers_examples;
+package brown.tracingplane.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -10,31 +10,26 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TreeMap;
-import org.apache.log4j.BasicConfigurator;
 import org.junit.Test;
-import edu.brown.cs.systems.baggage_buffers.gen.example.ExampleBag;
-import edu.brown.cs.systems.baggage_buffers.gen.example.SimpleBag2;
-import edu.brown.cs.systems.baggage_buffers.gen.example.SimpleStruct1;
-import edu.brown.cs.systems.baggage_buffers.gen.example.SimpleStruct1.Handler;
-import edu.brown.cs.systems.tracingplane.atom_layer.BaggageAtoms;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
-import edu.brown.cs.systems.tracingplane.baggage_buffers.BaggageBuffers;
-import edu.brown.cs.systems.tracingplane.baggage_buffers.Registrations;
-import edu.brown.cs.systems.tracingplane.baggage_buffers.api.SpecialTypes.Counter;
-import edu.brown.cs.systems.tracingplane.baggage_layer.BagKey;
-import edu.brown.cs.systems.tracingplane.transit_layer.Baggage;
+import brown.tracingplane.BaggageContext;
+import brown.tracingplane.baggageprotocol.BagKey;
+import brown.tracingplane.bdl.BDLUtils;
+import brown.tracingplane.bdl.SpecialTypes.Counter;
+import brown.tracingplane.bdl.examples.ExampleBag;
+import brown.tracingplane.bdl.examples.SimpleBag2;
+import brown.tracingplane.bdl.examples.SimpleStruct1;
 
 public class TestExampleBag {
 
     static {
-        BasicConfigurator.configure();
-
-        Registrations.register(BagKey.indexed(10), ExampleBag.Handler.instance);
-    }
+        BaggageHandlerRegistry.add(BagKey.indexed(10), ExampleBag.Handler.instance);
+    } 
+    
+    private static final BDLContextProvider provider = new BDLContextProvider();
     
     @Test
     public void testStruct() throws Exception {
-        Handler handler = SimpleStruct1.Handler.instance;
+        SimpleStruct1.Handler handler = SimpleStruct1.Handler.instance;
         
         SimpleStruct1 struct = new SimpleStruct1();
         assertEquals(2, handler.serializedSize(struct));
@@ -86,31 +81,31 @@ public class TestExampleBag {
         b2.secondField = "boshank";
         b1.bagMap.put("jon", b2);
 
-        System.out.println(b1);
+        BaggageContext baggage = ExampleBag.setIn(null, b1);
 
-        ExampleBag.set(b1);
-
-        assertEquals(b1, ExampleBag.get());
-
-        System.out.println(TypeUtils.toHexString(Baggage.serialize()));
-
+        assertEquals(b1, ExampleBag.getFrom(baggage));
+    }
+    
+    static List<ByteBuffer> atoms(BaggageContext baggage) {
+        if (baggage != null && baggage instanceof BDLContext) {
+            return ((BDLContext) baggage).serialize().atoms();
+        } else {
+            return null;
+        }
     }
 
     @Test
     public void testTaint() {
 
-        Baggage baggage = ExampleBag.setIn(null, new ExampleBag());
+        BaggageContext baggage = ExampleBag.setIn(null, new ExampleBag());
         
         assertNotNull(baggage);
         
-        List<ByteBuffer> atoms = BaggageAtoms.atoms((BaggageAtoms) baggage);
+        List<ByteBuffer> atoms = atoms(baggage);
         assertEquals(0, atoms.size());
         
-        byte[] byteRepr = Baggage.serialize(baggage);
+        byte[] byteRepr = provider.serialize((BDLContext) baggage);
         assertEquals(0, byteRepr.length);
-        
-        
-        
     }
 
     @Test
@@ -118,14 +113,14 @@ public class TestExampleBag {
 
         ExampleBag eb = new ExampleBag();
         eb.sampled = true;
-        Baggage baggage = ExampleBag.setIn(null, eb);
+        BaggageContext baggage = ExampleBag.setIn(null, eb);
         
         assertNotNull(baggage);
         
-        List<ByteBuffer> atoms = BaggageAtoms.atoms((BaggageAtoms) baggage);
+        List<ByteBuffer> atoms = atoms(baggage);
         assertEquals(3, atoms.size());
         
-        byte[] byteRepr = Baggage.serialize(baggage);
+        byte[] byteRepr = provider.serialize((BDLContext) baggage);
         assertEquals(9, byteRepr.length);
         
     }
@@ -136,13 +131,10 @@ public class TestExampleBag {
         eb1.c = Counter.newInstance();
         eb1.c.increment(174);
         
-        Baggage sourceBaggage = ExampleBag.setIn(null, eb1);
-        byte[] bytes = Baggage.serialize(sourceBaggage);
-        Baggage b = Baggage.deserialize(bytes);
-        System.out.println(b);
-        
+        BaggageContext sourceBaggage = ExampleBag.setIn(null, eb1);
+        byte[] bytes = provider.serialize((BDLContext) sourceBaggage);
+        BaggageContext b = provider.deserialize(bytes, 0, bytes.length);
         assertEquals(174, ExampleBag.getFrom(b).c.getValue());
-        
         
     }
 
@@ -155,10 +147,10 @@ public class TestExampleBag {
         ExampleBag eb2 = new ExampleBag();
         eb2.sampled = false;
 
-        Baggage b1 = ExampleBag.setIn(null, eb1);
-        Baggage b2 = ExampleBag.setIn(null, eb2);
+        BaggageContext b1 = ExampleBag.setIn(null, eb1);
+        BaggageContext b2 = ExampleBag.setIn(null, eb2);
         
-        Baggage bj = Baggage.join(b1, b2);
+        BaggageContext bj = provider.join((BDLContext) b1, (BDLContext) b2);
         
         ExampleBag ebj = ExampleBag.getFrom(bj);
         assertTrue(ebj.sampled);
@@ -186,14 +178,11 @@ public class TestExampleBag {
         eb2.countermap.put("c1", c1);
         eb2.countermap.put("c2", c2b);
 
-        Baggage b1 = ExampleBag.setIn(null, eb1);
-        Baggage b2 = ExampleBag.setIn(null, eb2);
+        BaggageContext b1 = ExampleBag.setIn(null, eb1);
+        BaggageContext b2 = ExampleBag.setIn(null, eb2);
         
-        Baggage b3 = Baggage.branch(b1);
-        Baggage b4 = Baggage.join(b1, b2);
-        
-        System.out.println("B4 is: " + b4);
-        
+        BaggageContext b3 = provider.branch((BDLContext) b1);
+        BaggageContext b4 = provider.join((BDLContext) b1, (BDLContext) b2);
     }
     
     @Test
@@ -205,14 +194,14 @@ public class TestExampleBag {
         eb1.countermap = new TreeMap<>();
         eb1.countermap.put("c1", c1);
         
-        Baggage b1 = ExampleBag.setIn(null, eb1);
+        BaggageContext b1 = ExampleBag.setIn(null, eb1);
         
-        Baggage b2 = Baggage.branch(b1);
+        BaggageContext b2 = provider.branch((BDLContext) b1);
         ExampleBag.getFrom(b2).countermap.get("c1").increment(5);
         
-        Baggage bjoined = Baggage.join(b1, b2);
+        BaggageContext bjoined = provider.join((BDLContext) b1, (BDLContext) b2);
         
-        assertEquals(28, Baggage.serialize(bjoined).length);
+        assertEquals(28, provider.serialize((BDLContext) bjoined).length);
         assertEquals(8, ExampleBag.getFrom(bjoined).countermap.get("c1").getValue());
     }
     
@@ -225,14 +214,14 @@ public class TestExampleBag {
         eb1.countermap = new TreeMap<>();
         eb1.countermap.put("c1", c1);
         
-        Baggage b1 = ExampleBag.setIn(null, eb1);
+        BaggageContext b1 = ExampleBag.setIn(null, eb1);
         
-        Baggage b2 = Baggage.branch(b1);
+        BaggageContext b2 = provider.branch((BDLContext) b1);
         ExampleBag.getFrom(b2).countermap.get("c1").increment(5);
         
-        Baggage bjoined = BaggageBuffers.compact(b1, b2);
+        BaggageContext bjoined = provider.compact((BDLContext) b1, (BDLContext) b2);
         
-        assertEquals(19, Baggage.serialize(bjoined).length);
+        assertEquals(19, provider.serialize((BDLContext) bjoined).length);
         assertEquals(8, ExampleBag.getFrom(bjoined).countermap.get("c1").getValue());
     }
     
@@ -245,23 +234,23 @@ public class TestExampleBag {
         eb1.countermap = new TreeMap<>();
         eb1.countermap.put("c1", c1);
         
-        Baggage b1 = ExampleBag.setIn(null, eb1);
+        BaggageContext b1 = ExampleBag.setIn(null, eb1);
         
-        Baggage b2 = Baggage.branch(b1);
+        BaggageContext b2 = provider.branch((BDLContext) b1);
         ExampleBag.getFrom(b2).countermap.get("c1").increment(5);
         
-        Baggage b3 = Baggage.branch(b2);
+        BaggageContext b3 = provider.branch((BDLContext) b2);
         ExampleBag.getFrom(b3).countermap.get("c1").increment(100);
         
-        Baggage b2joined = Baggage.join(b2, b3);
-        assertEquals(37, Baggage.serialize(b2joined).length);
+        BaggageContext b2joined = provider.join((BDLContext) b2, (BDLContext) b3);
+        assertEquals(37, provider.serialize((BDLContext) b2joined).length);
         assertEquals(108, ExampleBag.getFrom(b2joined).countermap.get("c1").getValue());
         
         ExampleBag.getFrom(b2joined).countermap.get("c1").increment(7);
         
         
-        Baggage bjoined = Baggage.join(b1, b2joined);
-        assertEquals(37, Baggage.serialize(bjoined).length);
+        BaggageContext bjoined = provider.join((BDLContext) b1, (BDLContext) b2joined);
+        assertEquals(37, provider.serialize((BDLContext) bjoined).length);
         assertEquals(115, ExampleBag.getFrom(bjoined).countermap.get("c1").getValue());
     }
     
@@ -274,23 +263,25 @@ public class TestExampleBag {
         eb1.countermap = new TreeMap<>();
         eb1.countermap.put("c1", c1);
         
-        Baggage b1 = ExampleBag.setIn(null, eb1);
+        BaggageContext b1 = ExampleBag.setIn(null, eb1);
         
-        Baggage b2 = Baggage.branch(b1);
+        BaggageContext b2 = provider.branch((BDLContext) b1);
         ExampleBag.getFrom(b2).countermap.get("c1").increment(5);
         
-        Baggage b3 = Baggage.branch(b2);
+        BaggageContext b3 = provider.branch((BDLContext) b2);
         ExampleBag.getFrom(b3).countermap.get("c1").increment(100);
         
-        Baggage b2joined = Baggage.join(b2, b3);
-        assertEquals(37, Baggage.serialize(b2joined).length);
+        BaggageContext b2joined = provider.join((BDLContext) b2, (BDLContext) b3);
+        assertEquals(37, provider.serialize((BDLContext) b2joined).length);
         assertEquals(108, ExampleBag.getFrom(b2joined).countermap.get("c1").getValue());
         
         ExampleBag.getFrom(b2joined).countermap.get("c1").increment(7);
         
+        BDLUtils.is_compaction.set(true);
+        BaggageContext bjoined = provider.join((BDLContext) b1, (BDLContext) b2joined);
+        BDLUtils.is_compaction.set(false);
         
-        Baggage bjoined = BaggageBuffers.compact(b1, b2joined);
-        assertEquals(19, Baggage.serialize(bjoined).length);
+        assertEquals(19, provider.serialize((BDLContext) bjoined).length);
         assertEquals(115, ExampleBag.getFrom(bjoined).countermap.get("c1").getValue());
     }
 

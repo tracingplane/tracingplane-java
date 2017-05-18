@@ -33,7 +33,8 @@ public class TestStaticAPI {
         assertNull(Baggage.join(null, null));
         assertNull(Baggage.serialize(null));
         assertNull(Baggage.serialize(null, 0));
-        assertNull(Baggage.deserialize(null));
+        assertNull(Baggage.deserialize((byte[]) null));
+        assertNull(Baggage.deserialize((ByteBuffer) null));
         assertNull(Baggage.deserialize(null, 0, 0));
     }
 
@@ -153,9 +154,11 @@ public class TestStaticAPI {
             providerForTest.expect(1, 0, 0, 0, 0, 0, 0, 1, 0);
             Baggage.serialize(null, 10);
             providerForTest.expect(1, 0, 0, 0, 0, 0, 0, 0, 1);
-            Baggage.deserialize(null);
+            Baggage.deserialize((ByteBuffer) null);
             providerForTest.expect(0, 0, 0, 0, 0, 0, 1, 0, 0);
             Baggage.deserialize(null, 0, 0);
+            providerForTest.expect(0, 0, 0, 0, 0, 1, 0, 0, 0);
+            Baggage.deserialize((byte[]) null);
             providerForTest.expect(0, 0, 0, 0, 0, 1, 0, 0, 0);
         } finally {
             Baggage.provider = originalProvider;

@@ -18,8 +18,7 @@ import brown.tracingplane.bdl.BaggageHandler;
 
 /**
  * <p>
- * {@link BaggageHandlerRegistry} manages the mapping of baggage handlers to bag numbers. The globally configured mapping of
- * baggage handlers to bag numbers is maintained in {@link BDLContext#registry}.
+ * {@link BaggageHandlerRegistry} manages the mapping of baggage handlers to bag numbers.
  * </p>
  * 
  * <p>
@@ -50,28 +49,138 @@ public class BaggageHandlerRegistry {
 
     private static final String BAGS_CONFIGURATION_KEY = "bag";
 
-    /* Implementation notes: Could be volatile or atomic reference, but not trying to optimize for adding handlers at
-     * runtime (only at init). Could be treemap if the performance different is fine */
-    final BagKey[] keys;
-    final BaggageHandler<?>[] handlers;
+    static final BaggageHandlerRegistry instance = BaggageHandlerRegistry.create();
 
-    final Map<BaggageHandler<?>, BagKey> handlersToKeys = new HashMap<>();
-    final Map<BagKey, BaggageHandler<?>> keysToHandlers = new TreeMap<>();
+    Registrations registrations;
+
+    private BaggageHandlerRegistry(Registrations registrations) {
+        this.registrations = registrations;
+    }
+
+    /**
+     * Look up the {@link BagKey} that the specified {@link BaggageHandler} is registered to
+     */
+    public static BagKey get(BaggageHandler<?> handler) {
+        return instance.doGet(handler);
+    }
+
+    /**
+     * Registers the provided key with the provided handler. It is recommended to statically configure the mapping from
+     * keys to handlers as part of the process configuration, rather than calling this method.
+     */
+    public static void add(BagKey key, BaggageHandler<?> handler) {
+        instance.doAdd(key, handler);
+    }
+
+    /**
+     * Unregisters the handler for the specified bag key.
+     */
+    public static void remove(BagKey key) {
+        instance.doRemove(key);
+    }
+
+    BagKey doGet(BaggageHandler<?> handler) {
+        return registrations.get(handler);
+    }
+
+    void doAdd(BagKey key, BaggageHandler<?> handler) {
+        if (key == null) {
+            log.error("Unable to register handler for null key: " + String.valueOf(handler));
+        } else if (handler == null) {
+            log.error("Cannot register null handler for key " + key);
+        } else {
+            registrations = registrations.add(key, handler);
+        }
+    }
+
+    void doRemove(BagKey key) {
+        registrations = registrations.remove(key);
+    }
+
+    static class Registrations {
+
+        /* Implementation notes: Could be volatile or atomic reference, but not trying to optimize for adding handlers
+         * at runtime (only at init). Could be treemap if the performance different is fine */
+        final BagKey[] keys;
+        final BaggageHandler<?>[] handlers;
+
+        final Map<BaggageHandler<?>, BagKey> handlersToKeys = new HashMap<>();
+        final Map<BagKey, BaggageHandler<?>> keysToHandlers = new TreeMap<>();
+
+        Registrations(Map<BagKey, BaggageHandler<?>> mapping) {
+            keys = new BagKey[mapping.size()];
+            handlers = new BaggageHandler<?>[mapping.size()];
+
+            int i = 0;
+            for (BagKey key : mapping.keySet()) {
+                BaggageHandler<?> handler = mapping.get(key);
+
+                keysToHandlers.put(key, handler);
+                handlersToKeys.put(handler, key);
+                keys[i] = key;
+                handlers[i] = handler;
+                i++;
+            }
+        }
+
+        /**
+         * Look up the {@link BagKey} that the specified {@link BaggageHandler} is registered to
+         */
+        BagKey get(BaggageHandler<?> handler) {
+            return handlersToKeys.get(handler);
+        }
+
+        /**
+         * Registers the provided key with the provided handler into the process's default registrations. Recommended
+         * NOT to do this -- instead you should statically configure the registration of keys to handlers.
+         * 
+         * {@link BaggageHandlerRegistry} instances are immutable, so adding a new registration will create and return a
+         * new {@link BaggageHandlerRegistry} instance with the additional mapping.
+         */
+        Registrations add(BagKey key, BaggageHandler<?> handler) {
+            Map<BagKey, BaggageHandler<?>> newMapping = new TreeMap<>(keysToHandlers);
+            newMapping.put(key, handler);
+            return new Registrations(newMapping);
+        }
+
+        /**
+         * Unregisters the handler for the specified bag key.
+         * 
+         * {@link BaggageHandlerRegistry} instances are immutable, so removing a registration will return a new
+         * {@link BaggageHandlerRegistry} instance with the mapping removed.
+         */
+        Registrations remove(BagKey key) {
+            Map<BagKey, BaggageHandler<?>> newMapping = new TreeMap<>(keysToHandlers);
+            if (newMapping.remove(key) != null) {
+                return new Registrations(newMapping);
+            } else {
+                return this;
+            }
+        }
+    }
+
+    /**
+     * Create an empty {@link BaggageHandlerRegistry}
+     */
+    static BaggageHandlerRegistry empty() {
+        return new BaggageHandlerRegistry(new Registrations(new TreeMap<>()));
+    }
 
     /**
      * Create a {@link BaggageHandlerRegistry} instance by parsing configured values from the default config
      */
-    public static BaggageHandlerRegistry create() {
+    static BaggageHandlerRegistry create() {
         return create(ConfigFactory.load());
     }
 
     /**
-     * Create a {@link BaggageHandlerRegistry} instance by parsing the mappings configured in the provided {@link Config}
+     * Create a {@link BaggageHandlerRegistry} instance by parsing the mappings configured in the provided
+     * {@link Config}
      * 
      * @param config a typesafe config
      * @return a {@link BaggageHandlerRegistry} instance with handlers loaded for the configured bag keys
      */
-    public static BaggageHandlerRegistry create(Config config) {
+    static BaggageHandlerRegistry create(Config config) {
         Map<BagKey, BaggageHandler<?>> mapping = new TreeMap<>();
         for (Entry<String, ConfigValue> x : config.getConfig(BAGS_CONFIGURATION_KEY).entrySet()) {
             String bagHandlerClassName = x.getValue().unwrapped().toString();
@@ -85,24 +194,6 @@ public class BaggageHandlerRegistry {
 
             mapping.put(key, handler);
         }
-        return new BaggageHandlerRegistry(mapping);
-    }
-
-    private BaggageHandlerRegistry(Map<BagKey, BaggageHandler<?>> mapping) {
-        keys = new BagKey[mapping.size()];
-        handlers = new BaggageHandler<?>[mapping.size()];
-
-        int i = 0;
-        for (BagKey key : mapping.keySet()) {
-            BaggageHandler<?> handler = mapping.get(key);
-
-            keysToHandlers.put(key, handler);
-            handlersToKeys.put(handler, key);
-            keys[i] = key;
-            handlers[i] = handler;
-            i++;
-        }
-
         if (mapping.size() == 0) {
             log.warn("No baggage handlers are registered -- if this is unexpected, ensure `bag` is correctly configured");
         } else {
@@ -112,41 +203,7 @@ public class BaggageHandlerRegistry {
                                            .collect(Collectors.joining("\n"));
             log.info(mapping.size() + " baggage handlers registered:\n" + handlersString);
         }
-    }
-
-    /**
-     * Look up the {@link BagKey} that the specified {@link BaggageHandler} is registered to
-     */
-    public BagKey get(BaggageHandler<?> handler) {
-        return handlersToKeys.get(handler);
-    }
-
-    /**
-     * Registers the provided key with the provided handler into the process's default registrations. Recommended NOT to
-     * do this -- instead you should statically configure the registration of keys to handlers.
-     * 
-     * {@link BaggageHandlerRegistry} instances are immutable, so adding a new registration will create and return a new
-     * {@link BaggageHandlerRegistry} instance with the additional mapping.
-     */
-    public BaggageHandlerRegistry add(BagKey key, BaggageHandler<?> handler) {
-        Map<BagKey, BaggageHandler<?>> newMapping = new TreeMap<>(keysToHandlers);
-        newMapping.put(key, handler);
-        return new BaggageHandlerRegistry(newMapping);
-    }
-
-    /**
-     * Unregisters the handler for the specified bag key.
-     * 
-     * {@link BaggageHandlerRegistry} instances are immutable, so removing a registration will return a new
-     * {@link BaggageHandlerRegistry} instance with the mapping removed.
-     */
-    public BaggageHandlerRegistry remove(BagKey key) {
-        Map<BagKey, BaggageHandler<?>> newMapping = new TreeMap<>(keysToHandlers);
-        if (newMapping.remove(key) != null) {
-            return new BaggageHandlerRegistry(newMapping);
-        } else {
-            return this;
-        }
+        return new BaggageHandlerRegistry(new Registrations(mapping));
     }
 
     static Integer parseBagKey(String key, String className) {

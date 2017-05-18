@@ -11,7 +11,7 @@ public class BDLContextProviderFactory implements BaggageProviderFactory {
 
     @Override
     public BaggageProvider<? extends BaggageContext> provider() {
-        return new BDLContextProvider();
+        return new BDLContextProvider(BaggageHandlerRegistry.instance);
     }
 
 }

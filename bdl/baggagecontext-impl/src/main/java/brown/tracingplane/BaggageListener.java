@@ -1,4 +1,4 @@
-package brown.tracingplane.impl;
+package brown.tracingplane;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

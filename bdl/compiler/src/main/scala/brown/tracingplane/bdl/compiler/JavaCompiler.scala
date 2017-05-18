@@ -12,7 +12,7 @@ class JavaCompiler extends Compiler {
   override def compile(outputDir: String, objectDecl: ObjectDeclaration): Unit = {
     compiler(objectDecl).compile(outputDir)
   }
-  
+
   def compiler(objectDecl: ObjectDeclaration): CompilerInstance = {
     objectDecl match {
       case bagDecl: BagDeclaration => return new BagCompilerInstance(bagDecl)
@@ -54,6 +54,7 @@ class JavaCompiler extends Compiler {
 
     // Transit layer api
     def Baggage = importIfPossible("brown.tracingplane.BaggageContext")
+    def ActiveBaggage = importIfPossible("brown.tracingplane.ActiveBaggage")
 
     // Baggage layer api
     def BagKey = importIfPossible("brown.tracingplane.baggageprotocol.BagKey")
@@ -61,8 +62,8 @@ class JavaCompiler extends Compiler {
     def BaggageWriter = importIfPossible("brown.tracingplane.baggageprotocol.BaggageWriter")
 
     // Baggage buffers api
-    def BaggageBuffers = importIfPossible("brown.tracingplane.bdl.BaggageBuffers")
-    def Registrations = importIfPossible("brown.tracingplane.bdl.Registrations")
+    def BDLContextProvider = importIfPossible("brown.tracingplane.impl.BDLContextProvider")
+    def BaggageHandlerRegistry = importIfPossible("brown.tracingplane.impl.BaggageHandlerRegistry")
     def Bag = importIfPossible("brown.tracingplane.bdl.Bag")
     def Struct = importIfPossible("brown.tracingplane.bdl.Struct")
     def Parser = importIfPossible("brown.tracingplane.bdl.Parser")
@@ -70,7 +71,7 @@ class JavaCompiler extends Compiler {
     def Brancher = importIfPossible("brown.tracingplane.bdl.Brancher")
     def Joiner = importIfPossible("brown.tracingplane.bdl.Joiner")
     def BaggageHandler = importIfPossible("brown.tracingplane.bdl.BaggageHandler")
-    def BBUtils = importIfPossible("brown.tracingplane.bdl.BBUtils")
+    def BBUtils = importIfPossible("brown.tracingplane.bdl.BDLUtils")
     def Counter = importIfPossible("brown.tracingplane.bdl.SpecialTypes.Counter")
     def CounterImpl = importIfPossible("brown.tracingplane.bdl.CounterImpl")
     def StructReader = s"${importIfPossible("brown.tracingplane.bdl.Struct")}.StructReader"
@@ -174,7 +175,7 @@ class JavaCompiler extends Compiler {
       val lambdaVarname = s"_v$recurseCount"
       fieldtype match {
         case set: BuiltInType.Set => s"$BBUtils.toString($instance)"
-        case BuiltInType.Map(k, v) => s"$BBUtils.toString($instance, $lambdaVarname -> ${toStringStatement(v, lambdaVarname, recurseCount+1)})"
+        case BuiltInType.Map(k, v) => s"$BBUtils.toString($instance, $lambdaVarname -> ${toStringStatement(v, lambdaVarname, recurseCount + 1)})"
         case _ => s"String.valueOf($instance)"
       }
     }
@@ -187,9 +188,9 @@ class JavaCompiler extends Compiler {
       return s"$WriterHelpers.from_$primitiveType"
     }
   }
-  
+
   class StructCompilerInstance(structDecl: StructDeclaration) extends CompilerInstance(structDecl) {
-    
+
     override def compile(): String = {
       return JavaCompilerUtils.formatIndentation(new StructToCompile(structDecl).declaration, "    ");
     }
@@ -203,9 +204,9 @@ class JavaCompiler extends Compiler {
     abstract class StructFieldToCompile(decl: StructFieldDeclaration) {
 
       val Name: String = javaName(decl.name)
-      
+
       val Type: String = javaType(decl.fieldtype)
-      
+
       def DefaultValue: String = {
         decl.fieldtype match {
           case BuiltInType.bool => return "false"
@@ -219,21 +220,21 @@ class JavaCompiler extends Compiler {
         }
       }
       val fieldDeclaration = s"public $Type $Name = $DefaultValue;"
-      
+
       val defaultValueName = s"_${Name}_defaultValue"
       val defaultValueDeclaration = s"private static final $Type $defaultValueName = $DefaultValue;"
-      
+
       def NullCheck(instance: String): String = s"$instance.$Name == null ? $defaultValueName : $instance.$Name"
 
       val ReaderName: String
       val SizerName: String
       val WriterName: String
       val privateFieldsDeclaration: String
-      
+
       def equalsStatement(a: String, b: String) = s"if (!$BBUtils.equals($a.$Name, $b.$Name, $defaultValueName)) return false;"
 
       def readStatement(buf: String, instance: String) = s"$instance.$Name = $ReaderName.readFrom($buf);"
-      
+
       def serializedSizeStatement(size: String, instance: String) = s"$size += $SizerName.serializedSize(${NullCheck(instance)});"
 
       def writeStatement(buf: String, instance: String) = s"$WriterName.writeTo($buf, ${NullCheck(instance)});"
@@ -262,7 +263,7 @@ class JavaCompiler extends Compiler {
       val privateFieldsDeclaration: String = s"""
           private static final $StructHandler<$Type> $HandlerName = ${handler(userfield)};"""
     }
-    
+
     class StructToCompile(decl: StructDeclaration) {
 
       val Name: String = javaName(decl.name)
@@ -276,7 +277,7 @@ class JavaCompiler extends Compiler {
             case _ => new BuiltInStructFieldToCompile(x)
           }
       }
-      
+
       val body = s"""
         public class $Name implements $Struct {
 
@@ -371,11 +372,11 @@ class JavaCompiler extends Compiler {
         ${body}"""
 
     }
-    
+
   }
-  
+
   class BagCompilerInstance(bagDecl: BagDeclaration) extends CompilerInstance(bagDecl) {
-    
+
     override def compile(): String = {
       return JavaCompilerUtils.formatIndentation(new BagToCompile(bagDecl).declaration, "    ");
     }
@@ -385,8 +386,7 @@ class JavaCompiler extends Compiler {
       val text = JavaCompilerUtils.formatIndentation(toCompile.declaration, "    ");
       JavaCompilerUtils.writeOutputFile(outputDir, toCompile.PackageName, toCompile.Name, text)
     }
-    
-    
+
     abstract class FieldToCompile(decl: FieldDeclaration) {
 
       val Name: String = javaName(decl.name)
@@ -476,7 +476,7 @@ class JavaCompiler extends Compiler {
           private static final $Brancher<$Type> $BrancherName = ${brancher(decl.fieldtype)};
           private static final $Joiner<$Type> $JoinerName = ${joiner(decl.fieldtype)};"""
     }
-    
+
     class BagToCompile(decl: BagDeclaration) {
 
       val Name: String = javaName(decl.name)
@@ -496,7 +496,7 @@ class JavaCompiler extends Compiler {
             case _ => new BuiltInFieldToCompile(x)
           }
       }
-    
+
       val body = s"""
         public class $Name implements $Bag {
 
@@ -508,7 +508,7 @@ class JavaCompiler extends Compiler {
 
             /**
              * <p>
-             * Get the {@link $Name} set in the {@link $Baggage} carried by the current thread. If no baggage is being
+             * Get the {@link $Name} set in the active {@link $Baggage} carried by the current thread. If no baggage is being
              * carried by the current thread, or if there is no $Name in it, then this method returns {@code null}.
              * </p>
              * 
@@ -521,7 +521,7 @@ class JavaCompiler extends Compiler {
              *         the baggage.
              */
             public static $Name get() {
-                $Bag bag = $BaggageBuffers.get(Handler.registration());
+                $Bag bag = $BDLContextProvider.get($ActiveBaggage.peek(), Handler.registration());
                 if (bag instanceof $Name) {
                     return ($Name) bag;
                 } else {
@@ -545,7 +545,7 @@ class JavaCompiler extends Compiler {
              *         The returned instance can be modified, and modifications will be reflected in the baggage.
              */
             public static $Name getFrom($Baggage baggage) {
-                $Bag bag = $BaggageBuffers.get(baggage, Handler.registration());
+                $Bag bag = $BDLContextProvider.get(baggage, Handler.registration());
                 if (bag instanceof $Name) {
                     return ($Name) bag;
                 } else if (bag != null) {
@@ -569,7 +569,7 @@ class JavaCompiler extends Compiler {
              *            then any existing mappings will be removed.
              */
             public static void set($Name $varName) {
-                $BaggageBuffers.set(Handler.registration(), $varName);
+                $ActiveBaggage.update($BDLContextProvider.set($ActiveBaggage.peek(), Handler.registration(), $varName));
             }
         
             /**
@@ -589,7 +589,7 @@ class JavaCompiler extends Compiler {
              * @return a possibly new {@link $Baggage} instance that contains all previous mappings plus the new mapping.
              */
             public static $Baggage setIn($Baggage baggage, $Name $varName) {
-                return $BaggageBuffers.set(baggage, Handler.registration(), $varName);
+                return $BDLContextProvider.set(baggage, Handler.registration(), $varName);
             }
 
             @Override
@@ -612,12 +612,13 @@ class JavaCompiler extends Compiler {
                 private static $BagKey registration = null;
 
                 static synchronized $BagKey checkRegistration() {
-                    registration = $Registrations.lookup(instance);
+                    registration = $BaggageHandlerRegistry.get(instance);
                     if (registration == null) {
                         _log.error("$Name MUST be registered to a key before it can be propagated.  " +
                                    "There is currently no registration for $Name and it will not be propagated. " +
-                                   "To register a bag set the baggage-buffers.bags property in your application.conf " +
-                                   "or with -Dbaggage-buffers.bags flag (eg, for key 10, -Dbaggage-buffers.bags.10=" + $Name.class.getName());
+                                   "To register a bag set the bag.{index} property in your application.conf (eg, for " +
+                                   "index 10, bag.10 = \\\"${decl.packageName}.$Name\\\") or with -Dbag.{index} flag " +
+                                   "(eg, for index 10, -Dbag.10=${decl.packageName}.$Name)");
                     }
                     return registration;
                 }
@@ -688,7 +689,7 @@ class JavaCompiler extends Compiler {
         ${body}"""
 
     }
-    
+
   }
 
 }

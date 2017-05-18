@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 import brown.tracingplane.BaggageContext;
+import brown.tracingplane.BaggageListener;
 import brown.tracingplane.atomlayer.AtomLayerOverflow;
 import brown.tracingplane.atomlayer.Lexicographic;
 import brown.tracingplane.atomlayer.StringUtils;
@@ -16,6 +17,7 @@ import brown.tracingplane.baggageprotocol.BagKey;
 import brown.tracingplane.baggageprotocol.BaggageReader;
 import brown.tracingplane.baggageprotocol.BaggageWriter;
 import brown.tracingplane.bdl.Bag;
+import brown.tracingplane.impl.BaggageHandlerRegistry.Registrations;
 
 /**
  * <p>
@@ -47,7 +49,7 @@ import brown.tracingplane.bdl.Bag;
  * or statically in code:
  * 
  * <pre>
- * BDLContext.register(22, my.compiled.object.MyObject.class);
+ * BaggageHandlerRegistry.add(BagKey.indexed(22), my.compiled.object.MyObject.Handler.instance);
  * </pre>
  * </p>
  * 
@@ -247,10 +249,11 @@ public class BDLContext implements BaggageContext {
 
         // Parse the contents that we have handlers for
         BDLContext bbcontents = null;
-        for (int i = 0, len = registry.keys.length; i < len; i++) {
-            BagKey key = registry.keys[i];
+        Registrations reg = registry.registrations;
+        for (int i = 0, len = reg.keys.length; i < len; i++) {
+            BagKey key = reg.keys[i];
             if (reader.enter(key)) {
-                Bag parsed = registry.handlers[i].parse(reader);
+                Bag parsed = reg.handlers[i].parse(reader);
                 if (parsed == null) {
                     continue;
                 }

@@ -1,11 +1,9 @@
-package edu.brown.cs.systems.baggage_buffers_examples;
+package brown.tracingplane.bdl.examples;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import edu.brown.cs.systems.baggage_buffers.gen.example.ExampleBag;
-import edu.brown.cs.systems.baggage_buffers.gen.example.SimpleBag2;
-import edu.brown.cs.systems.tracingplane.atom_layer.types.TypeUtils;
-import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.BaggageWriter;
+import brown.tracingplane.atomlayer.TypeUtils;
+import brown.tracingplane.baggageprotocol.BaggageWriter;
 
 public class Example {
     

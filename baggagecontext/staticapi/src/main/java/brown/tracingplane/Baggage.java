@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 /**
  * <p>
  * The static methods in the {@link Baggage} class are the main entry point for manipulating {@link BaggageContext}
- * instances.  The methods here mirror those provided by the {@link BaggageProvider} interface.
+ * instances. The methods here mirror those provided by the {@link BaggageProvider} interface.
  * <p>
  * 
  * <p>
@@ -63,6 +63,16 @@ public class Baggage {
      */
     public static BaggageContext join(BaggageContext left, BaggageContext right) {
         return provider.join(left, right);
+    }
+
+    /**
+     * Deserialize the provided serialized baggage representation.
+     * 
+     * @param serialized a serialized baggage
+     * @return a deserialized baggage instance, possibly null
+     */
+    public static BaggageContext deserialize(byte[] serialized) {
+        return provider.deserialize(serialized, 0, serialized == null ? 0 : serialized.length);
     }
 
     /**
