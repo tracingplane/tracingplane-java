@@ -24,9 +24,6 @@
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<tracingplane.root>${basedir}</tracingplane.root>
-
-		<github.global.userName>${GITHUB_USERNAME}</github.global.userName>
-		<github.global.password>${GITHUB_OAUTH_TOKEN}</github.global.password>
 	</properties>
 
 	<dependencyManagement>
