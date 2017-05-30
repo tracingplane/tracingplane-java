@@ -18,4 +18,8 @@
         <version>1.0</version>
     </parent>
 
+    <properties>
+        <tracingplane.root>${basedir}/..</tracingplane.root>
+    </properties>
+
 </project>
