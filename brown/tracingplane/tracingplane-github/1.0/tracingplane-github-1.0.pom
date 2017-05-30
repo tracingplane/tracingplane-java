@@ -1,0 +1,55 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>brown.tracingplane</groupId>
+	<artifactId>tracingplane-github</artifactId>
+	<packaging>pom</packaging>
+
+	<name>Tracing Plane Distributions - Github Distribution</name>
+
+	<parent>
+		<groupId>brown.tracingplane</groupId>
+		<artifactId>tracingplane-dist-project</artifactId>
+		<version>1.0</version>
+	</parent>
+
+	<properties>
+		<tracingplane.root>${basedir}/../..</tracingplane.root>
+
+		<github.global.userName>${GITHUB_USERNAME}</github.global.userName>
+		<github.global.password>${GITHUB_OAUTH_TOKEN}</github.global.password>
+	</properties>
+
+	<build>
+		<plugins>
+
+			<!-- uploads mvn repo dir to github -->
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<version>0.12</version>
+				<configuration>
+					<message>Maven artifacts for ${project.version}</message>  				<!-- git commit message -->
+					<noJekyll>true</noJekyll>                                  				<!-- disable webpage processing -->
+					<outputDirectory>${tracingplane.root}/target/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
+					<branch>refs/heads/mvn-repo</branch>                       				<!-- remote branch name -->
+					<includes>
+						<include>**/*</include>
+					</includes>
+					<repositoryName>tracingplane-java</repositoryName>      <!-- github repo name -->
+					<repositoryOwner>tracingplane</repositoryOwner>    		<!-- github repo owner -->
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>deploy</phase>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+
+</project>

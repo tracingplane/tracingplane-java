@@ -24,9 +24,6 @@
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<tracingplane.root>${basedir}</tracingplane.root>
-
-		<github.global.userName>${GITHUB_USERNAME}</github.global.userName>
-		<github.global.password>${GITHUB_OAUTH_TOKEN}</github.global.password>
 	</properties>
 
 	<dependencyManagement>
@@ -57,92 +54,6 @@
 				<artifactId>guava</artifactId>
 				<version>${guava.version}</version>
 			</dependency>
-<!-- 			<dependency>
-				<groupId>org.scala-lang</groupId>
-				<artifactId>scala-compiler</artifactId>
-				<version>${scala.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.scala-lang</groupId>
-				<artifactId>scala-reflect</artifactId>
-				<version>${scala.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.scala-lang</groupId>
-				<artifactId>scala-actors</artifactId>
-				<version>${scala.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.scala-lang</groupId>
-				<artifactId>scalap</artifactId>
-				<version>${scala.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.aspectj</groupId>
-				<artifactId>aspectjrt</artifactId>
-				<version>${aspectj.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>commons-logging</groupId>
-				<artifactId>commons-logging-api</artifactId>
-				<version>${commons.logging.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>net.minidev</groupId>
-				<artifactId>json-smart</artifactId>
-				<version>${jsonsmart.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-lang3</artifactId>
-				<version>${apache.commons.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-collections4</artifactId>
-				<version>${apache.collections.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>${commons.io.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.google.protobuf</groupId>
-				<artifactId>protobuf-java</artifactId>
-				<version>${protobuf.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.github.davidmoten</groupId>
-				<artifactId>flatbuffers-java</artifactId>
-				<version>${flatbuf.version}</version>
-			</dependency>
-
-
-			<dependency>
-				<groupId>org.javassist</groupId>
-				<artifactId>javassist</artifactId>
-				<version>${javassist.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.beust</groupId>
-				<artifactId>jcommander</artifactId>
-				<version>${jcommander.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-math3</artifactId>
-				<version>${apache.commons.math3.version}</version>
-			</dependency> -->
 		</dependencies>
 	</dependencyManagement>
 
@@ -150,11 +61,11 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-				    <artifactId>maven-deploy-plugin</artifactId>
-				    <version>2.8.1</version>
-				    <configuration>
-				        <altDeploymentRepository>internal.repo::default::file://${tracingplane.root}/target/mvn-repo</altDeploymentRepository>
-				    </configuration>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.8.1</version>
+					<configuration>
+						<altDeploymentRepository>internal.repo::default::file://${tracingplane.root}/target/mvn-repo</altDeploymentRepository>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
