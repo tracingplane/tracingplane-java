@@ -1,10 +1,14 @@
 # <img src="doc/figures/baggage.png" width="40"/> Tracing Plane #
 
-## Quick Start ##
+## 1 Quick Start ##
 
 Documentation and tutorials for this project are located in the [Tracing Plane Wiki](https://github.com/tracingplane/tracingplane-java/wiki); see also the [Tracing Plane Javadocs](https://tracingplane.github.io/tracingplane-java/doc/)
 
-## BaggageContext ##
+## 2 Concepts ##
+
+The Tracing Plane introduces two key abstractions: ***BaggageContexts*** and ***Execution-Flow Scoped Variables***.
+
+### 2.1 BaggageContext ##
 
 A `BaggageContext` is a general-purpose request context, intended to be used **within** and **across** distributed services.
 
@@ -14,9 +18,21 @@ For each request, a `BaggageContext` carries request metadata (things like reque
 
 It's very useful to pass around `BaggageContext` objects at runtime.  They are used by a range of different debugging and monitoring tools, the classic example being distributed tracing (like [Zipkin](https://github.com/openzipkin/zipkin) and [OpenTracing](http://opentracing.io/) and [Dapper](https://research.google.com/pubs/archive/36356.pdf)).  However, there are also other cool examples, like [resource management](http://cs.brown.edu/people/jcmace/papers/mace15retro.pdf) and [dynamic monitoring](http://cs.brown.edu/people/jcmace/papers/mace15pivot.pdf).  We use the name ***tracing tools*** to refer to such tools.
 
-### Project Goals
+### 2.2 Execution-Flow Scoped Variables
 
-What's the point of this project?  Simply put, it's actually *very hard* to get context propagation right and *very hard* to deploy new tracing tools in today's distributed systems:
+An execution-flow scoped variable is similar, in concept, to a thread-local variable.  However, instead of being dynamically scoped to threads, EFS variables are scoped to ***end-to-end requests***.
+
+EFS variables *follow requests inline* as they execute.  The `TraceID` used by distributed tracing tools is an example of an execution-flow scoped variable.
+
+Updates to an EFS variable occur *locally* to an EFS instance -- for example, if my request is doing several things concurrently, they might have different values for their respective EFS variables.  This relates to the notion of *causality* -- EFS variables follow execution's causality.  The `SpanID` used by distributed tracing tools is an EFS variable that demonstrates this -- several concurrent execution branches could be executing simultaneously, each with a different value for `SpanID`.
+
+The Tracing Plane exposes EFS variables with an interface definition language, called BDL (Baggage Definition Language), and corresponding compiler.  BDL is similar to protocol buffers, and generates accessors that interface with `BaggageContext` instances and encapsulate all of the concurrency and propagation nuances that are easy to get wrong.
+
+## 3 Project Information
+
+### 3.1 Project Goals
+
+It's actually *very hard* to get context propagation right and *very hard* to deploy new tracing tools in today's distributed systems:
 
 * It's hard to instrument systems to pass around contexts, because it involves touching lots of little bits of code in many places.  **Instrumentation is hard -- only do it once**.
 * It's hard to agree on context formats across system components, especially if they use different languages or frameworks **Agree on a general-purpose format -- bind specific tools to it later**
@@ -28,7 +44,7 @@ The *Tracing Plane* is a layered design for context propagation in distributed s
 
 The tracing plane enables interoperability between systems and tracing applications.  It provides a "narrow waist" for tracing, analogous to the role of TCP/IP in networking.
 
-### Similar Projects
+### 3.2 Similar Projects
 
 There are some similar projects, that we list here to make it more concrete what the Tracing Plane is:
 
@@ -36,7 +52,7 @@ There are some similar projects, that we list here to make it more concrete what
 * Span contexts in [Zipkin](https://github.com/openzipkin/zipkin), [OpenTracing](http://opentracing.io/) and [Dapper](https://research.google.com/pubs/archive/36356.pdf) -- these pass around metadata (span and trace IDs) for distributed tracing.  The goal of `BaggageContext` is to provide a well-defined, concrete data format that these tracing tools would be able to use, to store their IDs.
 * Instrumentation in [OpenTracing](http://opentracing.io/) is similar to instrumentation for the Tracing Plane.  One difference is that `BaggageContext` instances are *truly opaque* at instrumentation time, and are passed across all execution boundaries (including, for example, in request responses); whereas OpenTracing spans are conceptually tightly bound to the task of distributed tracing.
 
-### Status of this Project
+### 3.3 Project Status
 
 This is an active research project at Brown University by [Jonathan Mace](http://cs.brown.edu/people/jcmace/) and [Prof. Rodrigo Fonseca](http://cs.brown.edu/~rfonseca/).  This work is supported in part by NSF award 1452712, and from generous gifts from Facebook and Google.
 
@@ -46,7 +62,7 @@ We currently provide a Java implementation of the Tracing Plane.  However, the T
 
 Keep an eye out for our research paper about Baggage, coming soon.
 
-### Other Useful Links ###
+## 4 Other Useful Links ###
 
 [Project Wiki](https://github.com/tracingplane/tracingplane-java/wiki)
 
