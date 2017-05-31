@@ -1,4 +1,4 @@
-# <img src="doc/figures/baggage.png" width="40"/> The Tracing Plane and Baggage #
+# <img src="doc/figures/baggage.png" width="40"/> Tracing Plane #
 
 ## Quick Start ##
 
