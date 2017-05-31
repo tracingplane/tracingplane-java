@@ -10,8 +10,8 @@ import brown.tracingplane.baggageprotocol.BaggageWriter;
 
 /**
  * <p>
- * An implementation of {@link BaggageContext} based on atoms and lexicographic merge. {@link AtomContext} represents
- * the minimal logic necessary to propagate {@link BaggageContext}s and participate in the tracing plane.
+ * {@link BaggageProvider} for {@link NestedBaggageContext}, which extends {@link AtomContext} to interpret atoms as
+ * nested data structures.
  * </p>
  */
 public class NestedBaggageContextProvider implements BaggageProvider<NestedBaggageContext> {

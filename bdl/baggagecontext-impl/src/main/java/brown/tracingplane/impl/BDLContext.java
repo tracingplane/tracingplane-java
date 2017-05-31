@@ -21,8 +21,8 @@ import brown.tracingplane.impl.BaggageHandlerRegistry.Registrations;
 
 /**
  * <p>
- * {@link BDLContext} is the main implementation of {@link BaggageContext} used by the tracing plane. It is used in
- * conjunction with BDL-compiled objects.
+ * The full-featured {@link BaggageContext} implementation used by the tracing plane using atoms and the baggage
+ * protocol, intended for use in conjunction with BDL-compiled accessor classes.
  * </p>
  * 
  * <p>

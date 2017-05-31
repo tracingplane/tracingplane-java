@@ -11,8 +11,8 @@ import brown.tracingplane.atomlayer.ProtobufVarint;
 
 /**
  * <p>
- * An implementation of {@link BaggageContext} based on atoms and lexicographic merge. {@link AtomContext} represents
- * the minimal logic necessary to propagate {@link BaggageContext}s and participate in the tracing plane.
+ * A minimal implementation of {@link BaggageContext} based on atoms and lexicographic merge, but providing no read or
+ * write methods to the atoms themselves.
  * </p>
  */
 public class AtomContext implements BaggageContext {

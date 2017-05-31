@@ -8,8 +8,7 @@ import brown.tracingplane.atomlayer.AtomLayerSerialization;
 
 /**
  * <p>
- * An implementation of {@link BaggageContext} based on atoms and lexicographic merge. {@link AtomContext} represents
- * the minimal logic necessary to propagate {@link BaggageContext}s and participate in the tracing plane.
+ * {@link BaggageProvider} for {@link AtomContext}, a minimal {@link BaggageContext} based on atoms and lexicographic merge.
  * </p>
  */
 public class AtomContextProvider implements BaggageProvider<AtomContext> {

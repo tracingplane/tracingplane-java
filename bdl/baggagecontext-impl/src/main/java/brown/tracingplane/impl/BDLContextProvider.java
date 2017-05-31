@@ -20,8 +20,9 @@ import brown.tracingplane.bdl.Bag;
 
 /**
  * <p>
- * {@link BDLContextProvider} is the primary {@link BaggageProvider} for the tracing plane. It provides a
- * {@link BaggageContext} implementation that is used by BDL-generated classes.
+ * {@link BaggageProvider} for {@link BDLContext}, which extends {@link NestedBaggageContext} to provide object
+ * representations for a range of data types, and to convert to and from those object representations using
+ * BDL-generated classes.
  * </p>
  * 
  * <p>

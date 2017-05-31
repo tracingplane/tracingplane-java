@@ -14,9 +14,8 @@ import brown.tracingplane.baggageprotocol.BaggageWriter;
 
 /**
  * <p>
- * An implementation of {@link BaggageContext} based on the baggage protocol. It essentially implements nested bags.
- * This {@link BaggageContext} is here mostly for demonstration... in practice, either use an atom context, or a BDL
- * client context.
+ * An implementation of {@link BaggageContext} that interprets atoms using the baggage protocol, which specifies a data
+ * layout for nested bags.
  * </p>
  */
 public class NestedBaggageContext implements BaggageContext {
