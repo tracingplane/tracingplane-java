@@ -1,4 +1,4 @@
-# <img src="doc/figures/baggage.png" width="40"/> Tracing Plane #
+# <img src="doc/figures/baggage.png" width="40"/> brown.tracingplane #
 
 ## 1 Quick Start ##
 
