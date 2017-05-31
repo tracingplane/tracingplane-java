@@ -10,8 +10,7 @@ import brown.tracingplane.impl.ThreadLocalTransitLayer;
 
 /**
  * <p>
- * Loads the default configured {@link TransitLayer} using reflection. Checks the <code>baggage.transit</code> property.
- * If <code>baggage.transit</code> is not set, then the default transit layer will be {@link ThreadLocalTransitLayer}.
+ * Loads the {@link TransitLayerFactory} specified by <code>baggage.transit</code> using reflection.
  * </p>
  */
 public class DefaultTransitLayer {

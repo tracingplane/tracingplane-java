@@ -15,6 +15,9 @@ import brown.tracingplane.baggageprotocol.BaggageReader;
 import brown.tracingplane.baggageprotocol.BaggageWriter;
 import brown.tracingplane.bdl.SpecialTypes.Counter;
 
+/**
+ * Implements the special {@link Counter} type based on the P-Counter CRDT; the {@code counter} BDL type uses this.
+ */
 public class CounterImpl implements Counter {
 
     private static final Random r = new Random(System.currentTimeMillis()); // TODO: properly seed rng uniquely
@@ -86,15 +89,15 @@ public class CounterImpl implements Counter {
         if (other == null || other.componentValues == null) {
             return this;
         }
-        
+
         boolean is_compaction = BDLUtils.is_compaction.get();
-        
+
         if (is_compaction) {
             for (Entry<BagKey, Long> entry : other.componentValues.entrySet()) {
                 Long existingValue = componentValues.get(entry.getKey());
                 if (existingValue == null) {
                     // We can compact the new value into our own component ID
-                    increment(entry.getValue()); 
+                    increment(entry.getValue());
                 } else {
                     // We already knew about this component ID so we can't compact it
                     componentValues.put(entry.getKey(), Math.max(entry.getValue(), existingValue));
@@ -135,6 +138,9 @@ public class CounterImpl implements Counter {
         return b.toString();
     }
 
+    /**
+     * Provides branch, merge, and serialization logic for {@link CounterImpl}
+     */
     public static class Handler implements BaggageHandler<CounterImpl> {
 
         public static final Handler instance = new Handler();

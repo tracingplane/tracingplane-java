@@ -11,9 +11,12 @@ import brown.tracingplane.baggageprotocol.BagKey;
 import brown.tracingplane.baggageprotocol.BaggageWriter;
 import brown.tracingplane.bdl.Bag;
 
+/**
+ * <p>Helper methods for {@link BDLContext} instances -- calculating serialized size, printing context contents, etc.</p>
+ */
 public class BDLContextUtils {
-    
-    private BDLContextUtils(){}
+
+    private BDLContextUtils() {}
 
     /**
      * Ideally, this is an instance method, but for now we're doing it here
@@ -22,7 +25,7 @@ public class BDLContextUtils {
         if (instance == null || !(instance instanceof BDLContext)) {
             return 0;
         } else {
-            return AtomLayerSerialization.serializedSize(((BDLContext)instance).serialize().atoms());
+            return AtomLayerSerialization.serializedSize(((BDLContext) instance).serialize().atoms());
         }
     }
 
@@ -45,7 +48,7 @@ public class BDLContextUtils {
     /**
      * Ideally, this is an instance method, but for now we're doing it here
      */
-    public static int serializedSize (BagKey key, Bag bag) {
+    public static int serializedSize(BagKey key, Bag bag) {
         if (bag != null) {
             BaggageWriter writer = BaggageWriter.create();
             writer.enter(key);
@@ -59,22 +62,22 @@ public class BDLContextUtils {
         }
         return 0;
     }
-    
+
     public static Map<String, String> getSizeSummary(BaggageContext instance) {
         if (instance == null || !(instance instanceof BDLContext)) {
             return Collections.emptyMap();
         }
         return getSizeSummary((BDLContext) instance);
     }
-    
+
     public static Map<String, String> getSizeSummary(BDLContext instance) {
         if (instance == null) {
-            return Collections.emptyMap();            
+            return Collections.emptyMap();
         }
-        
+
         Map<String, String> summary = new HashMap<>();
         summary.put("BaggageTotalSize", String.valueOf(serializedSize(instance)));
-        
+
         if (instance.bags != null) {
             for (BagKey key : instance.bags.keySet()) {
                 Bag bag = instance.bags.get(key);
@@ -88,26 +91,36 @@ public class BDLContextUtils {
             summary.put("OverflowAtoms", TypeUtils.toHexString(instance.overflowAtoms, ","));
         }
         if (instance.unprocessedAtoms != null) {
-            summary.put("UnprocessedAtoms", TypeUtils.toHexString(instance.overflowAtoms, ","));            
+            summary.put("UnprocessedAtoms", TypeUtils.toHexString(instance.overflowAtoms, ","));
         }
-        
+
         return summary;
     }
-    
+
     /** Utility for seeing who accesses baggage and where */
     public static interface BaggageAccessListener {
         public boolean enter();
+
         public void get(BagKey bagKey);
+
         public void set(BagKey bagKey);
+
         public void compact();
+
         public void exit();
     }
-    
+
     public static class NullBaggageListener implements BaggageAccessListener {
-        public boolean enter() { return false; }
+        public boolean enter() {
+            return false;
+        }
+
         public void get(BagKey bagKey) {}
+
         public void set(BagKey bagKey) {}
+
         public void compact() {}
+
         public void exit() {}
     }
 

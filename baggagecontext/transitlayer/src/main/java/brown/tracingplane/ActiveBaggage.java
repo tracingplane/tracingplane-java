@@ -4,10 +4,14 @@ import java.nio.ByteBuffer;
 
 /**
  * <p>
- * {@link ActiveBaggage} provides static methods that mirror the methods implemented by {@link BaggageProvider} and
- * {@link TransitLayer}. Unlike the {@link brown.tracingplane.Baggage} interface, {@link ActiveBaggage} implicitly
- * accesses the currently-active {@link BaggageContext} that is being managed by the {@link TransitLayer}. Unless it has
- * been configured otherwise, this entails looking up the {@link BaggageContext} in thread-local storage.
+ * Extends the static {@link Baggage} API with further methods for saving, retrieving, and interacting with
+ * {@link BaggageContext} instances using the default {@link TransitLayer}.
+ * <p>
+ * 
+ * <p>
+ * Unlike the {@link brown.tracingplane.Baggage} interface, {@link ActiveBaggage} implicitly accesses the
+ * currently-active {@link BaggageContext} that is being managed by the {@link TransitLayer}. Unless it has been
+ * configured otherwise, this entails looking up the {@link BaggageContext} in thread-local storage.
  * </p>
  * 
  * <p>

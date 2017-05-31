@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Branchers for built-in types used by compiled baggage buffers classes
+ * Branch logic for primitive BDL types {@link #noop()}, sets, and maps.
  */
 public class Branchers {
 

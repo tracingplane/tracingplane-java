@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Joiners for built-in types used by compiled baggage buffers classes
+ * Merge logic for primitive BDL types {@link #first()}, sets, and maps.
  */
 public class Joiners {
 

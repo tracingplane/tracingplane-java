@@ -7,8 +7,8 @@ import brown.tracingplane.bdl.Parser.ElementParser;
 import brown.tracingplane.bdl.Serializer.ElementSerializer;
 
 /**
- * BaggageBuffers generates classes that implement this interface, Struct. They also generate BaggageHandler
- * implementations
+ * BDL supports structs, which are simply several data types combined into a single binary blob and
+ * encoded as one atom.
  */
 public interface Struct {
 
@@ -18,7 +18,7 @@ public interface Struct {
     public interface StructReader<S> {
         public S readFrom(ByteBuffer buf) throws Exception;
     }
-    
+
     @FunctionalInterface
     public interface StructSizer<S> {
         public int serializedSize(S struct);
@@ -28,9 +28,10 @@ public interface Struct {
     public interface StructWriter<S> {
         public void writeTo(ByteBuffer buf, S struct) throws Exception;
     }
-    
-    public interface StructHandler<S> extends StructReader<S>, StructWriter<S>, StructSizer<S>, ElementParser<S>, ElementSerializer<S> {
-        
+
+    public interface StructHandler<S>
+            extends StructReader<S>, StructWriter<S>, StructSizer<S>, ElementParser<S>, ElementSerializer<S> {
+
         @Override
         public default S parse(ElementReader reader) {
             ByteBuffer buf = null;
@@ -47,7 +48,7 @@ public interface Struct {
             }
             return null;
         }
-        
+
         @Override
         public default void serialize(ElementWriter writer, S instance) {
             if (instance != null) {
@@ -60,7 +61,7 @@ public interface Struct {
                 }
             }
         }
-        
+
     }
 
 }

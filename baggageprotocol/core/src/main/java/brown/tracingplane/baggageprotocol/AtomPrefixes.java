@@ -68,7 +68,10 @@ public class AtomPrefixes {
         }
     }
 
-    /** AtomPrefix has some convenience methods for checking what kind of prefix a byte is and what it supports */
+    /**
+     * The first byte of an atom is its prefix, which contains some metadata about the atom; the first bit of an atom
+     * denotes whether it is a data atom or header atom.
+     */
     public static abstract class AtomPrefix implements Comparable<AtomPrefix> {
 
         protected final AtomType atomType;
@@ -101,6 +104,7 @@ public class AtomPrefixes {
         }
     }
 
+    /** The first byte of a header atom also specifies whether it is indexed or keyed, and the header's level */
     public static abstract class HeaderPrefix extends AtomPrefix {
 
         public static final AtomType atomType = AtomType.Header;
@@ -151,6 +155,10 @@ public class AtomPrefixes {
 
     }
 
+    /**
+     * The payload of an indexed header is expected to be an unsigned variable-length lexicographically consistent
+     * integer: {@link brown.tracingplane.atomlayer.UnsignedLexVarint}
+     */
     public static class IndexedHeaderPrefix extends HeaderPrefix {
 
         public static final HeaderType headerType = HeaderType.Indexed;
@@ -191,6 +199,10 @@ public class AtomPrefixes {
 
     }
 
+    /**
+     * The payload of a keyed header is expected to be arbitrary length bytes. It can often be interpreted as a String,
+     * though this is not a requirement.
+     */
     public static class KeyedHeaderPrefix extends HeaderPrefix {
 
         public static final HeaderType headerType = HeaderType.Keyed;

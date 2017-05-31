@@ -7,7 +7,7 @@ import brown.tracingplane.atomlayer.SignedLexVarint;
 import brown.tracingplane.atomlayer.UnsignedLexVarint;
 
 /**
- * Functions for converting to and from built-in baggagebuffers types and java types
+ * Converts between {@link ByteBuffer} and Object representations for primitive BDL types.
  */
 public class Cast {
 

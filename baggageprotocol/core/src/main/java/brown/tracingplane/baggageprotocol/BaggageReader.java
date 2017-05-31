@@ -15,7 +15,9 @@ import brown.tracingplane.baggageprotocol.AtomPrefixes.AtomPrefix;
 import brown.tracingplane.baggageprotocol.AtomPrefixes.HeaderPrefix;
 import brown.tracingplane.baggageprotocol.BaggageLayerException.BaggageLayerRuntimeException;
 
-/** TODO: documentation */
+/**
+ * Iterates over a list of atoms, interpreting them according to the baggage protocol; readers interpret data atoms and construct corresponding object representations. 
+ */
 public class BaggageReader implements ElementReader {
 
     private static final Logger log = LoggerFactory.getLogger(BaggageReader.class);

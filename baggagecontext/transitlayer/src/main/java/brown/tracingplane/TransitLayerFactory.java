@@ -1,9 +1,14 @@
 package brown.tracingplane;
 
 /**
- * It wouldn't be Java without a camel-case caravan of nouns.
+ * <p>
+ * Factory for {@link TransitLayer} instances; primarily used to configure the {@link TransitLayer} used by the
+ * {@link ActiveBaggage} static API.
+ * </p>
  * 
+ * <p>
  * {@link TransitLayerFactory} is expected to have a no-arg constructor so that it can be instantiated by reflection.
+ * </p>
  */
 public interface TransitLayerFactory {
 

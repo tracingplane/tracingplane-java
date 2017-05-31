@@ -2,6 +2,11 @@ package brown.tracingplane.bdl;
 
 import brown.tracingplane.baggageprotocol.BaggageWriter;
 
+/**
+ * <p>
+ * Provides serialization, deserialization, branch, and merge logic for a bag type.
+ * </p>
+ */
 public interface BaggageHandler<T extends Bag> extends Parser<T>, Serializer<T>, Joiner<T>, Brancher<T> {
 
     public boolean isInstance(Bag bag);

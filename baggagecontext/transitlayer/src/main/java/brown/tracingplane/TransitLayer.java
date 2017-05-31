@@ -4,6 +4,12 @@ import java.nio.ByteBuffer;
 
 /**
  * <p>
+ * Maintains {@link BaggageContext} instances for requests. Most {@link TransitLayer} implementations will store
+ * {@link BaggageContext} instances using thread-local storage; this interface primarily exists to support wrappers to
+ * other implementations (e.g., OpenTracing).
+ * </p>
+ * 
+ * <p>
  * The static methods in the {@link ActiveBaggage} interface proxy to a {@link TransitLayer} implementation. Typically
  * this implementation will be {@link ThreadLocalTransitLayer}, which maintains an active {@link BaggageContext}
  * instance using thread-local storage.

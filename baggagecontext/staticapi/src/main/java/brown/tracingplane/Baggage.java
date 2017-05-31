@@ -4,8 +4,7 @@ import java.nio.ByteBuffer;
 
 /**
  * <p>
- * The static methods in the {@link Baggage} class are the main entry point for manipulating {@link BaggageContext}
- * instances. The methods here mirror those provided by the {@link BaggageProvider} interface.
+ * The static API for manipulating {@link BaggageContext} instances using the default {@link BaggageProvider}.
  * <p>
  * 
  * <p>

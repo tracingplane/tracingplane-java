@@ -10,8 +10,7 @@ import brown.tracingplane.impl.NoOpBaggageContextProviderFactory;
 
 /**
  * <p>
- * Loads the default configured {@link BaggageProvider} using reflection. Checks the <code>baggage.provider</code>
- * property.
+ * Loads the {@link BaggageProviderFactory} specified by <code>baggage.provider</code> using reflection.
  * </p>
  */
 public class DefaultBaggageProvider {

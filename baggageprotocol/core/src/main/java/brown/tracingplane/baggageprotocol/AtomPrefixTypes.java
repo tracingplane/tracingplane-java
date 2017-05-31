@@ -171,6 +171,7 @@ public class AtomPrefixTypes {
 
     }
 
+    /** Some bag options are contained within the header prefix -- currently only the {@link MergeBehavior} */
     public static class BagOptionsInPrefix {
 
         public static final int mask = 0x01;
