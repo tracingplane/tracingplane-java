@@ -2,7 +2,7 @@
 
 ## Quick Start ##
 
-Documentation and tutorials for this project are located in the repository's [Wiki](https://github.com/tracingplane/tracingplane-java/wiki)
+Documentation and tutorials for this project are located in the [Tracing Plane Wiki](https://github.com/tracingplane/tracingplane-java/wiki); see also the [Tracing Plane Javadocs](https://tracingplane.github.io/tracingplane-java/doc/)
 
 ## BaggageContext ##
 
@@ -40,13 +40,13 @@ There are some similar projects, that we list here to make it more concrete what
 
 This is an active research project at Brown University by [Jonathan Mace](http://cs.brown.edu/people/jcmace/) and [Prof. Rodrigo Fonseca](http://cs.brown.edu/~rfonseca/).  This work is supported in part by NSF award 1452712, and from generous gifts from Facebook and Google.
 
-We currently only have a Java implementation, but we stress that this is **not fundamental** -- the Tracing Plane is designed for interoperability between languages.
-
 The Tracing Plane is motivated by many years of collective experience in end-to-end tracing and numerous tracing-related research projects including [X-Trace](https://www.usenix.org/legacy/event/nsdi07/tech/full_papers/fonseca/fonseca.pdf), [Quanto](https://www.usenix.org/legacy/event/osdi08/tech/full_papers/fonseca/fonseca.pdf), [Retro](http://cs.brown.edu/people/jcmace/papers/mace15retro.pdf), [Pivot Tracing](http://cs.brown.edu/people/jcmace/papers/mace15pivot.pdf).  You can also check out our research group's [GitHub](http://brownsys.github.io/tracing-framework/).
+
+We currently provide a Java implementation of the Tracing Plane.  However, the Tracing Plane is not tightly coupled to Java, and is designed with interoperability in mind - between languages, systems, platforms, etc.
 
 Keep an eye out for our research paper about Baggage, coming soon.
 
-### Useful Links ###
+### Other Useful Links ###
 
 [Project Wiki](https://github.com/tracingplane/tracingplane-java/wiki)
 
