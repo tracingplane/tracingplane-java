@@ -63,3 +63,7 @@ bag ExampleBag {
 	map<string, counter> countermap = 35;
 	
 }
+
+bag FonsecaBag {
+    map<string, set<string>> publications_by_conference = 77;
+}
