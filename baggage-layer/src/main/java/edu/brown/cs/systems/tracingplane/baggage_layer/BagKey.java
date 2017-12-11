@@ -1,6 +1,7 @@
 package edu.brown.cs.systems.tracingplane.baggage_layer;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Lists;
@@ -24,6 +25,27 @@ import edu.brown.cs.systems.tracingplane.baggage_layer.protocol.HeaderSerializat
  * </p>
  */
 public abstract class BagKey implements Comparable<BagKey> {
+    
+    public static void main(String[] args) {
+        String test = "AddressGetHostname";
+        ByteBuffer buf = ByteBuffer.wrap(test.getBytes());
+        BagKey.Keyed key = keyed(buf);
+        
+        int size = HeaderSerialization.serializedSize(key);
+        System.out.println("size is " + size);
+        ByteBuffer b2 = ByteBuffer.allocate(size);
+        HeaderSerialization.writeAtom(b2, key, 1);
+        b2.rewind();
+        
+        List<Integer> byteStrings = new ArrayList<>();
+        for (int i = 0; i < b2.remaining(); i++) {
+            int b = b2.get();
+            if (b < 0) b += 256;
+            byteStrings.add(b);
+        }
+        System.out.println("[" + StringUtils.join(byteStrings, " ") + "]");
+        
+    }
 
     protected static final int PRIORITY_INDEXED_BAG = 0;
     protected static final int PRIORITY_KEYED_BAG = 1;
@@ -59,11 +81,11 @@ public abstract class BagKey implements Comparable<BagKey> {
         return keyed(ByteBuffer.wrap(name.getBytes()), options);
     }
 
-    public static BagKey keyed(ByteBuffer key) {
+    public static BagKey.Keyed keyed(ByteBuffer key) {
         return keyed(key, null);
     }
 
-    public static BagKey keyed(ByteBuffer key, BagOptions options) {
+    public static BagKey.Keyed keyed(ByteBuffer key, BagOptions options) {
         if (options == null) {
             options = BagOptions.defaultOptions;
         }

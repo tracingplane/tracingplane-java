@@ -2,6 +2,7 @@ package edu.brown.cs.systems.tracingplane.baggage_buffers.impl;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -184,21 +185,24 @@ public class Serializers {
                     return;
                 }
 
-                SortedMap<ByteBuffer, K> keys = new TreeMap<ByteBuffer, K>(Lexicographic.BYTE_BUFFER_COMPARATOR);
-                for (K key : instance.keySet()) {
+                SortedMap<ByteBuffer, V> serializationOrder = new TreeMap<ByteBuffer, V>(Lexicographic.BYTE_BUFFER_COMPARATOR);
+                for (Entry<K, V> entry : instance.entrySet()) {
+                    K key = entry.getKey();
+                    V value = entry.getValue();
+                    if (key == null || value == null) {
+                        continue;
+                    }
                     ByteBuffer serializedKey = keySerializer.apply(key);
-                    if (serializedKey != null) {
-                        keys.put(serializedKey, key);
+                    if (serializedKey == null) {
+                        continue;
                     }
+                    serializationOrder.put(serializedKey, value);
                 }
-
-                for (ByteBuffer serializedKey : keys.keySet()) {
-                    V value = instance.get(keys.get(serializedKey));
-                    if (value != null) {
-                        writer.enter(BagKey.keyed(serializedKey));
-                        valueSerializer.serialize(writer, value);
-                        writer.exit();
-                    }
+                
+                for (Entry<ByteBuffer, V> entry : serializationOrder.entrySet()){
+                    writer.enter(BagKey.keyed(entry.getKey()));
+                    valueSerializer.serialize(writer, entry.getValue());
+                    writer.exit();
                 }
             }
         };
