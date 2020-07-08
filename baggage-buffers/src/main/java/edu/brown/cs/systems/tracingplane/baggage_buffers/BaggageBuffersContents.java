@@ -74,7 +74,7 @@ public class BaggageBuffersContents implements BaggageContents {
 
     /** Get the value mapped to a key, or null if no mapping */
     public Bag get(BagKey key) {
-        return bags == null ? null : bags.get(key);
+        return (bags == null || key == null) ? null : bags.get(key);
     }
 
     /** Remove the mapping for the specified key. Returns this object */
